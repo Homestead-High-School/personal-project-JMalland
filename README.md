@@ -1,4 +1,4 @@
-# Adv_Lab_Individual_Learning
+# Advanced Programming Personal Project: Scrabble
 Final project for Advanced Programming
 
 Replace this with a daily detail of what you have learned/done.
