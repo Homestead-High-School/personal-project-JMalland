@@ -1,4 +1,4 @@
-# Advanced Programming Personal Project: Scrabble
+# Advanced PIP: Scrabble
 Final project for Advanced Programming
 
 Replace this with a daily detail of what you have learned/done.
