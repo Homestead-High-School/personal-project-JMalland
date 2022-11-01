@@ -20,6 +20,7 @@ class Board extends JFrame implements ActionListener {
     public static void main(String args[]) {
         // create a frame
         frame = new JFrame("Scrabble");
+        int rows, cols = rows = 15;
  
         try {
             // set look and feel
@@ -29,24 +30,47 @@ class Board extends JFrame implements ActionListener {
             System.err.println(e.getMessage());
         }
 
-        GridLayout grid = new GridLayout(25,25); // Main Board layout
+        GridLayout grid = new GridLayout(rows,cols); // Main Board layout
         JPanel board = new JPanel(grid); // Main Board panel
-        int step = 0;
-        for (int r=0; r<25; r++) {
-            for (int c=0; c<25; c++) {
+        int[][] scrabble = new int[][] {
+            {4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4},
+            {0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0},
+            {0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 3, 0, 0},
+            {1, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 1},
+            {0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0},
+            {0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0},
+            {0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0},
+            {4, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 4},
+            {0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0},
+            {0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0},
+            {0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0},
+            {1, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 1},
+            {0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 3, 0, 0},
+            {0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0},
+            {4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4}
+        };
+        for (int r=0; r<rows; r++) {
+            for (int c=0; c<cols; c++) {
                 JButton temp = new JButton();
-                c += step;
-                if ((r%2 == 0 && c%5 == 1) || (r%2 == 1 && c%5 == 4)) { // Make sure there are gaps between the different types.
-                    temp.setText("W");
-                }
-                else if ((r%2 == 0 && c%5 == 3) || (r%2 == 1 && c%5 == 0)) {
-                    temp.setText("L");
+                temp.setForeground(new Color(0xCC1010)); // https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
+                temp.setOpaque(true);
+                switch(scrabble[r%rows][c%cols]) {
+                    case(1):
+                        temp.setText("2x Letter");
+                        break;
+                    case(2):
+                        temp.setText("3x Letter");
+                        break;
+                    case(3):
+                        temp.setText("2x Word");
+                        break;
+                    case(4):
+                        temp.setText("3x Word");
+                        break;
                 }
                 temp.setSize(50, 50);
                 board.add(temp);
-                c -= step;
             }
-            step ++;
         }
         frame.add(board);
         frame.setSize(1000, 1000);
