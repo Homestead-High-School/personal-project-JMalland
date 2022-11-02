@@ -4,6 +4,7 @@ import java.awt.*;
 class Board extends JFrame implements ActionListener {
     // create a frame
     static JFrame frame;
+    
  
     // default constructor
     Board() {
@@ -26,29 +27,13 @@ class Board extends JFrame implements ActionListener {
 
         GridLayout grid = new GridLayout(rows,cols); // Main Board layout
         JPanel board = new JPanel(grid); // Main Board panel
-        int[][] scrabble = new int[][] {
-            {4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4},
-            {0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0},
-            {0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 3, 0, 0},
-            {1, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 1},
-            {0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0},
-            {0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0},
-            {0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0},
-            {4, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 4},
-            {0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0},
-            {0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 2, 0},
-            {0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0},
-            {1, 0, 0, 3, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 1},
-            {0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 3, 0, 0},
-            {0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0},
-            {4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4}
-        };
+        
         // https://stackoverflow.com/questions/29379441/java-set-transparency-on-color-color-without-using-rgbs
         // https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
         for (int r=0; r<rows; r++) {
             for (int c=0; c<cols; c++) {
                 JButton temp = new JButton();
-                switch(scrabble[r%rows][c%cols]) {
+                switch(Scrabble.getVal(r%rows, c%cols)) {
                     case(1):
                         temp = new JButton("2x L") {
                             public void paintComponent(Graphics g) {
@@ -88,12 +73,19 @@ class Board extends JFrame implements ActionListener {
                         };
                         break;
                 }
-                temp.setBorderPainted(true);
                 temp.setContentAreaFilled(false);
+                // https://stackoverflow.com/questions/33954698/jbutton-change-default-borderhttps://stackoverflow.com/questions/33954698/jbutton-change-default-border
+                temp.setBorder(BorderFactory.createLineBorder(Color.black, 1));
                 // Action Listener: https://stackoverflow.com/questions/22580243/get-position-of-the-button-on-gridlayout
-                //temp.setOpaque(true);
-                //temp.setForeground(new Color(0xCC1010));
-                //temp.setOpaque(true);
+                final int rIndex = r; // Make final so accessable at any time
+                final int cIndex = c; // Make final so accessable at any time
+                temp.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        System.out.println("rowIndex "+rIndex+" columnIndex "+cIndex);
+                    }
+        
+                });
                 temp.setSize(50, 50);
                 board.add(temp);
             }
