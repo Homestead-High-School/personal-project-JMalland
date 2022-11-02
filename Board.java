@@ -43,13 +43,14 @@ class Board extends JFrame implements ActionListener {
             {0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0},
             {4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4}
         };
+        // https://stackoverflow.com/questions/29379441/java-set-transparency-on-color-color-without-using-rgbs
+        // https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
         for (int r=0; r<rows; r++) {
             for (int c=0; c<cols; c++) {
                 JButton temp = new JButton();
                 switch(scrabble[r%rows][c%cols]) {
                     case(1):
                         temp = new JButton("2x L") {
-                            //@Override // https://stackoverflow.com/questions/29379441/java-set-transparency-on-color-color-without-using-rgbs
                             public void paintComponent(Graphics g) {
                                 Color temp = new Color(0x4274FF);
                                 g.setColor(new Color(temp.getRed(), temp.getGreen(), temp.getBlue(), 75)); // 75% Opacity
@@ -60,7 +61,6 @@ class Board extends JFrame implements ActionListener {
                         break;
                     case(2):
                         temp = new JButton("3x L") {
-                            //@Override // https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
                             public void paintComponent(Graphics g) {
                                 g.setColor(new Color(0x4274FF));
                                 g.fillRect(0, 0, getSize().width, getSize().height);
@@ -70,7 +70,6 @@ class Board extends JFrame implements ActionListener {
                         break;
                     case(3):
                         temp = new JButton("2x W") {
-                            //@Override // https://stackoverflow.com/questions/29379441/java-set-transparency-on-color-color-without-using-rgbs
                             public void paintComponent(Graphics g) {
                                 Color temp = new Color(0xD7381C);
                                 g.setColor(new Color(temp.getRed(), temp.getGreen(), temp.getBlue(), 75)); // 75% Opacity
@@ -81,7 +80,6 @@ class Board extends JFrame implements ActionListener {
                         break;
                     case(4):
                         temp = new JButton("3x W") {
-                            //@Override // https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
                             public void paintComponent(Graphics g) {
                                 g.setColor(new Color(0xD7381C));
                                 g.fillRect(0, 0, getSize().width, getSize().height);
