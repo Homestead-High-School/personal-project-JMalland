@@ -46,8 +46,6 @@ class Board extends JFrame implements ActionListener {
         for (int r=0; r<rows; r++) {
             for (int c=0; c<cols; c++) {
                 JButton temp = new JButton();
-                Color fill = null;
-                String text = "";
                 switch(scrabble[r%rows][c%cols]) {
                     case(1):
                         temp = new JButton("2x L") {
@@ -59,7 +57,6 @@ class Board extends JFrame implements ActionListener {
                                 super.paintComponent(g);
                             }
                         };
-                        fill = new Color(0x504274FF);
                         break;
                     case(2):
                         temp = new JButton("3x L") {
