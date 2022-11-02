@@ -14,8 +14,6 @@ public class Main {
             }
             System.out.println("\tTotal Size: "+total+" Words");
         }
-        TreeMap<Integer, HashSet<Word>> temp = map.get('C');
-        HashSet<Word> temp2 = temp.get(3);
     }
 
     public static TreeMap<Character, TreeMap<Integer, HashSet<Word>>> parseAndStore(String file) {
