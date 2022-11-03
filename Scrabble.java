@@ -38,7 +38,7 @@ public class Scrabble {
     }
 
     public boolean validWordPlacement() {
-        return(calcRowOrCol(true) && calcRowOrCol(false));
+        return(calcRowOrCol(true) && calcRowOrCol(false)); // Check that the words formed by rows and columns are valid
     }
 
     private boolean calcRowOrCol(boolean rowOrCol) {
