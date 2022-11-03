@@ -48,7 +48,7 @@ class Board extends JFrame implements ActionListener {
                         else if (tile == 3 || tile == 4) { // Word Bonus
                             color = new Color(0xD7381C); // Red Tile
                         }
-                        g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), tile == 1 || tile == 3 ? 25 : 100)); // 75% Opacity, if tile is 1 or 3
+                        g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), tile == 1 || tile == 3 ? 37 : 100)); // 75% Opacity, if tile is 1 or 3
                         g.fillRect(0, 0, getSize().width, getSize().height);
                         super.paintComponent(g);
                     }
