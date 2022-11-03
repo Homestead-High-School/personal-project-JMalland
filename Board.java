@@ -4,7 +4,6 @@ import java.awt.*;
 class Board extends JFrame implements ActionListener {
     // create a frame
     static JFrame frame;
-    
  
     // default constructor
     Board() {
@@ -12,7 +11,7 @@ class Board extends JFrame implements ActionListener {
     }
  
     // main function
-    public static void main(String args[]) {
+    public static void run() {
         // create a frame
         frame = new JFrame("Scrabble");
         int rows, cols = rows = 15;
@@ -34,27 +33,17 @@ class Board extends JFrame implements ActionListener {
             for (int c=0; c<cols; c++) {
                 final int rIndex = r; // Make final so accessible at any time
                 final int cIndex = c; // Make final so accessible at any time
-                final int tile = Scrabble.getVal(r%rows, c%cols); // Make final so accessible in @Overridden methods
+                int tile = Scrabble.getVal(r%rows, c%cols); // Create the tile value to determine the look of each button
+                JButton temp = new JButton();
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
-                    final String text = (tile == 1 ? '2' : '3') + "x L"; // 2 or 3 * Letter Bonus
-                    final Color color = new Color(0x4274FF); // Blue Tile
+                    temp = createButton((tile == 1 ? '2' : '3') + "x L", new Color(0x4274FF), tile);
                 }
                 else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'
-                    final String text = (tile == 3 ? '2' : '3') + "x W"; // 2 or 3 * Word Bonus
-                    final Color color = new Color(0xD7381C); // Red Tile
+                    temp = createButton((tile == 3 ? '2' : '3') + "x W", new Color(0xD7381C), tile);
                 }
                 else { // Tile is a Blank Tile, represented by '0'
-                    final String text = ""; // Blank Text
-                    final Color color = new Color(0xFFFFFF); // White Tile
+                    temp = createButton("", new Color(0xFFFFFF), tile);
                 }
-                temp = new JButton(text) {
-                    @Override
-                    public void paintComponent(Graphics g) {
-                        g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), tile%2 == 1 ? 25 : 100)); // 75% Opacity, if tile is 1 or 3
-                        g.fillRect(0, 0, getSize().width, getSize().height);
-                        super.paintComponent(g);
-                    }
-                };
                 temp.setContentAreaFilled(false); // Change how the JButton paints the borders, so I can paint the border below
                 // https://stackoverflow.com/questions/33954698/jbutton-change-default-borderhttps://stackoverflow.com/questions/33954698/jbutton-change-default-border
                 // Maybe I should make the borders appear curved?
@@ -77,9 +66,20 @@ class Board extends JFrame implements ActionListener {
         frame.setVisible(true); // Set the application frame visible
     }
 
+    private static JButton createButton(String text, Color color, int tile) {
+        JButton temp = new JButton(text) {
+            @Override
+            public void paintComponent(Graphics g) {
+                g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), tile%2 == 1 ? 25 : 100)); // 75% Opacity, if tile is 1 or 3
+                g.fillRect(0, 0, getSize().width, getSize().height);
+                super.paintComponent(g);
+            }
+        };
+        return(temp);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         // TODO Auto-generated method stub
-        
     }
 }
