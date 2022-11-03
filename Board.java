@@ -1,18 +1,27 @@
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import java.awt.*;
 class Board extends JFrame implements ActionListener {
     
     private JFrame frame;
+    private JPanel gamePanel = new JPanel();
+    private JPanel mainPanel = new JPanel();
     private JPanel board = new JPanel();
     private JPanel hand = new JPanel();
-    private Player[] players;
-    private int index;
+    private JPanel menu = new JPanel();
     private int rows, cols;
+    private final int TILE_SIZE = 50;
+    private final int HAND_LENGTH = 7;
+    private final int MENU_WIDTH = 300;
+    private final int MENU_HEIGHT = 75;
+    private int FRAME_WIDTH = 1000;
+    private int FRAME_HEIGHT = 1000;
  
     // default constructor
-    Board(int p) {
-        players = new Player[p];
+    Board() {
         frame = new JFrame("Scrabble");
         rows = Scrabble.getBoard().length;
         cols = Scrabble.getBoard()[0].length;
@@ -24,27 +33,52 @@ class Board extends JFrame implements ActionListener {
         catch (Exception e) {
             System.err.println(e.getMessage());
         }
-        
-        for (int i=0; i<players.length; i++) {
-            players[i] = new Player("Player "+(i+1), new char[0]);
-        }
 
-        index = 0; // Player Index
+        // Create the main menu
+        
         // https://stackoverflow.com/questions/70523527/how-to-stop-components-adapting-to-the-size-of-a-jpanel-that-is-inside-a-jscroll
-        createBoard(); // Create the game board
-        createHand(); // Create the player's hand
-        JPanel panel = new JPanel(new GridLayout(2, 1));
-        panel.add(board); // Add the grid to the application frame
-        panel.add(hand); // Add the hand to the application frame;
-        frame.add(panel);
-        frame.setSize(1000, 1000); // Set the application frame to 1000 x 1000
+        gamePanel.setLayout(new BoxLayout(gamePanel, BoxLayout.Y_AXIS)); // Box Layout layers the Board and the Players Hand from top to bottom
+        gamePanel.add(createBoard()); // Create and add the board to the application frame
+        gamePanel.add(createHand()); // Create and add the hand to the application frame;
+
+        mainPanel.setLayout(new BorderLayout()); // Set the BorderLayout for the main menu
+        mainPanel.add(createMenu(), BorderLayout.CENTER); // Create and add the Menu to the JPanel
+        
+        mainPanel.setVisible(true); // Set the main menu visible, if not
+        gamePanel.setVisible(true); // Set the board visible, for when it will be added
+
+        frame.add(mainPanel); // Add the main menu to the JFrame
+        
+        Toolkit.getDefaultToolkit().setDynamicLayout(false); // Ensures window resize keeps the right ratio: https://stackoverflow.com/questions/20925193/using-componentadapter-to-determine-when-frame-resize-is-finished 
+        frame.setSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Set the Preferred size
+        frame.setMaximumSize(new Dimension(FRAME_WIDTH*2, FRAME_HEIGHT*2)); // Sets the Maximum size
+        frame.setMinimumSize(new Dimension(FRAME_WIDTH/2, FRAME_HEIGHT/2)); // Sets the Minimum size
+
+        frame.addComponentListener(new ComponentAdapter() { // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-event
+            public void componentResized(ComponentEvent componentEvent) { // Kind of works.
+                int width = frame.getWidth(); // Create a temporary width variable, just for simplicity
+                int height = frame.getHeight(); // Create a temporary height variable, just for simplicity
+                if (width != height) {
+                    if (width > FRAME_WIDTH || height > FRAME_HEIGHT) { // Frame was resized to larger than previously
+                        frame.setPreferredSize(new Dimension(Math.max(width, height), Math.max(width, height))); // Set size to the largest dimension
+                    }
+                    else { // Frame was resized to smaller than previously
+                        frame.setPreferredSize(new Dimension(Math.min(width, height), Math.min(width, height))); // Set size to the smallest dimension
+                    }
+                }
+                FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
+                FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
+                frame.pack(); // Repack the frame to adjust the aspect ratios of each component in it.
+            }
+        });
+
         frame.setVisible(true); // Set the application frame visible
     }
  
     // Board Creation
-    private void createBoard() {
+    private JPanel createBoard() {
         GridLayout grid = new GridLayout(rows,cols); // Main Board layout
-        board = new JPanel(grid); // Main Board panel
+        JPanel board = new JPanel(grid); // Main Board panel
         
         // https://stackoverflow.com/questions/29379441/java-set-transparency-on-color-color-without-using-rgbs
         // https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
@@ -57,28 +91,9 @@ class Board extends JFrame implements ActionListener {
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
                     temp = createButton((tile == 1 ? '2' : '3') + "x L", new Color(0x4274FF), tile);
                 }
-<<<<<<< HEAD
-                temp = new JButton(text) {
-                    public void paintComponent(Graphics g) {
-                        Color color = new Color(0xFFFFFF);
-                        if (tile == 1 || tile == 2) { // Letter Bonus
-                            color = new Color(0x4274FF); // Blue Tile
-                        }
-                        else if (tile == 3 || tile == 4) { // Word Bonus
-                            color = new Color(0xD7381C); // Red Tile
-                        }
-                        g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), tile == 1 || tile == 3 ? 37 : 100)); // 75% Opacity, if tile is 1 or 3
-                        g.fillRect(0, 0, getSize().width, getSize().height);
-                        super.paintComponent(g);
-                    }
-                };
-                temp.setContentAreaFilled(false);
-=======
                 else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'
                     temp = createButton((tile == 3 ? '2' : '3') + "x W", new Color(0xD7381C), tile);
                 }
-                temp.setContentAreaFilled(false); // Change how the JButton paints the borders, so I can paint the border below
->>>>>>> 5285d3e42663ce2597ddda3c523dd754e5edaf8c
                 // https://stackoverflow.com/questions/33954698/jbutton-change-default-borderhttps://stackoverflow.com/questions/33954698/jbutton-change-default-border
                 // Maybe I should make the borders appear curved?
                 temp.setBorder(BorderFactory.createLineBorder(Color.black, 1)); // Create each tile with a black border
@@ -91,35 +106,100 @@ class Board extends JFrame implements ActionListener {
                         System.out.println("rowIndex "+rIndex+" columnIndex "+cIndex);
                     }
                 });
-                temp.setSize(50, 50); // Set tile size
+                temp.setSize(TILE_SIZE, TILE_SIZE); // Set tile size
+                temp.setMaximumSize(new Dimension(TILE_SIZE, TILE_SIZE));
                 board.add(temp); // Add tile to the grid
             }
         }
-        board.setMaximumSize(new Dimension(rows*50, cols*50));
-        board.setPreferredSize(new Dimension(rows*50, cols*50));
+        setDefaultSizes(board, cols*TILE_SIZE, rows*TILE_SIZE); // Sets all preferred sizes of the JPanel
+        return(board);
     }
 
-    private void createHand() {
+    private JPanel createHand() {
         GridLayout grid = new GridLayout(1,7); // Main Hand layout
-        hand = new JPanel(grid); // Main Hand Panel
+        int padding = (FRAME_WIDTH - HAND_LENGTH*(int)(TILE_SIZE*1.5))/(int)(TILE_SIZE*1.5)/2;
+        JPanel hand = new JPanel(grid); // Main Hand Panel
+        for (int i=0; i<padding; i++) { // Loop that runs 'padding' number of times
+            JLabel tile = new JLabel(); // Creates an empty JLabel
+            tile.setSize((int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5)); // Sets the size
+            hand.add(tile); // Adds it to the Hand panel, as left-padding
+        }
         for (int i=0; i<7; i++) {
-            JLabel tile = new JLabel("W") {
-                @Override
+            JLabel tile = new JLabel("W", SwingConstants.CENTER) {
+                @Override // Paints a custom color
                 public void paintComponent(Graphics g) {
-                    g.setColor(new Color(0xBA7F40)); // 75% Opacity, if tile is 1 or 3
+                    g.setColor(new Color(0xBA7F40));
                     g.fillRect(0, 0, getSize().width, getSize().height);
                     super.paintComponent(g);
                 }
             };
-            tile.setSize(50, 50);
-            tile.setBorder(BorderFactory.createLineBorder(Color.black, 1));
-            hand.add(tile);
+            tile.setSize((int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5)); // Sets the size of the JLabel to the determined size
+            tile.setBorder(BorderFactory.createLineBorder(Color.black, 1)); // Sets the border of the JLabel to black
+            hand.add(tile); // Adds it to the Hand panel, representing a tile held by the player 
         }
-        hand.setMaximumSize(new Dimension(rows*50, cols*50));
-        hand.setPreferredSize(new Dimension(rows*50, cols*50));
+        for (int i=0; i<padding; i++) { // Loop that runs 'padding' number of times
+            JLabel tile = new JLabel(); // Creates an empty JLabel
+            tile.setSize((int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5)); // Sets the size
+            hand.add(tile); // Adds it to the Hand panel, as right-padding
+        }
+        setDefaultSizes(hand, FRAME_WIDTH, (int)(TILE_SIZE*1.5)); // Sets all preferred sizes of the JPanel
+        return(hand);
     }
 
-    private static JButton createButton(final String text, final Color color, final int tile) {
+    private JPanel createMenu() {
+        JPanel menu = new JPanel(); // Reset the Menu JPanel, just cause
+        menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS)); // Set the LayoutManager for the Start Menu
+        JPanel players = new JPanel(new GridLayout(2, 1)); // Default JPanel to store the Player Slider
+        JPanel start = new JPanel(new GridLayout(3, 1)); // Default JPanel to store the Start Button
+        final JSlider pSlider = new JSlider(2, 6); // A Slider to select the number of players, max should be four
+        final JLabel numPlayers = new JLabel("2", SwingConstants.CENTER); // Create a JLabel to display the number of Players
+        JButton startButton = createButton("Start", new Color(0xFFBB00), 2); // Button to confirm starting the game
+        // JButton for Options... etc ???
+
+        setDefaultSizes(numPlayers, MENU_HEIGHT, MENU_HEIGHT); // Set preferred sizes for the Player Counter
+        setDefaultSizes(pSlider, MENU_WIDTH, MENU_HEIGHT); // Set the preferred sizes for the Player Slider
+        setDefaultSizes(startButton, MENU_WIDTH, MENU_HEIGHT); // Set the preferred sizes for the Start Button
+
+        // Should have Tick-Marks on the slider, if possible
+        pSlider.setValue(2); // Set the default value of the Player Slider
+        pSlider.addChangeListener(new ChangeListener() { // EventListener to check when Player Slider gets changed
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                numPlayers.setText(pSlider.getValue()+""); // Set the Player Counter to display the updated JSlider value
+            }
+        });
+
+        startButton.setEnabled(true);
+        startButton.addActionListener(new ActionListener() { // EventListener to check when Start Button gets clicked
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.remove(mainPanel); // Remove the start menu from the window's view
+                frame.add(gamePanel); // Add the game board to the window
+                frame.pack(); // Repack the JFrame to keep the graphics up to speed
+                int players = pSlider.getValue(); // Number of players in the game
+                System.out.println("Starting the game with "+players+" players"); 
+                // Put Code Below For How Game Will Be Running
+                // Maybe Make A Recursive Game-Playing Method, Or Have One In Scrabble.Java
+                // Could Also Have A ScrabbleMain.Java That Runs?
+            }
+        }); 
+        players.add(numPlayers); // Add the Player Counter to the JPanel, to be stored in a separate Menu Panel
+        players.add(pSlider); // Add the Player Slider to the JPanel, to be stored in a separate Menu Panel
+        start.add(Box.createVerticalStrut(MENU_HEIGHT)); // Add the blank label to the Start Panel, just so the vertical placement is even between components
+        start.add(startButton); // Add the Start Button to the JPanel, to be stored in a seperate Menu Panel
+        menu.add(Box.createVerticalGlue()); // Vertically center using Glue() --> https://stackoverflow.com/questions/60422149/vertically-center-content-with-boxlayout
+        menu.add(players, Box.CENTER_ALIGNMENT); // Add the Player JPanel to the Menu
+        menu.add(start, Box.CENTER_ALIGNMENT); // Add the Start JPanel to the Menu
+        return(menu);
+    }
+
+    private void setDefaultSizes(JComponent comp, int width, int height) {
+        comp.setPreferredSize(new Dimension(width, height));
+        comp.setMaximumSize(new Dimension(width*2, height*2));
+        comp.setMinimumSize(new Dimension(width/2, height/2));
+    }
+
+    private JButton createButton(final String text, final Color color, final int tile) {
         JButton temp = new JButton(text) {
             @Override
             public void paintComponent(Graphics g) {
@@ -128,6 +208,7 @@ class Board extends JFrame implements ActionListener {
                 super.paintComponent(g);
             }
         };
+        temp.setContentAreaFilled(false); // Change how the JButton paints the borders, so I can paint the border below
         return(temp);
     }
 
