@@ -15,8 +15,8 @@ class Board extends JFrame implements ActionListener {
     private final int HAND_LENGTH = 7;
     private final int MENU_WIDTH = 300;
     private final int MENU_HEIGHT = 75;
-    private int FRAME_WIDTH = 1000;
-    private int FRAME_HEIGHT = 1000;
+    private int FRAME_WIDTH = 1040;
+    private int FRAME_HEIGHT = 1040;
     private boolean GameStarted = false;
  
     // default constructor
@@ -47,7 +47,7 @@ class Board extends JFrame implements ActionListener {
         frame.add(mainPanel); // Add the main menu to the JFrame
         
         Toolkit.getDefaultToolkit().setDynamicLayout(false); // Ensures window resize keeps the right ratio: https://stackoverflow.com/questions/20925193/using-componentadapter-to-determine-when-frame-resize-is-finished 
-        frame.setSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Set the Preferred size
+        frame.setPreferredSize(new Dimension(FRAME_WIDTH/2, FRAME_HEIGHT/2)); // Set the Preferred size
         frame.setMaximumSize(new Dimension(FRAME_WIDTH*2, FRAME_HEIGHT*2)); // Sets the Maximum size
         frame.setMinimumSize(new Dimension(FRAME_WIDTH/2, FRAME_HEIGHT/2)); // Sets the Minimum size
 
@@ -56,6 +56,7 @@ class Board extends JFrame implements ActionListener {
                 int width = frame.getWidth(); // Create a temporary width variable, just for simplicity
                 int height = frame.getHeight(); // Create a temporary height variable, just for simplicity
                 if (width != height) {
+                    System.out.println("Resized Window: "+width+" x "+height);
                     if (width > FRAME_WIDTH || height > FRAME_HEIGHT) { // Frame was resized to larger than previously
                         frame.setPreferredSize(new Dimension(Math.max(width, height), Math.max(width, height))); // Set size to the largest dimension
                     }
@@ -206,7 +207,7 @@ class Board extends JFrame implements ActionListener {
     }
 
     public JButton[][] getBoard() {
-        JPanel board = (JPanel)(gamePanel.getComponent(1));
+        JPanel board = (JPanel)(gamePanel.getComponent(0));
         JButton[][] list = new JButton[ROWS][COLS]; // Creates a 2D Array of JButtons
         for (int i=0; i<ROWS*COLS; i++) { // Loops through each JButton on the board
             list[i/ROWS][i%COLS] = (JButton)(board.getComponent(i)); // Adds the JButton to the array

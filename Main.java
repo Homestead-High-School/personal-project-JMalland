@@ -60,13 +60,26 @@ public class Main {
         System.out.println("Words Contained: ");
         boolean temp = basic.validWordPlacement();
         System.out.println("Words Are Valid: "+temp);
+        
         System.out.println("A: "+basic.getLetterValue('A')+" "+basic.getLetterCount('A'));
         System.out.println("B: "+basic.getLetterValue('B')+" "+basic.getLetterCount('B'));
         System.out.println("C: "+basic.getLetterValue('C')+" "+basic.getLetterCount('C'));
         System.out.println("_: "+basic.getLetterValue(' ')+" "+basic.getLetterCount(' '));
+        
         Board b = new Board();
-        //System.out.println("Rows: "+b.getBoard().length);
-        //System.out.println("Cols: "+b.getBoard()[0].length);
+        JButton[][] tiles = b.getBoard();
+        for (int r=0; r<tiles.length; r++) {
+            for (int c=0; c<tiles[r].length; c++) {
+                final int rIndex = r;
+                final int cIndex = c;
+                tiles[r][c].addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        System.out.println("Tile clicked @ ("+rIndex+", "+cIndex+").");
+                    }
+                });
+            }
+        }
     }
 
     public static TreeMap<Character, HashMap<String, String>> parseAndStore(String file) {
