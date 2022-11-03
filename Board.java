@@ -9,19 +9,19 @@ class Board extends JFrame implements ActionListener {
     private JFrame frame;
     private JPanel gamePanel = new JPanel();
     private JPanel mainPanel = new JPanel();
-    private int rows, cols;
+    private final int ROWS = Scrabble.getBoard().length;
+    private final int COLS = Scrabble.getBoard()[0].length;
     private final int TILE_SIZE = 50;
     private final int HAND_LENGTH = 7;
     private final int MENU_WIDTH = 300;
     private final int MENU_HEIGHT = 75;
     private int FRAME_WIDTH = 1000;
     private int FRAME_HEIGHT = 1000;
+    private boolean GameStarted = false;
  
     // default constructor
     Board() {
         frame = new JFrame("Scrabble");
-        rows = Scrabble.getBoard().length;
-        cols = Scrabble.getBoard()[0].length;
         
         try {
             // set look and feel
@@ -74,16 +74,16 @@ class Board extends JFrame implements ActionListener {
  
     // Board Creation
     private JPanel createBoard() {
-        GridLayout grid = new GridLayout(rows,cols); // Main Board layout
+        GridLayout grid = new GridLayout(ROWS,COLS); // Main Board layout
         JPanel board = new JPanel(grid); // Main Board panel
         
         // https://stackoverflow.com/questions/29379441/java-set-transparency-on-color-color-without-using-rgbs
         // https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
-        for (int r=0; r<rows; r++) {
-            for (int c=0; c<cols; c++) {
+        for (int r=0; r<ROWS; r++) {
+            for (int c=0; c<COLS; c++) {
                 final int rIndex = r; // Make final so accessible at any time
                 final int cIndex = c; // Make final so accessible at any time
-                int tile = Scrabble.getVal(r%rows, c%cols); // Create the tile value to determine the look of each button
+                int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
                 JButton temp = createButton("", new Color(0xFFFFFF), tile); // Blank Tile, represented by a '0'
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
                     temp = createButton((tile == 1 ? '2' : '3') + "x L", new Color(0x4274FF), tile);
@@ -108,7 +108,7 @@ class Board extends JFrame implements ActionListener {
                 board.add(temp); // Add tile to the grid
             }
         }
-        setDefaultSizes(board, cols*TILE_SIZE, rows*TILE_SIZE); // Sets all preferred sizes of the JPanel
+        setDefaultSizes(board, COLS*TILE_SIZE, ROWS*TILE_SIZE); // Sets all preferred sizes of the JPanel
         return(board);
     }
 
@@ -145,13 +145,15 @@ class Board extends JFrame implements ActionListener {
 
     private JPanel createMenu() {
         JPanel menu = new JPanel(); // Reset the Menu JPanel, just cause
-        menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS)); // Set the LayoutManager for the Start Menu
         JPanel players = new JPanel(new GridLayout(2, 1)); // Default JPanel to store the Player Slider
         JPanel start = new JPanel(new GridLayout(3, 1)); // Default JPanel to store the Start Button
+
+        // JButton for Options... etc ???
+        final JButton startButton = createButton("Start", new Color(0xFFBB00), 2); // Button to confirm starting the game
         final JSlider pSlider = new JSlider(2, 6); // A Slider to select the number of players, max should be four
         final JLabel numPlayers = new JLabel("2", SwingConstants.CENTER); // Create a JLabel to display the number of Players
-        JButton startButton = createButton("Start", new Color(0xFFBB00), 2); // Button to confirm starting the game
-        // JButton for Options... etc ???
+
+        menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS)); // Set the LayoutManager for the Start Menu
 
         setDefaultSizes(numPlayers, MENU_HEIGHT, MENU_HEIGHT); // Set preferred sizes for the Player Counter
         setDefaultSizes(pSlider, MENU_WIDTH, MENU_HEIGHT); // Set the preferred sizes for the Player Slider
@@ -174,16 +176,20 @@ class Board extends JFrame implements ActionListener {
                 frame.add(gamePanel); // Add the game board to the window
                 frame.pack(); // Repack the JFrame to keep the graphics up to speed
                 int players = pSlider.getValue(); // Number of players in the game
+                GameStarted = true; // Mark that the game has started
                 System.out.println("Starting the game with "+players+" players"); 
                 // Put Code Below For How Game Will Be Running
                 // Maybe Make A Recursive Game-Playing Method, Or Have One In Scrabble.Java
                 // Could Also Have A ScrabbleMain.Java That Runs?
             }
         }); 
+
         players.add(numPlayers); // Add the Player Counter to the JPanel, to be stored in a separate Menu Panel
         players.add(pSlider); // Add the Player Slider to the JPanel, to be stored in a separate Menu Panel
+        
         start.add(Box.createVerticalStrut(MENU_HEIGHT)); // Add the blank label to the Start Panel, just so the vertical placement is even between components
         start.add(startButton); // Add the Start Button to the JPanel, to be stored in a seperate Menu Panel
+        
         menu.add(Box.createVerticalGlue()); // Vertically center using Glue() --> https://stackoverflow.com/questions/60422149/vertically-center-content-with-boxlayout
         menu.add(players, Box.CENTER_ALIGNMENT); // Add the Player JPanel to the Menu
         menu.add(start, Box.CENTER_ALIGNMENT); // Add the Start JPanel to the Menu
@@ -211,15 +217,22 @@ class Board extends JFrame implements ActionListener {
 
     public JButton[][] getBoard() {
         JPanel board = (JPanel)(gamePanel.getComponent(1));
-        JButton[][] list = new JButton[rows][cols]; // Creates a 2D Array of JButtons
-        for (int i=0; i<rows*cols; i++) { // Loops through each JButton on the board
-            list[i/rows][i%cols] = (JButton)(board.getComponent(i)); // Adds the JButton to the array
+        JButton[][] list = new JButton[ROWS][COLS]; // Creates a 2D Array of JButtons
+        for (int i=0; i<ROWS*COLS; i++) { // Loops through each JButton on the board
+            list[i/ROWS][i%COLS] = (JButton)(board.getComponent(i)); // Adds the JButton to the array
         }
         return(list); // Returns the array
     }
     
+    public boolean gameStarted() {
+        return(GameStarted);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        // TODO Auto-generated method stub
+        // Might be able to have the Board() object with custom ActionListener outside of class?
+        if (gameStarted()) {
+            System.out.println("The game is running...");
+        }
     }
 }
