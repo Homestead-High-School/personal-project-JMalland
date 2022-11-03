@@ -35,17 +35,9 @@ class Board extends JFrame implements ActionListener {
                 JButton temp = new JButton();
                 final int tile = Scrabble.getVal(r%rows, c%cols);
                 String text = "";
-                if (tile == 1) {
-                    text = "2x L"; // 2 * Letter Value
-                }
-                else if (tile == 2) {
-                    text = "3x L"; // 3 * Letter Value
-                }
-                else if (tile == 3) {
-                    text = "2x W"; // 2 * Word Value
-                }
-                else if (tile == 4) {
-                    text = "3x W"; // 3 * Word Value
+                if (tile > 0) {
+                    text += tile%2 == 1 ? "2x " : "3x ";
+                    text += tile < 2 ? 'L' : 'W'; // Letter/Word Bonus
                 }
                 temp = new JButton(text) {
                     public void paintComponent(Graphics g) {
