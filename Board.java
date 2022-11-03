@@ -55,27 +55,26 @@ class Board extends JFrame implements ActionListener {
                         super.paintComponent(g);
                     }
                 };
-                temp.setContentAreaFilled(false);
+                temp.setContentAreaFilled(false); // Change how the JButton paints the borders, so I can paint the border below
                 // https://stackoverflow.com/questions/33954698/jbutton-change-default-borderhttps://stackoverflow.com/questions/33954698/jbutton-change-default-border
                 // Maybe I should make the borders appear curved?
-                temp.setBorder(BorderFactory.createLineBorder(Color.black, 1));
+                temp.setBorder(BorderFactory.createLineBorder(Color.black, 1)); // Create each tile with a black border
                 // Action Listener: https://stackoverflow.com/questions/22580243/get-position-of-the-button-on-gridlayout
-                temp.addActionListener(new ActionListener() {
+                temp.addActionListener(new ActionListener() { // Create an actionListener to react when the button is interacted with
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         // Pass the resultant actions to the Scrabble Game? // Board.getComponent(n)
                         // Or, have a method return a list of all tiles, and add actionListeners inside a seperate class or the Scrabble class?
                         System.out.println("rowIndex "+rIndex+" columnIndex "+cIndex);
                     }
-        
                 });
-                temp.setSize(50, 50);
-                board.add(temp);
+                temp.setSize(50, 50); // Set tile size
+                board.add(temp); // Add tile to the grid
             }
         }
-        frame.add(board);
-        frame.setSize(1000, 1000);
-        frame.setVisible(true);
+        frame.add(board); // Add the grid to the application frame
+        frame.setSize(1000, 1000); // Set the application frame to 1000 x 1000
+        frame.setVisible(true); // Set the application frame visible
     }
 
     @Override
