@@ -4,6 +4,8 @@ import java.awt.Point;
 import java.util.Comparator;
 
 public class Scrabble {
+    private static final int[] tiles = new int[] {9, 2, 2, 2, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1, 2};
+    private static final int[] values = new int[] {1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 10, 1, 1, 1, 1, 4, 4, 8, 4, 10, 0};
     private static final int[][] board = new int[][] {
         {4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4},
         {0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0},
@@ -28,6 +30,14 @@ public class Scrabble {
     public Scrabble(TreeMap<Character, HashMap<String, String>> list) {
         this.list = list; // Map of possible words, sorted by first character, A-Z
         items = new HashMap<Point, Character>(); // Map of coordinates, each pointing to a char
+    }
+
+    public int getLetterValue(char c) {
+        return(c == 32 ? Scrabble.values[26] : Scrabble.values[c-65]);
+    }
+
+    public int getLetterCount(char c) {
+        return(c == 32 ? Scrabble.tiles[26] : Scrabble.tiles[c-65]);
     }
 
     public void placeLetter(char l, int r, int c) {
@@ -60,7 +70,7 @@ public class Scrabble {
         int position = -1; // Stores the position of the current word to mark when the loop shifts rows or columns
         for (Point p : map.keySet()) { // Loop through each character, forming each possible word in the list
             int posUsed = rowOrCol ? p.x : p.y; // Use X if 'rowOrCol' is true, otherwise use Y
-            if (position == -1 || posUsed != position || map.get(p) == ' ') {
+            if (position == -1 || posUsed != position || map.get(p) == ' ') { // The point doesn't follow the previous one
                 if (isLegalWord(current)) { // Check to see if the word is valid
                     position = posUsed; // Set the current position
                     current = ""; // Reset the string to start the word over again
