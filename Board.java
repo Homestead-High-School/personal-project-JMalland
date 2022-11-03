@@ -2,20 +2,16 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.awt.*;
 class Board extends JFrame implements ActionListener {
-    // create a frame
-    static JFrame frame;
     
+    private JFrame frame;
+    private JPanel board = new JPanel();
+    private int rows, cols;
  
     // default constructor
     Board() {
-        
-    }
- 
-    // main function
-    public static void main(String args[]) {
-        // create a frame
         frame = new JFrame("Scrabble");
-        int rows, cols = rows = 15;
+        rows = Scrabble.getBoard().length;
+        cols = Scrabble.getBoard()[0].length;
  
         try {
             // set look and feel
@@ -24,76 +20,77 @@ class Board extends JFrame implements ActionListener {
         catch (Exception e) {
             System.err.println(e.getMessage());
         }
-
+        
+        createBoard(); // Create the game board
+        
+        frame.add(board); // Add the grid to the application frame
+        frame.setSize(1000, 1000); // Set the application frame to 1000 x 1000
+        frame.setVisible(true); // Set the application frame visible
+    }
+ 
+    // Board Creation
+    private void createBoard() {
         GridLayout grid = new GridLayout(rows,cols); // Main Board layout
-        JPanel board = new JPanel(grid); // Main Board panel
+        board = new JPanel(grid); // Main Board panel
         
         // https://stackoverflow.com/questions/29379441/java-set-transparency-on-color-color-without-using-rgbs
         // https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
         for (int r=0; r<rows; r++) {
             for (int c=0; c<cols; c++) {
+                final int rIndex = r; // Make final so accessible at any time
+                final int cIndex = c; // Make final so accessible at any time
+                int tile = Scrabble.getVal(r%rows, c%cols); // Create the tile value to determine the look of each button
                 JButton temp = new JButton();
-                switch(Scrabble.getVal(r%rows, c%cols)) {
-                    case(1):
-                        temp = new JButton("2x L") {
-                            public void paintComponent(Graphics g) {
-                                Color temp = new Color(0x4274FF);
-                                g.setColor(new Color(temp.getRed(), temp.getGreen(), temp.getBlue(), 75)); // 75% Opacity
-                                g.fillRect(0, 0, getSize().width, getSize().height);
-                                super.paintComponent(g);
-                            }
-                        };
-                        break;
-                    case(2):
-                        temp = new JButton("3x L") {
-                            public void paintComponent(Graphics g) {
-                                g.setColor(new Color(0x4274FF));
-                                g.fillRect(0, 0, getSize().width, getSize().height);
-                                super.paintComponent(g);
-                            }
-                        };
-                        break;
-                    case(3):
-                        temp = new JButton("2x W") {
-                            public void paintComponent(Graphics g) {
-                                Color temp = new Color(0xD7381C);
-                                g.setColor(new Color(temp.getRed(), temp.getGreen(), temp.getBlue(), 75)); // 75% Opacity
-                                g.fillRect(0, 0, getSize().width, getSize().height);
-                                super.paintComponent(g);
-                            }
-                        };
-                        break;
-                    case(4):
-                        temp = new JButton("3x W") {
-                            public void paintComponent(Graphics g) {
-                                g.setColor(new Color(0xD7381C));
-                                g.fillRect(0, 0, getSize().width, getSize().height);
-                                super.paintComponent(g);
-                            }
-                        };
-                        break;
+                if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
+                    temp = createButton((tile == 1 ? '2' : '3') + "x L", new Color(0x4274FF), tile);
                 }
-                temp.setContentAreaFilled(false);
+                else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'
+                    temp = createButton((tile == 3 ? '2' : '3') + "x W", new Color(0xD7381C), tile);
+                }
+                else { // Tile is a Blank Tile, represented by '0'
+                    temp = createButton("", new Color(0xFFFFFF), tile);
+                }
+                temp.setContentAreaFilled(false); // Change how the JButton paints the borders, so I can paint the border below
                 // https://stackoverflow.com/questions/33954698/jbutton-change-default-borderhttps://stackoverflow.com/questions/33954698/jbutton-change-default-border
-                temp.setBorder(BorderFactory.createLineBorder(Color.black, 1));
+                // Maybe I should make the borders appear curved?
+                temp.setBorder(BorderFactory.createLineBorder(Color.black, 1)); // Create each tile with a black border
                 // Action Listener: https://stackoverflow.com/questions/22580243/get-position-of-the-button-on-gridlayout
-                final int rIndex = r; // Make final so accessable at any time
-                final int cIndex = c; // Make final so accessable at any time
-                temp.addActionListener(new ActionListener() {
+                temp.addActionListener(new ActionListener() { // Create an actionListener to react when the button is interacted with
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        // Pass the resultant actions to the Scrabble Game? // Board.getComponent(n)
+                        // Or, have a method return a list of all tiles, and add actionListeners inside a seperate class or the Scrabble class?
                         System.out.println("rowIndex "+rIndex+" columnIndex "+cIndex);
                     }
-        
                 });
-                temp.setSize(50, 50);
-                board.add(temp);
+                temp.setSize(50, 50); // Set tile size
+                board.add(temp); // Add tile to the grid
             }
         }
-        frame.add(board);
-        frame.setSize(1000, 1000);
-        frame.setVisible(true);
     }
+
+    private static JButton createButton(String text, Color color, int tile) {
+        JButton temp = new JButton(text) {
+            @Override
+            public void paintComponent(Graphics g) {
+                g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), tile%2 == 1 ? 25 : 100)); // 75% Opacity, if tile is 1 or 3
+                g.fillRect(0, 0, getSize().width, getSize().height);
+                super.paintComponent(g);
+            }
+        };
+        return(temp);
+    }
+
+    public JButton[][] getBoard() {
+        JButton[][] list = new JButton[rows][cols]; // Creates a 2D Array of JButtons
+        for (int i=0; i<rows*cols; i++) { // Loops through each JButton on the board
+            list[i/rows][i%cols] = (JButton)(board.getComponent(i)); // Adds the JButton to the array
+        }
+        return(list); // Returns the array
+    }
+    
+    @Override
     public void actionPerformed(ActionEvent e) {
+        // TODO Auto-generated method stub
     }
 }
