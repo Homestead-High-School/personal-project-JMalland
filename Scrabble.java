@@ -29,8 +29,8 @@ public class Scrabble {
     private HashMap<Point, Character> items;
 
     public Scrabble(TreeMap<Character, HashMap<String, String>> list) {
-        this.list = list;
-        items = new HashMap<Point, Character>();
+        this.list = list; // Map of possible words, sorted by first character, A-Z
+        items = new HashMap<Point, Character>(); // Map of coordinates, each pointing to a char
     }
 
     public void placeLetter(char l, int r, int c) {
@@ -80,13 +80,10 @@ public class Scrabble {
     }
     
     private boolean isLegalWord(String word) {
-        if (word.equals("") || word.length() < 2) {
-            return(true);
+        if (!word.equals("") && word.length() > 2) { // If the word isn't null
+            System.out.println("\t"+word); // Print the word, if it's real.
         }
-        else {
-            System.out.println("\t"+word);
-            return(list.get(word.charAt(0)).containsKey(word)); // Map does or doesn't contain the word
-        }
+        return((word.equals("") || word.length() < 2) || list.get(word.charAt(0)).containsKey(word)); // Map does or doesn't contain the word
     }
 
     // Return the scrabble board

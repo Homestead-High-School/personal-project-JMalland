@@ -14,7 +14,7 @@ public class Main {
         String three = "HELP";
         String four = "HUGS";
         String five = "SOUP";
-        String six = "PREP";
+        String six = "PERP";
         /* End Result:
             U N H A P P Y   H U G S
                 E                 O
