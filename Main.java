@@ -64,18 +64,13 @@ public class Main {
         try {
             Scanner input = new Scanner(new File(file)); // Use Scanner to parse the file
             while (input.hasNextLine()) { // Loop through each line in the file
-                String temp = input.nextLine().trim(); // Store String for easy access
-                if (temp.contains("#")) continue; // Skip if the word is commented.
-                String[] arr = temp.trim().split("\\s", 2);
-                String define = arr[1];
-                temp = arr[0];
-                if (!map.containsKey(temp.charAt(0))) { // Add an empty TreeMap if it doesn't exist
-                    map.put(temp.charAt(0), new HashMap<String, String>()); // Add Integer TreeMap
+                String[] arr = input.nextLine().trim().split("\\s", 2); // Store word for easy access
+                char c = arr[0].charAt(0); // Frontmost character in the string
+                if (arr[0].contains("#")) continue; // Skip if the word is commented.
+                if (!map.containsKey(c)) { // Add an empty TreeMap if it doesn't exist
+                    map.put(c, new HashMap<String, String>()); // Add the Character, corresponding to a TreeMap of Strings
                 }
-                //if (!map.get(temp.charAt(0)).containsKey(temp)) { // Add an emptuy HashMap if it doesn't exist
-                map.get(temp.charAt(0)).put(temp, define);
-                //}
-                //map.get(temp.charAt(0)).get(temp.length()).put(temp, define); // Add the String and its definition to the HashMap
+                map.get(c).put(arr[0], arr[1]); // Add the word and definition to the map
             }
         } catch (Exception e) { // Throw an exception, if necessary
             System.out.println("Error: "+e); // Print the stack trace.
