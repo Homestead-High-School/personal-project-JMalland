@@ -1,6 +1,6 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-c66648af7eb3fe8bc4f294546bfd86ef473780cde1dea487d3c4ff354943c9ae.svg)](https://classroom.github.com/online_ide?assignment_repo_id=8472554&assignment_repo_type=AssignmentRepo)
 # Advanced PIP: Scrabble
 Final project for Advanced Programming
 
-Replace this with a daily detail of what you have learned/done.
-This detail should be well formatted, google how-to-create github wiki for more information
+# 11/1/22 ~ 11/3/22: Building Classes
+  I've been building the base case for each class for the Board and Scrabble class. So far, I've built an application window featuring a 15x15 grid of tiles that build the Scrabble board. 
+  My Scrabble class, however, I've built the base features to place letters corresponding to specific coordinates. Using an algorithm I built to custom sort TreeMaps, I then check whether or not all added letters form valid words from my dictionary file. 
