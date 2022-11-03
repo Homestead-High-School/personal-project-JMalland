@@ -25,107 +25,67 @@ public class Scrabble {
         {4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4}
     };
     private char[][] map = new char[15][15];
-    private TreeMap<Character, TreeMap<Integer, HashMap<String, String>>> list = null;
-    private ArrayList<Point> coords;
-    private ArrayList<Character> chars;
+    private TreeMap<Character, HashMap<String, String>> list = null;
+    private HashMap<Point, Character> items;
 
-    public Scrabble(TreeMap<Character, TreeMap<Integer, HashMap<String, String>>> list) {
+    public Scrabble(TreeMap<Character, HashMap<String, String>> list) {
         this.list = list;
-        coords = new ArrayList<Point>();
-        chars = new ArrayList<Character>();
+        items = new HashMap<Point, Character>();
     }
 
     public void placeLetter(char l, int r, int c) {
-        if (r > map.length || c > map[0].length) {
+        if (r > map.length || c > map[0].length) { // Throw an exception if I'm stupid enough to make such a horrible mistake
             throw new IllegalArgumentException("Index Out Of Bounds For Map Placement");
         }
-        chars.add(l); // Append character
-        coords.add(new Point(c, r)); // Append character coordinates
+        items.put(new Point(c, r), l); // Append the coordinate, pointing to the character
     }
 
     public boolean validWordPlacement() {
+        return(calcRowOrCol(true) && calcRowOrCol(false));
+    }
+
+    private boolean calcRowOrCol(boolean rowOrCol) {
         // Sort rows & cols by both row and col index, to compare words in same column and row.
         // https://stackoverflow.com/questions/2784514/sort-arraylist-of-custom-objects-by-property
-        Collections.sort(coords, new Comparator<Point>() { // Sort By Rows
+        TreeMap<Point, Character> map = new TreeMap<>(new Comparator<Point>() { // Sort By Columns
             @Override
             public int compare(Point o1, Point o2) {
-                if (o1.y != o2.y) {
-                    return(o1.y - o2.y);
+                if ((rowOrCol && o1.x != o2.x) || (!rowOrCol && o1.y != o2.y)) { // Each x value is the column of the point
+                    return(rowOrCol ? o1.x - o2.x : o1.y - o2.y); // Sort by column/row placement first
                 }
-                else { // 2,3 2,5 2,6 2,4
-                    return(o1.x - o2.x);
+                else { // Each y value is the row of the point
+                    return(rowOrCol ? o1.y - o2.y : o1.x - o2.x); // Sort by row/column placement second
                 }
             }
         });
-        String current = "";
-        int row = -1;
-        for (int i=0; i<coords.size(); i++) { // Loop through each character, forming each possible word in the list
-            Point p = coords.get(i);
-            System.out.print(p.y+","+p.x+"\t");
-            if (row == -1 || p.y != row || chars.get(i) == ' ') {
-                row = p.y; // Set the current row
-                if (!current.equals("") && current.length() > 1) {
-                    System.out.println("\n"+current); // Display Word
-                    if (!isLegalWord(current)) { // Word may be flipped
-                        return(false);
-                    }
-                }
-                else if (!current.equals("")) {
-                    System.out.println();
-                }
-                current = "";
-            }
-            current += chars.get(i);
-        }
-        System.out.println("\n"+current);
-        if (!current.equals("")) {
-            if (!isLegalWord(current)) {
-                return(false);
-            }
-        }
-        System.out.println("Columns:");
-        Collections.sort(coords, new Comparator<Point>() { // Sort By Columns
-            @Override
-            public int compare(Point o1, Point o2) {
-                if (o1.x != o2.x) {
-                    return(o1.x - o2.x);
+        map.putAll(items);
+        String current = ""; // String to store the current word, formed by row or column
+        int position = -1; // Stores the position of the current word to mark when the loop shifts rows or columns
+        for (Point p : map.keySet()) { // Loop through each character, forming each possible word in the list
+            int posUsed = rowOrCol ? p.x : p.y; // Use X if 'rowOrCol' is true, otherwise use Y
+            if (position == -1 || posUsed != position || map.get(p) == ' ') {
+                if (isLegalWord(current)) { // Check to see if the word is valid
+                    position = posUsed; // Set the current position
+                    current = ""; // Reset the string to start the word over again
                 }
                 else {
-                    return(o1.y - o2.y);
+                    return(false); // Return false if invalid
                 }
             }
-        });
-        current = "";
-        int col = -1;
-        for (int i=0; i<coords.size(); i++) { // Loop through each character, forming each possible word in the list
-            Point p = coords.get(i);
-            System.out.print(p.y+","+p.x+"\t");
-            if (col == -1 || p.x != col || chars.get(i) == ' ') {
-                col = p.x; // Set the current column
-                if (!current.equals("") && current.length() > 1) {
-                    System.out.println("\n"+current); // Display Word
-                    if (!isLegalWord(current)) { // Word may be upside down
-                        return(false);
-                    }
-                }
-                else if (!current.equals("")) {
-                    System.out.println();
-                }
-                current = "";
+            if (map.get(p) != ' ') { 
+                current += map.get(p); // Only add the character if it isn't a space
             }
-            current += chars.get(i);
         }
-        //coords.clear(); // Wipe the words of the placement. Probably don't want to do
-        //chars.clear(); // Wipe the words of the placement.
-        return(true);
+        return(isLegalWord(current)); // Returns whether or not the final word is valid
     }
     
     private boolean isLegalWord(String word) {
-        if (word.length() < 2 || !list.get(word.charAt(0)).containsKey(word.length())) {
-            return(false); // Word doesn't exist at that character or length
+        if (word.equals("") || word.length() < 2) {
+            return(true);
         }
         else {
-            return(list.get(word.charAt(0)).get(word.length()).containsKey(word)); // Map does or doesn't contain the word
+            System.out.println("\t"+word);
+            return(list.get(word.charAt(0)).containsKey(word)); // Map does or doesn't contain the word
         }
     }
 
@@ -136,7 +96,7 @@ public class Scrabble {
 
     // Return the scrabble board tile
     public static int getVal(int r, int c) {
-        if (r > Scrabble.board.length || c > Scrabble.board.length) {
+        if (r > Scrabble.board.length || c > Scrabble.board.length) { // Throw an exception if I'm stupid enough to make such a horrible mistake.
             throw new IllegalArgumentException("Index Out Of Bounds For Scrabble Board");
         }
         return(Scrabble.board[r][c]);
