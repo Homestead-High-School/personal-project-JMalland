@@ -32,23 +32,25 @@ class Board extends JFrame implements ActionListener {
         // https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
         for (int r=0; r<rows; r++) {
             for (int c=0; c<cols; c++) {
-                JButton temp = new JButton();
-                final int tile = Scrabble.getVal(r%rows, c%cols);
-                String text = "";
-                if (tile > 0) {
-                    text += tile%2 == 1 ? "2x " : "3x ";
-                    text += tile < 2 ? 'L' : 'W'; // Letter/Word Bonus
+                final int rIndex = r; // Make final so accessible at any time
+                final int cIndex = c; // Make final so accessible at any time
+                final int tile = Scrabble.getVal(r%rows, c%cols); // Make final so accessible in @Overridden methods
+                if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
+                    final String text = (tile == 1 ? '2' : '3') + "x L"; // 2 or 3 * Letter Bonus
+                    final Color color = new Color(0x4274FF); // Blue Tile
+                }
+                else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'
+                    final String text = (tile == 3 ? '2' : '3') + "x W"; // 2 or 3 * Word Bonus
+                    final Color color = new Color(0xD7381C); // Red Tile
+                }
+                else { // Tile is a Blank Tile, represented by '0'
+                    final String text = ""; // Blank Text
+                    final Color color = new Color(0xFFFFFF); // White Tile
                 }
                 temp = new JButton(text) {
+                    @Override
                     public void paintComponent(Graphics g) {
-                        Color color = new Color(0xFFFFFF);
-                        if (tile == 1 || tile == 2) { // Letter Bonus
-                            color = new Color(0x4274FF); // Blue Tile
-                        }
-                        else if (tile == 3 || tile == 4) { // Word Bonus
-                            color = new Color(0xD7381C); // Red Tile
-                        }
-                        g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), tile == 1 || tile == 3 ? 25 : 100)); // 75% Opacity, if tile is 1 or 3
+                        g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), tile%2 == 1 ? 25 : 100)); // 75% Opacity, if tile is 1 or 3
                         g.fillRect(0, 0, getSize().width, getSize().height);
                         super.paintComponent(g);
                     }
@@ -58,8 +60,6 @@ class Board extends JFrame implements ActionListener {
                 // Maybe I should make the borders appear curved?
                 temp.setBorder(BorderFactory.createLineBorder(Color.black, 1));
                 // Action Listener: https://stackoverflow.com/questions/22580243/get-position-of-the-button-on-gridlayout
-                final int rIndex = r; // Make final so accessable at any time
-                final int cIndex = c; // Make final so accessable at any time
                 temp.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
