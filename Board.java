@@ -9,9 +9,6 @@ class Board extends JFrame implements ActionListener {
     private JFrame frame;
     private JPanel gamePanel = new JPanel();
     private JPanel mainPanel = new JPanel();
-    private JPanel board = new JPanel();
-    private JPanel hand = new JPanel();
-    private JPanel menu = new JPanel();
     private int rows, cols;
     private final int TILE_SIZE = 50;
     private final int HAND_LENGTH = 7;
@@ -213,6 +210,7 @@ class Board extends JFrame implements ActionListener {
     }
 
     public JButton[][] getBoard() {
+        JPanel board = (JPanel)(gamePanel.getComponent(1));
         JButton[][] list = new JButton[rows][cols]; // Creates a 2D Array of JButtons
         for (int i=0; i<rows*cols; i++) { // Loops through each JButton on the board
             list[i/rows][i%cols] = (JButton)(board.getComponent(i)); // Adds the JButton to the array
