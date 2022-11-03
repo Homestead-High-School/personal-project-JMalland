@@ -2,19 +2,16 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.awt.*;
 class Board extends JFrame implements ActionListener {
-    // create a frame
-    static JFrame frame;
+    
+    private JFrame frame;
+    private JPanel board = new JPanel();
+    private int rows, cols;
  
     // default constructor
     Board() {
-        
-    }
- 
-    // main function
-    public static void run() {
-        // create a frame
         frame = new JFrame("Scrabble");
-        int rows, cols = rows = 15;
+        rows = Scrabble.getBoard().length;
+        cols = Scrabble.getBoard()[0].length;
  
         try {
             // set look and feel
@@ -23,9 +20,18 @@ class Board extends JFrame implements ActionListener {
         catch (Exception e) {
             System.err.println(e.getMessage());
         }
-
+        
+        createBoard(); // Create the game board
+        
+        frame.add(board); // Add the grid to the application frame
+        frame.setSize(1000, 1000); // Set the application frame to 1000 x 1000
+        frame.setVisible(true); // Set the application frame visible
+    }
+ 
+    // Board Creation
+    private void createBoard() {
         GridLayout grid = new GridLayout(rows,cols); // Main Board layout
-        JPanel board = new JPanel(grid); // Main Board panel
+        board = new JPanel(grid); // Main Board panel
         
         // https://stackoverflow.com/questions/29379441/java-set-transparency-on-color-color-without-using-rgbs
         // https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
@@ -61,9 +67,6 @@ class Board extends JFrame implements ActionListener {
                 board.add(temp); // Add tile to the grid
             }
         }
-        frame.add(board); // Add the grid to the application frame
-        frame.setSize(1000, 1000); // Set the application frame to 1000 x 1000
-        frame.setVisible(true); // Set the application frame visible
     }
 
     private static JButton createButton(String text, Color color, int tile) {
@@ -78,6 +81,14 @@ class Board extends JFrame implements ActionListener {
         return(temp);
     }
 
+    public JButton[][] getBoard() {
+        JButton[][] list = new JButton[rows][cols]; // Creates a 2D Array of JButtons
+        for (int i=0; i<rows*cols; i++) { // Loops through each JButton on the board
+            list[i/rows][i%cols] = (JButton)(board.getComponent(i)); // Adds the JButton to the array
+        }
+        return(list); // Returns the array
+    }
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         // TODO Auto-generated method stub
