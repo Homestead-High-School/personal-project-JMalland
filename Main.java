@@ -64,9 +64,9 @@ public class Main {
         System.out.println("B: "+basic.getLetterValue('B')+" "+basic.getLetterCount('B'));
         System.out.println("C: "+basic.getLetterValue('C')+" "+basic.getLetterCount('C'));
         System.out.println("_: "+basic.getLetterValue(' ')+" "+basic.getLetterCount(' '));
-        Board b = new Board();
-        System.out.println("Rows: "+b.getBoard().length);
-        System.out.println("Cols: "+b.getBoard()[0].length);
+        Board b = new Board(2);
+        //System.out.println("Rows: "+b.getBoard().length);
+        //System.out.println("Cols: "+b.getBoard()[0].length);
     }
 
     public static TreeMap<Character, HashMap<String, String>> parseAndStore(String file) {
