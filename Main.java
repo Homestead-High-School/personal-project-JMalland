@@ -1,5 +1,8 @@
 import java.util.*;
 import java.io.File;
+import java.awt.event.*;
+import javax.swing.*;
+import java.awt.*;
 public class Main {
     public static void main(String[] args) {
         TreeMap<Character, HashMap<String, String>> map = parseAndStore("Words.txt"); // Get the sorted TreeMap
@@ -57,6 +60,13 @@ public class Main {
         System.out.println("Words Contained: ");
         boolean temp = basic.validWordPlacement();
         System.out.println("Words Are Valid: "+temp);
+        System.out.println("A: "+basic.getLetterValue('A')+" "+basic.getLetterCount('A'));
+        System.out.println("B: "+basic.getLetterValue('B')+" "+basic.getLetterCount('B'));
+        System.out.println("C: "+basic.getLetterValue('C')+" "+basic.getLetterCount('C'));
+        System.out.println("_: "+basic.getLetterValue(' ')+" "+basic.getLetterCount(' '));
+        Board b = new Board();
+        System.out.println("Rows: "+b.getBoard().length);
+        System.out.println("Cols: "+b.getBoard()[0].length);
     }
 
     public static TreeMap<Character, HashMap<String, String>> parseAndStore(String file) {
