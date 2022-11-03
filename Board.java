@@ -81,8 +81,6 @@ class Board extends JFrame implements ActionListener {
         // https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
         for (int r=0; r<ROWS; r++) {
             for (int c=0; c<COLS; c++) {
-                final int rIndex = r; // Make final so accessible at any time
-                final int cIndex = c; // Make final so accessible at any time
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
                 JButton temp = createButton("", new Color(0xFFFFFF), tile); // Blank Tile, represented by a '0'
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
@@ -94,15 +92,6 @@ class Board extends JFrame implements ActionListener {
                 // https://stackoverflow.com/questions/33954698/jbutton-change-default-borderhttps://stackoverflow.com/questions/33954698/jbutton-change-default-border
                 // Maybe I should make the borders appear curved?
                 temp.setBorder(BorderFactory.createLineBorder(Color.black, 1)); // Create each tile with a black border
-                // Action Listener: https://stackoverflow.com/questions/22580243/get-position-of-the-button-on-gridlayout
-                temp.addActionListener(new ActionListener() { // Create an actionListener to react when the button is interacted with
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        // Pass the resultant actions to the Scrabble Game? // Board.getComponent(n)
-                        // Or, have a method return a list of all tiles, and add actionListeners inside a seperate class or the Scrabble class?
-                        System.out.println("rowIndex "+rIndex+" columnIndex "+cIndex);
-                    }
-                });
                 temp.setSize(TILE_SIZE, TILE_SIZE); // Set tile size
                 temp.setMaximumSize(new Dimension(TILE_SIZE, TILE_SIZE));
                 board.add(temp); // Add tile to the grid
@@ -168,6 +157,7 @@ class Board extends JFrame implements ActionListener {
             }
         });
 
+        // Action Listener: https://stackoverflow.com/questions/22580243/get-position-of-the-button-on-gridlayout
         startButton.setEnabled(true);
         startButton.addActionListener(new ActionListener() { // EventListener to check when Start Button gets clicked
             @Override
