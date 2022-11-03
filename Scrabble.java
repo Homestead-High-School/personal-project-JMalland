@@ -1,9 +1,12 @@
 import java.util.TreeMap;
 import java.util.HashMap;
+import java.util.Random;
 import java.awt.Point;
 import java.util.Comparator;
 
 public class Scrabble {
+    private static int[] tiles = new int[] {9, 2, 2, 2, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1, 2};
+    private static final int[] values = new int[] {1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 10, 1, 1, 1, 1, 4, 4, 8, 4, 10, 0};
     private static final int[][] board = new int[][] {
         {4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4},
         {0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0},
@@ -21,13 +24,41 @@ public class Scrabble {
         {0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0},
         {4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4}
     };
+    private TreeMap<Character, HashMap<String, String>> list;
     private char[][] map = new char[15][15];
-    private TreeMap<Character, HashMap<String, String>> list = null;
     private HashMap<Point, Character> items;
+    private int numTiles = 0;
 
     public Scrabble(TreeMap<Character, HashMap<String, String>> list) {
         this.list = list; // Map of possible words, sorted by first character, A-Z
         items = new HashMap<Point, Character>(); // Map of coordinates, each pointing to a char
+        numTiles = 100; // Set the default number of tiles
+    }
+
+    public char[] drawTiles() {
+        Random rand = new Random();
+        char[] hand = new char[7];
+        if (numTiles > 7) { // Check to see if enough tiles left to draw
+            for (int i=0; i<hand.length; i++) {
+                do { // Run the loop while the chosen character is empty
+                    hand[i] = (char)(65+rand.nextInt(27)); // Choose a random character, from A-Z or SPACE
+                    hand[i] = (hand[i]-65 == 26) ? 32 : hand[i]; // If the character was SPACE, fix the value
+                } while (getLetterCount(hand[i]) == 0);
+            }
+            numTiles -= 7; // Remove 7 tiles from the count, since a hand is 7 large
+            return(hand); // Return the chosen hand
+        }
+        else { // Throw Exception because extra tiles are unknown, at the moment
+            throw new IllegalArgumentException("Out Of Tiles. Didn't Know What To Do");
+        }
+    }
+
+    public int getLetterValue(char c) {
+        return(c == 32 ? Scrabble.values[26] : Scrabble.values[c-65]);
+    }
+
+    public int getLetterCount(char c) {
+        return(c == 32 ? Scrabble.tiles[26] : Scrabble.tiles[c-65]);
     }
 
     public void placeLetter(char l, int r, int c) {
@@ -38,13 +69,13 @@ public class Scrabble {
     }
 
     public boolean validWordPlacement() {
-        return(calcRowOrCol(true) && calcRowOrCol(false));
+        return(calcRowOrCol(true) && calcRowOrCol(false)); // Check that the words formed by rows and columns are valid
     }
 
-    private boolean calcRowOrCol(boolean rowOrCol) {
+    private boolean calcRowOrCol(final boolean rowOrCol) {
         // Sort rows & cols by both row and col index, to compare words in same column and row.
         // https://stackoverflow.com/questions/2784514/sort-arraylist-of-custom-objects-by-property
-        TreeMap<Point, Character> map = new TreeMap<>(new Comparator<Point>() { // Sort By Columns
+        TreeMap<Point, Character> map = new TreeMap<Point, Character>(new Comparator<Point>() { // Sort By Columns
             @Override
             public int compare(Point o1, Point o2) {
                 if ((rowOrCol && o1.x != o2.x) || (!rowOrCol && o1.y != o2.y)) { // Each x value is the column of the point
@@ -60,7 +91,7 @@ public class Scrabble {
         int position = -1; // Stores the position of the current word to mark when the loop shifts rows or columns
         for (Point p : map.keySet()) { // Loop through each character, forming each possible word in the list
             int posUsed = rowOrCol ? p.x : p.y; // Use X if 'rowOrCol' is true, otherwise use Y
-            if (position == -1 || posUsed != position || map.get(p) == ' ') {
+            if (position == -1 || posUsed != position || map.get(p) == ' ') { // The point doesn't follow the previous one
                 if (isLegalWord(current)) { // Check to see if the word is valid
                     position = posUsed; // Set the current position
                     current = ""; // Reset the string to start the word over again
