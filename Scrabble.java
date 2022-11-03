@@ -58,7 +58,7 @@ public class Scrabble {
                 }
             }
         });
-        map.putAll(items);
+        map.putAll(items); // Add all placed characters to the map to be sorted
         String current = ""; // String to store the current word, formed by row or column
         int position = -1; // Stores the position of the current word to mark when the loop shifts rows or columns
         for (Point p : map.keySet()) { // Loop through each character, forming each possible word in the list
