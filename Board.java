@@ -21,6 +21,8 @@ class Board extends JFrame implements ActionListener {
     private final int HAND_LENGTH = 7;
     private final int MENU_WIDTH = 300;
     private final int MENU_HEIGHT = 75;
+    private final int ORIGINAL_WIDTH = 1040;
+    private final int ORIGINAL_HEIGHT = 1040;
     private int FRAME_WIDTH = 1040;
     private int FRAME_HEIGHT = 1040;
     private boolean GameStarted = false;
@@ -88,6 +90,8 @@ class Board extends JFrame implements ActionListener {
         // https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
         for (int r=0; r<ROWS; r++) {
             for (int c=0; c<COLS; c++) {
+                final int rIndex = r;
+                final int cIndex = c;
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
                 JButton temp = createButton("", new Color(0xFFFFFF), tile, TILE_RADIUS); // Blank Tile, represented by a '0'
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
@@ -102,6 +106,11 @@ class Board extends JFrame implements ActionListener {
                 temp.setSize(TILE_SIZE, TILE_SIZE); // Set tile size
                 temp.setMaximumSize(new Dimension(TILE_SIZE, TILE_SIZE));
                 board.add(temp); // Add tile to the grid
+                temp.addComponentListener(new ComponentAdapter() {
+                    public void componentResized(ComponentEvent componentEvent) {
+                        // Remove and replace board.getComponent() in here
+                    }
+                });
             }
         }
         setDefaultSizes(board, COLS*TILE_SIZE, ROWS*TILE_SIZE); // Sets all preferred sizes of the JPanel

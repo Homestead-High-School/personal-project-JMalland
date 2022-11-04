@@ -2,6 +2,10 @@ import java.util.*;
 import java.io.File;
 import java.awt.event.*;
 import javax.swing.*;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+
 import java.awt.*;
 public class Main {
     public static void main(String[] args) {
@@ -82,6 +86,32 @@ public class Main {
                         //board.setBounds(board.getBounds().y+(rIndex*10), board.getBounds().x+(cIndex*10), board.getWidth(), board.getHeight());
                         System.out.println(b.getBounds().x+" "+b.getBounds().y);
                         b.setBounds(b.getBounds().x+1, b.getBounds().y+1, b.getWidth(), b.getHeight());
+                    }
+                });
+
+                tiles[r][c].addComponentListener(new ComponentListener() {
+                    @Override
+                    public void componentResized(ComponentEvent e) {
+                        // TODO Auto-generated method stub
+                        //System.out.println("Tile: ("+rIndex+", "+cIndex+") Resized!");
+                    }
+
+                    @Override
+                    public void componentHidden(ComponentEvent e) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public void componentMoved(ComponentEvent e) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public void componentShown(ComponentEvent e) {
+                        // TODO Auto-generated method stub
+                        
                     }
                 });
             }
