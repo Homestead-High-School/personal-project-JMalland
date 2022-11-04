@@ -245,7 +245,7 @@ class Board extends JFrame implements ActionListener {
                 g.fillRoundRect(0, 0, getSize().width, getSize().height, radius, radius);
                 super.paintComponent(g);
             }
-            @Override
+            @Override // Rounded Border: https://stackoverflow.com/questions/13866252/button-with-round-edges
             public void paintBorder(Graphics g) {
                 g.setColor(Color.black);
                 g.drawRoundRect(0, 0, getSize().width-1, getSize().height-1, radius, radius);
