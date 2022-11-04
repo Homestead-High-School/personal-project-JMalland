@@ -15,6 +15,7 @@ class Board extends JFrame implements ActionListener {
     private JPanel mainPanel = new JPanel();
     private final int ROWS = Scrabble.getBoard().length;
     private final int COLS = Scrabble.getBoard()[0].length;
+    private final int FONT_SIZE = 37;
     private final int TILE_SIZE = 50;
     private final int HAND_LENGTH = 7;
     private final int MENU_WIDTH = 300;
@@ -117,14 +118,7 @@ class Board extends JFrame implements ActionListener {
             hand.add(tile); // Adds it to the Hand panel, as left-padding
         }
         for (int i=0; i<7; i++) {
-            JLabel tile = new JLabel("W", SwingConstants.CENTER) {
-                @Override // Paints a custom color
-                public void paintComponent(Graphics g) {
-                    g.setColor(new Color(0xBA7F40));
-                    g.fillRect(0, 0, getSize().width, getSize().height);
-                    super.paintComponent(g);
-                }
-            };
+            JLabel tile = createLabel("W", new Color(0xBA7F40), new Font("Serif", Font.PLAIN, FONT_SIZE), SwingConstants.CENTER);
             tile.setSize((int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5)); // Sets the size of the JLabel to the determined size
             tile.setBorder(BorderFactory.createLineBorder(Color.black, 1)); // Sets the border of the JLabel to black
             hand.add(tile); // Adds it to the Hand panel, representing a tile held by the player 
@@ -147,7 +141,7 @@ class Board extends JFrame implements ActionListener {
         // JButton for Options... etc ???
         final JButton startButton = createButton("Start", new Color(0xFFBB00), 2); // Button to confirm starting the game
         final JSlider pSlider = new JSlider(2, 6); // A Slider to select the number of players, max should be four
-        final JLabel numPlayers = new JLabel("2", SwingConstants.CENTER); // Create a JLabel to display the number of Players
+        final JLabel numPlayers = createLabel("2", new Color(0xFFFFFF), new Font("Serif", Font.PLAIN, FONT_SIZE), SwingConstants.CENTER); // Create a JLabel to display the number of Players
 
         menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS)); // Set the LayoutManager for the Start Menu
 
@@ -166,6 +160,7 @@ class Board extends JFrame implements ActionListener {
 
         // Action Listener: https://stackoverflow.com/questions/22580243/get-position-of-the-button-on-gridlayout
         startButton.setEnabled(true);
+        startButton.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
         startButton.addActionListener(new ActionListener() { // EventListener to check when Start Button gets clicked
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -211,6 +206,19 @@ class Board extends JFrame implements ActionListener {
             }
         };
         temp.setContentAreaFilled(false); // Change how the JButton paints the borders, so I can paint the border below
+        return(temp);
+    }
+
+    private JLabel createLabel(String text, final Color color, Font font, int POSITION) {
+        JLabel temp = new JLabel(text, POSITION) {
+            @Override // Paints a custom color
+            public void paintComponent(Graphics g) {
+                g.setColor(color);
+                g.fillRect(0, 0, getSize().width, getSize().height);
+                super.paintComponent(g);
+            }
+        };
+        temp.setFont(font);
         return(temp);
     }
 
