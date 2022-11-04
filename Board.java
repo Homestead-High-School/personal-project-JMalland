@@ -80,6 +80,26 @@ class Board extends JFrame implements ActionListener {
 
         frame.setVisible(true); // Set the application frame visible
     }
+    
+    // Returns the JPanel for the Scrabble board
+    public JPanel getBoard() {
+        return((JPanel)(gamePanel.getComponent(0)));
+    }
+
+    // Returns all JButton tiles contained in the Scrabble board panel
+    public JButton[][] getTiles() {
+        JPanel board = getBoard(); // Gets the board from the Game JPanel
+        JButton[][] list = new JButton[ROWS][COLS]; // Creates a 2D Array of JButtons
+        for (int i=0; i<ROWS*COLS; i++) { // Loops through each JButton on the board
+            list[i/ROWS][i%COLS] = (JButton)(board.getComponent(i)); // Adds the JButton to the array
+        }
+        return(list); // Returns the array
+    }
+    
+    // Returns whether or not the game has been started
+    public boolean gameStarted() {
+        return(GameStarted);
+    }
  
     // Creates the JPanel which holds each JButton that makes up the Scrabble board 
     private JPanel createBoard() {
@@ -243,26 +263,6 @@ class Board extends JFrame implements ActionListener {
         };
         temp.setFont(font);
         return(temp);
-    }
-
-    // Returns the JPanel for the Scrabble board
-    public JPanel getBoard() {
-        return((JPanel)(gamePanel.getComponent(0)));
-    }
-
-    // Returns all JButton tiles contained in the Scrabble board panel
-    public JButton[][] getTiles() {
-        JPanel board = (JPanel)(gamePanel.getComponent(0));
-        JButton[][] list = new JButton[ROWS][COLS]; // Creates a 2D Array of JButtons
-        for (int i=0; i<ROWS*COLS; i++) { // Loops through each JButton on the board
-            list[i/ROWS][i%COLS] = (JButton)(board.getComponent(i)); // Adds the JButton to the array
-        }
-        return(list); // Returns the array
-    }
-    
-    // Returns whether or not the game has been started
-    public boolean gameStarted() {
-        return(GameStarted);
     }
 
     @Override
