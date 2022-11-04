@@ -15,8 +15,9 @@ class Board extends JFrame implements ActionListener {
     private JPanel mainPanel = new JPanel();
     private final int ROWS = Scrabble.getBoard().length;
     private final int COLS = Scrabble.getBoard()[0].length;
-    private final int FONT_SIZE = 37;
+    private final int FONT_SIZE = 37; // Should Increase With Window
     private final int TILE_SIZE = 50;
+    private final int TILE_RADIUS = 13; // Should Increase With Window
     private final int HAND_LENGTH = 7;
     private final int MENU_WIDTH = 300;
     private final int MENU_HEIGHT = 75;
@@ -88,12 +89,12 @@ class Board extends JFrame implements ActionListener {
         for (int r=0; r<ROWS; r++) {
             for (int c=0; c<COLS; c++) {
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
-                JButton temp = createButton("", new Color(0xFFFFFF), tile); // Blank Tile, represented by a '0'
+                JButton temp = createButton("", new Color(0xFFFFFF), tile, TILE_RADIUS); // Blank Tile, represented by a '0'
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
-                    temp = createButton((tile == 1 ? '2' : '3') + "x L", new Color(0x4274FF), tile);
+                    temp = createButton((tile == 1 ? '2' : '3') + "x L", new Color(0x4274FF), tile, TILE_RADIUS);
                 }
                 else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'
-                    temp = createButton((tile == 3 ? '2' : '3') + "x W", new Color(0xD7381C), tile);
+                    temp = createButton((tile == 3 ? '2' : '3') + "x W", new Color(0xD7381C), tile, TILE_RADIUS);
                 }
                 // https://stackoverflow.com/questions/33954698/jbutton-change-default-borderhttps://stackoverflow.com/questions/33954698/jbutton-change-default-border
                 // Maybe I should make the borders appear curved?
@@ -139,7 +140,7 @@ class Board extends JFrame implements ActionListener {
         JPanel start = new JPanel(new GridLayout(3, 1)); // Default JPanel to store the Start Button
 
         // JButton for Options... etc ???
-        final JButton startButton = createButton("Start", new Color(0xFFBB00), 2); // Button to confirm starting the game
+        final JButton startButton = createButton("Start", new Color(0xFFBB00), 2, 0); // Button to confirm starting the game
         final JSlider pSlider = new JSlider(2, 6); // A Slider to select the number of players, max should be four
         final JLabel numPlayers = createLabel("2", new Color(0xFFFFFF), new Font("Serif", Font.PLAIN, FONT_SIZE), SwingConstants.CENTER); // Create a JLabel to display the number of Players
 
@@ -196,12 +197,13 @@ class Board extends JFrame implements ActionListener {
     }
 
     // Paints and returns a custom JButton with a specific background color
-    private JButton createButton(final String text, final Color color, final int tile) {
+    private JButton createButton(final String text, final Color color, final int tile, int radius) {
         JButton temp = new JButton(text) {
             @Override
             public void paintComponent(Graphics g) {
                 g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), tile%2 == 1 ? 25 : 100)); // 75% Opacity, if tile is 1 or 3
-                g.fillRect(0, 0, getSize().width, getSize().height);
+                // Rounded Buttons: https://stackoverflow.com/questions/26036002/how-to-make-round-jbuttons-in-java
+                g.fillRoundRect(0, 0, getSize().width, getSize().height, radius, radius);
                 super.paintComponent(g);
             }
         };
@@ -210,6 +212,7 @@ class Board extends JFrame implements ActionListener {
     }
 
     private JLabel createLabel(String text, final Color color, Font font, int POSITION) {
+        //https://stackoverflow.com/questions/2715118/how-to-change-the-size-of-the-font-of-a-jlabel-to-take-the-maximum-size
         JLabel temp = new JLabel(text, POSITION) {
             @Override // Paints a custom color
             public void paintComponent(Graphics g) {
