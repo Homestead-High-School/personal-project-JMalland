@@ -123,7 +123,8 @@ class Board extends JFrame implements ActionListener {
                 // https://stackoverflow.com/questions/33954698/jbutton-change-default-borderhttps://stackoverflow.com/questions/33954698/jbutton-change-default-border
                 // Maybe I should make the borders appear curved?
                 // Look through System.out.println(temp); to see where Color and Painting is stored, if at all...
-                temp.setBorder(BorderFactory.createLineBorder(Color.black, 1)); // Create each tile with a black border
+                temp.setBorder(BorderFactory.createLineBorder(Color.black, 1, true)); // Create each tile with a black border
+                
                 temp.setSize(TILE_SIZE, TILE_SIZE); // Set tile size
                 temp.setMaximumSize(new Dimension(TILE_SIZE, TILE_SIZE));
                 board.add(temp); // Add tile to the grid
