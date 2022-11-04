@@ -1,3 +1,7 @@
+/*
+    The next thing I should look into is RoundedBorders, and Font sizes
+*/
+
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -19,7 +23,7 @@ class Board extends JFrame implements ActionListener {
     private int FRAME_HEIGHT = 1040;
     private boolean GameStarted = false;
  
-    // default constructor
+    // The Board() constructor runs its private methods to generate the panels that are contained in the application 
     Board() {
         frame = new JFrame("Scrabble");
         
@@ -73,7 +77,7 @@ class Board extends JFrame implements ActionListener {
         frame.setVisible(true); // Set the application frame visible
     }
  
-    // Board Creation
+    // Creates the JPanel which holds each JButton that makes up the Scrabble board 
     private JPanel createBoard() {
         GridLayout grid = new GridLayout(ROWS,COLS); // Main Board layout
         JPanel board = new JPanel(grid); // Main Board panel
@@ -102,6 +106,7 @@ class Board extends JFrame implements ActionListener {
         return(board);
     }
 
+    // Creates the JPanel that features each player's hand of tiles
     private JPanel createHand() {
         GridLayout grid = new GridLayout(1,7); // Main Hand layout
         int padding = (FRAME_WIDTH - HAND_LENGTH*(int)(TILE_SIZE*1.5))/(int)(TILE_SIZE*1.5)/2;
@@ -133,6 +138,7 @@ class Board extends JFrame implements ActionListener {
         return(hand);
     }
 
+    // Creates the JPanel that contains the components which make up the main menu
     private JPanel createMenu() {
         JPanel menu = new JPanel(); // Reset the Menu JPanel, just cause
         JPanel players = new JPanel(new GridLayout(2, 1)); // Default JPanel to store the Player Slider
@@ -187,12 +193,14 @@ class Board extends JFrame implements ActionListener {
         return(menu);
     }
 
+    // Sets the Preferred, Minimum, and Maximum size of a JComponent
     private void setDefaultSizes(JComponent comp, int width, int height) {
         comp.setPreferredSize(new Dimension(width, height));
         comp.setMaximumSize(new Dimension(width*2, height*2));
         comp.setMinimumSize(new Dimension(width/2, height/2));
     }
 
+    // Paints and returns a custom JButton with a specific background color
     private JButton createButton(final String text, final Color color, final int tile) {
         JButton temp = new JButton(text) {
             @Override
@@ -206,10 +214,12 @@ class Board extends JFrame implements ActionListener {
         return(temp);
     }
 
+    // Returns the JPanel for the Scrabble board
     public JPanel getBoard() {
         return((JPanel)(gamePanel.getComponent(0)));
     }
 
+    // Returns all JButton tiles contained in the Scrabble board panel
     public JButton[][] getTiles() {
         JPanel board = (JPanel)(gamePanel.getComponent(0));
         JButton[][] list = new JButton[ROWS][COLS]; // Creates a 2D Array of JButtons
@@ -219,6 +229,7 @@ class Board extends JFrame implements ActionListener {
         return(list); // Returns the array
     }
     
+    // Returns whether or not the game has been started
     public boolean gameStarted() {
         return(GameStarted);
     }
