@@ -51,12 +51,13 @@ class Board extends JFrame implements ActionListener {
         // Create the main menu
         
         // https://stackoverflow.com/questions/70523527/how-to-stop-components-adapting-to-the-size-of-a-jpanel-that-is-inside-a-jscroll
-        gamePanel.setLayout(new BoxLayout(gamePanel, BoxLayout.Y_AXIS)); // Box Layout layers the Board and the Players Hand from top to bottom
-        gamePanel.add(createBoard()); // Create and add the board to the application frame
-        gamePanel.add(createHand()); // Create and add the hand to the application frame;
 
         mainPanel.setLayout(new BorderLayout()); // Set the BorderLayout for the main menu
-        mainPanel.add(createMenu(), BorderLayout.CENTER); // Create and add the Menu to the JPanel
+        createMenu(); // Generate the Main Menu and add to mainPanel
+
+        gamePanel.setLayout(new BoxLayout(gamePanel, BoxLayout.Y_AXIS)); // Box Layout layers the Board and the Players Hand from top to bottom
+        createBoard(); // Generate the Scrabble Board and add to gamePanel
+        createHand(); // Generate the Player's Hand and add to gamePanel
         
         mainPanel.setVisible(true); // Set the main menu visible, if not
         gamePanel.setVisible(true); // Set the board visible, for when it will be added
@@ -83,9 +84,6 @@ class Board extends JFrame implements ActionListener {
                     for (JComponent comp : adjustFonts) { // Readjusts the font of each component with text to compensate for the dimension change
                         comp.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*(frame.getWidth()/(double)(ORIGINAL_WIDTH))))); // Calculates the new FONT_SIZE
                     }
-                    //for (JButton tile : adjustRadius) {
-                      //  tile.setBorder(createButton("", Color.black, 0, (int)(TILE_RADIUS*(frame.getWidth()/(double)(ORIGINAL_WIDTH)))).getBorder());
-                    //}
                 }
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
@@ -117,7 +115,7 @@ class Board extends JFrame implements ActionListener {
     }
  
     // Creates the JPanel which holds each JButton that makes up the Scrabble board 
-    private JPanel createBoard() {
+    private void createBoard() {
         GridLayout grid = new GridLayout(ROWS,COLS); // Main Board layout
         JPanel board = new JPanel(grid); // Main Board panel
         
@@ -125,13 +123,16 @@ class Board extends JFrame implements ActionListener {
         // https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
         for (int r=0; r<ROWS; r++) {
             for (int c=0; c<COLS; c++) {
-                int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
-                JButton temp = createButton("", new Color(0xFFFFFF), tile, TILE_RADIUS); // Blank Tile, represented by a '0'
+                final int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
+                final JButton temp;
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
                     temp = createButton((tile == 1 ? '2' : '3') + "x L", new Color(0x4274FF), tile, TILE_RADIUS);
                 }
                 else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'
                     temp = createButton((tile == 3 ? '2' : '3') + "x W", new Color(0xD7381C), tile, TILE_RADIUS);
+                }
+                else {
+                    temp = createButton("", new Color(0xFFFFFF), tile, TILE_RADIUS); // Blank Tile, represented by a '0'
                 }
                 // https://stackoverflow.com/questions/33954698/jbutton-change-default-borderhttps://stackoverflow.com/questions/33954698/jbutton-change-default-border
                 temp.setBorder(new LineBorder(Color.black, 1)); // Create each tile with a black border
@@ -143,12 +144,12 @@ class Board extends JFrame implements ActionListener {
             }
         }
         setDefaultSizes(board, COLS*TILE_SIZE, ROWS*TILE_SIZE); // Sets all preferred sizes of the JPanel
-        return(board);
+        gamePanel.add(board); // Create and add the board to the application frame
     }
 
     // Creates the JPanel that features each player's hand of tiles
-    private JPanel createHand() {
-        GridLayout grid = new GridLayout(1,7); // Main Hand layout
+    private void createHand() {
+        GridLayout grid = new GridLayout(1, 7);
         int padding = (ORIGINAL_WIDTH - HAND_LENGTH*(int)(TILE_SIZE*1.5))/(int)(TILE_SIZE*1.5)/2;
         JPanel hand = new JPanel(grid); // Main Hand Panel
         // Could use BoxLayout & createHorizontalStruts() to pad the Hand Panel
@@ -158,7 +159,7 @@ class Board extends JFrame implements ActionListener {
             hand.add(tile); // Adds it to the Hand panel, as left-padding
         }
         for (int i=0; i<7; i++) {
-            JLabel tile = createLabel("W", new Color(0xBA7F40), new Font("Serif", Font.PLAIN, FONT_SIZE), SwingConstants.CENTER);
+            JLabel tile = createLabel("W", new Color(0xBA7F40), SwingConstants.CENTER);
             tile.setSize((int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5)); // Sets the size of the JLabel to the determined size
             tile.setBorder(BorderFactory.createLineBorder(Color.black, 1)); // Sets the border of the JLabel to black
             hand.add(tile); // Adds it to the Hand panel, representing a tile held by the player 
@@ -170,11 +171,11 @@ class Board extends JFrame implements ActionListener {
             hand.add(tile); // Adds it to the Hand panel, as right-padding
         }
         setDefaultSizes(hand, ORIGINAL_WIDTH, (int)(TILE_SIZE*1.5)); // Sets all preferred sizes of the JPanel
-        return(hand);
+        gamePanel.add(hand); // Create and add the hand to the application frame;
     }
 
     // Creates the JPanel that contains the components which make up the main menu
-    private JPanel createMenu() {
+    private void createMenu() {
         JPanel menu = new JPanel(); // Reset the Menu JPanel, just cause
         JPanel players = new JPanel(new GridLayout(2, 1)); // Default JPanel to store the Player Slider
         JPanel start = new JPanel(new GridLayout(3, 1)); // Default JPanel to store the Start Button
@@ -182,7 +183,7 @@ class Board extends JFrame implements ActionListener {
         // JButton for Options... etc ???
         final JButton startButton = createButton("Start", new Color(0xFFBB00), 2, 0); // Button to confirm starting the game
         final JSlider pSlider = new JSlider(2, 6); // A Slider to select the number of players, max should be four
-        final JLabel numPlayers = createLabel("2", new Color(0xFFFFFF), new Font("Serif", Font.PLAIN, FONT_SIZE/2), SwingConstants.CENTER); // Create a JLabel to display the number of Players
+        final JLabel numPlayers = createLabel("2", new Color(0xFFFFFF), SwingConstants.CENTER); // Create a JLabel to display the number of Players
 
         menu.setLayout(new BoxLayout(menu, BoxLayout.Y_AXIS)); // Set the LayoutManager for the Start Menu
 
@@ -230,7 +231,7 @@ class Board extends JFrame implements ActionListener {
         adjustFonts.add(startButton); // Add start button to list of objects to adjust font-size on window resize
         adjustFonts.add(numPlayers); // Add player counter to list of objects to adjust font-size on window resize
         
-        return(menu);
+        mainPanel.add(menu, BorderLayout.CENTER); // Create and add the Menu to the JPanel
     }
 
     // Sets the Preferred, Minimum, and Maximum size of a JComponent
@@ -261,7 +262,7 @@ class Board extends JFrame implements ActionListener {
         return(temp);
     }
 
-    private JLabel createLabel(String text, final Color color, Font font, int POSITION) {
+    private JLabel createLabel(String text, final Color color, int POSITION) {
         //https://stackoverflow.com/questions/2715118/how-to-change-the-size-of-the-font-of-a-jlabel-to-take-the-maximum-size
         JLabel temp = new JLabel(text, POSITION) {
             @Override // Paints a custom color
@@ -271,7 +272,7 @@ class Board extends JFrame implements ActionListener {
                 super.paintComponent(g);
             }
         };
-        temp.setFont(font);
+        temp.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE/2));
         return(temp);
     }
 
