@@ -206,7 +206,11 @@ class Board extends JFrame implements ActionListener {
         return(temp);
     }
 
-    public JButton[][] getBoard() {
+    public JPanel getBoard() {
+        return((JPanel)(gamePanel.getComponent(0)));
+    }
+
+    public JButton[][] getTiles() {
         JPanel board = (JPanel)(gamePanel.getComponent(0));
         JButton[][] list = new JButton[ROWS][COLS]; // Creates a 2D Array of JButtons
         for (int i=0; i<ROWS*COLS; i++) { // Loops through each JButton on the board

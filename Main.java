@@ -67,7 +67,7 @@ public class Main {
         System.out.println("_: "+basic.getLetterValue(' ')+" "+basic.getLetterCount(' '));
         
         Board b = new Board();
-        JButton[][] tiles = b.getBoard();
+        JButton[][] tiles = b.getTiles();
         for (int r=0; r<tiles.length; r++) {
             for (int c=0; c<tiles[r].length; c++) {
                 final int rIndex = r;
@@ -76,6 +76,12 @@ public class Main {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         System.out.println("Tile clicked @ ("+rIndex+", "+cIndex+").");
+                        JButton b = tiles[rIndex][cIndex];
+                        b.setLayout(new BorderLayout());
+                        // The code below provides an example of how to change the specific x and y coordinates of a JComponent
+                        //board.setBounds(board.getBounds().y+(rIndex*10), board.getBounds().x+(cIndex*10), board.getWidth(), board.getHeight());
+                        System.out.println(b.getBounds().x+" "+b.getBounds().y);
+                        b.setBounds(b.getBounds().x+1, b.getBounds().y+1, b.getWidth(), b.getHeight());
                     }
                 });
             }
