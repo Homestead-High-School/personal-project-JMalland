@@ -13,6 +13,10 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 class Board extends JFrame implements ActionListener {
     
+    // Might make a JFrameManager class to manage screen shifts between component interactions
+    // Could utilize a listNode type object or TreeMap where Component A --> Component C
+    // Would make UI swaps easier and smoother.
+
     private JFrame frame;
     private JPanel gamePanel = new JPanel();
     private JPanel mainPanel = new JPanel();
