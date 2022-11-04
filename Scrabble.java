@@ -48,7 +48,7 @@ public class Scrabble {
             numTiles -= 7; // Remove 7 tiles from the count, since a hand is 7 large
             return(hand); // Return the chosen hand
         }
-        else { // Throw Exception because extra tiles are unknown, at the moment
+        else { // Throw Exception because extra tiles are unknown at the moment
             throw new IllegalArgumentException("Out Of Tiles. Didn't Know What To Do");
         }
     }

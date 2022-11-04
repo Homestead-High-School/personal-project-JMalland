@@ -2,6 +2,10 @@ import java.util.*;
 import java.io.File;
 import java.awt.event.*;
 import javax.swing.*;
+
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+
 import java.awt.*;
 public class Main {
     public static void main(String[] args) {
@@ -60,13 +64,40 @@ public class Main {
         System.out.println("Words Contained: ");
         boolean temp = basic.validWordPlacement();
         System.out.println("Words Are Valid: "+temp);
+        
         System.out.println("A: "+basic.getLetterValue('A')+" "+basic.getLetterCount('A'));
         System.out.println("B: "+basic.getLetterValue('B')+" "+basic.getLetterCount('B'));
         System.out.println("C: "+basic.getLetterValue('C')+" "+basic.getLetterCount('C'));
         System.out.println("_: "+basic.getLetterValue(' ')+" "+basic.getLetterCount(' '));
-        Board b = new Board(2);
-        //System.out.println("Rows: "+b.getBoard().length);
-        //System.out.println("Cols: "+b.getBoard()[0].length);
+        
+        Board b = new Board();
+        JButton[][] tiles = b.getTiles();
+        for (int r=0; r<tiles.length; r++) {
+            for (int c=0; c<tiles[r].length; c++) {
+                final int rIndex = r;
+                final int cIndex = c;
+                tiles[r][c].addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        System.out.println("Tile clicked @ ("+rIndex+", "+cIndex+").");
+                        JButton b = tiles[rIndex][cIndex];
+                        b.setLayout(new BorderLayout());
+                        // The code below provides an example of how to change the specific x and y coordinates of a JComponent
+                        //board.setBounds(board.getBounds().y+(rIndex*10), board.getBounds().x+(cIndex*10), board.getWidth(), board.getHeight());
+                        System.out.println(b.getBounds().x+" "+b.getBounds().y);
+                        b.setBounds(b.getBounds().x+1, b.getBounds().y+1, b.getWidth(), b.getHeight());
+                    }
+                });
+
+                tiles[r][c].addComponentListener(new ComponentAdapter() {
+                    @Override
+                    public void componentResized(ComponentEvent e) {
+                        // TODO Auto-generated method stub
+                        //System.out.println("Tile: ("+rIndex+", "+cIndex+") Resized!");
+                    }
+                });
+            }
+        }
     }
 
     public static TreeMap<Character, HashMap<String, String>> parseAndStore(String file) {
