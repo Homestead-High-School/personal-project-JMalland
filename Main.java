@@ -3,9 +3,6 @@ import java.io.File;
 import java.awt.event.*;
 import javax.swing.*;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-
 import java.awt.*;
 public class Main {
     public static void main(String[] args) {
@@ -71,7 +68,7 @@ public class Main {
         System.out.println("_: "+basic.getLetterValue(' ')+" "+basic.getLetterCount(' '));
         
         Board b = new Board();
-        JButton[][] tiles = b.getTiles();
+        final JButton[][] tiles = b.getTiles();
         for (int r=0; r<tiles.length; r++) {
             for (int c=0; c<tiles[r].length; c++) {
                 final int rIndex = r;
