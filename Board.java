@@ -60,7 +60,7 @@ class Board extends JFrame implements ActionListener {
         frame.setMinimumSize(new Dimension(FRAME_WIDTH/2, FRAME_HEIGHT/2)); // Sets the Minimum size
 
         frame.addComponentListener(new ComponentAdapter() { // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-event
-            public void componentResized(ComponentEvent componentEvent) { // Kind of works.
+            public void componentResized(ComponentEvent componentEvent) { // Method to run every time window is resized
                 int width = frame.getWidth(); // Create a temporary width variable, just for simplicity
                 int height = frame.getHeight(); // Create a temporary height variable, just for simplicity
                 if (width != height) {
@@ -93,14 +93,12 @@ class Board extends JFrame implements ActionListener {
                 final int rIndex = r;
                 final int cIndex = c;
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
+                JButton temp = createButton("", new Color(0xFFFFFF), tile, TILE_RADIUS); // Blank Tile, represented by a '0'
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
-                    final JButton temp = createButton((tile == 1 ? '2' : '3') + "x L", new Color(0x4274FF), tile, TILE_RADIUS);
+                    temp = createButton((tile == 1 ? '2' : '3') + "x L", new Color(0x4274FF), tile, TILE_RADIUS);
                 }
                 else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'
-                    final JButton temp = createButton((tile == 3 ? '2' : '3') + "x W", new Color(0xD7381C), tile, TILE_RADIUS);
-                }
-                else {
-                     final JButton temp = createButton("", new Color(0xFFFFFF), tile, TILE_RADIUS); // Blank Tile, represented by a '0'
+                    temp = createButton((tile == 3 ? '2' : '3') + "x W", new Color(0xD7381C), tile, TILE_RADIUS);
                 }
                 // https://stackoverflow.com/questions/33954698/jbutton-change-default-borderhttps://stackoverflow.com/questions/33954698/jbutton-change-default-border
                 // Maybe I should make the borders appear curved?
@@ -108,13 +106,7 @@ class Board extends JFrame implements ActionListener {
                 temp.setSize(TILE_SIZE, TILE_SIZE); // Set tile size
                 temp.setMaximumSize(new Dimension(TILE_SIZE, TILE_SIZE));
                 board.add(temp); // Add tile to the grid
-                temp.addComponentListener(new ComponentAdapter() {
-                    @Override // Creates an EventListener to respond to window size adjustment
-                    public void componentResized(ComponentEvent componentEvent) {
-                        // Remove and replace board.getComponent() in here
-                        temp.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE*(FRAME_WIDTH/ORIGINAL_WIDTH))); // Update the Font Size
-                    }
-                });
+                setAutoFontSize(temp, "Serif", Font.PLAIN, FONT_SIZE); // Set auto-adjusting EventListener for window resizing
             }
         }
         setDefaultSizes(board, COLS*TILE_SIZE, ROWS*TILE_SIZE); // Sets all preferred sizes of the JPanel
@@ -132,17 +124,11 @@ class Board extends JFrame implements ActionListener {
             hand.add(tile); // Adds it to the Hand panel, as left-padding
         }
         for (int i=0; i<7; i++) {
-            final JLabel tile = createLabel("W", new Color(0xBA7F40), new Font("Serif", Font.PLAIN, FONT_SIZE), SwingConstants.CENTER);
+            JLabel tile = createLabel("W", new Color(0xBA7F40), new Font("Serif", Font.PLAIN, FONT_SIZE), SwingConstants.CENTER);
             tile.setSize((int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5)); // Sets the size of the JLabel to the determined size
             tile.setBorder(BorderFactory.createLineBorder(Color.black, 1)); // Sets the border of the JLabel to black
             hand.add(tile); // Adds it to the Hand panel, representing a tile held by the player 
-            tile.addComponentListener(new ComponentAdapter() {
-                @Override // Creates an EventListener to respond to window size adjustment
-                public void componentResized(ComponentEvent e) {
-                    // Remove and replace board.getComponent() in here
-                    tile.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE*(FRAME_WIDTH/ORIGINAL_WIDTH))); // Update the Font Size
-                }
-            });
+            setAutoFontSize(tile, "Serif", Font.PLAIN, FONT_SIZE); // Set auto-adjusting EventListener for window resizing
         }
         for (int i=0; i<padding; i++) { // Loop that runs 'padding' number of times
             JLabel tile = new JLabel(); // Creates an empty JLabel
@@ -207,21 +193,9 @@ class Board extends JFrame implements ActionListener {
         menu.add(players, Box.CENTER_ALIGNMENT); // Add the Player JPanel to the Menu
         menu.add(start, Box.CENTER_ALIGNMENT); // Add the Start JPanel to the Menu
         
-        startButton.addComponentListener(new ComponentAdapter() {
-            @Override // Creates an EventListener to respond to window size adjustment
-            public void componentResized(ComponentEvent e) {
-                // Remove and replace board.getComponent() in here
-                startButton.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE*(FRAME_WIDTH/ORIGINAL_WIDTH))); // Update the Font Size
-            }
-        });
+        setAutoFontSize(startButton, "Serif", Font.PLAIN, FONT_SIZE); // Set auto-adjusting EventListener for window resizing
+        setAutoFontSize(numPlayers, "Serif", Font.PLAIN, FONT_SIZE); // Set auto-adjusting EventListener for window resizing
         
-        numPlayers.addComponentListener(new ComponentAdapter() {
-            @Override // Creates an EventListener to respond to window size adjustment
-            public void componentResized(ComponentEvent e) {
-                // Remove and replace board.getComponent() in here
-                numPlayers.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE*(FRAME_WIDTH/ORIGINAL_WIDTH))); // Update the Font Size
-            }
-        });
         return(menu);
     }
 
@@ -231,9 +205,19 @@ class Board extends JFrame implements ActionListener {
         comp.setMaximumSize(new Dimension(width*2, height*2));
         comp.setMinimumSize(new Dimension(width/2, height/2));
     }
+    
+    // Resets the font size each time the window is resized, compensating for the new dimensions
+    private void setAutoFontSize(final JComponent comp, final String font, final int type, final int size) {
+        comp.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                comp.setFont(new Font(font, type, size*(FRAME_WIDTH/ORIGINAL_WIDTH)));
+            }
+        });
+    }
 
     // Paints and returns a custom JButton with a specific background color
-    private JButton createButton(final String text, final Color color, final int tile, int radius) {
+    private JButton createButton(final String text, final Color color, final int tile, final int radius) {
         JButton temp = new JButton(text) {
             @Override
             public void paintComponent(Graphics g) {
