@@ -151,6 +151,7 @@ class Board extends JFrame implements ActionListener {
         GridLayout grid = new GridLayout(1,7); // Main Hand layout
         int padding = (ORIGINAL_WIDTH - HAND_LENGTH*(int)(TILE_SIZE*1.5))/(int)(TILE_SIZE*1.5)/2;
         JPanel hand = new JPanel(grid); // Main Hand Panel
+        // Could use BoxLayout & createHorizontalStruts() to pad the Hand Panel
         for (int i=0; i<padding; i++) { // Loop that runs 'padding' number of times
             JLabel tile = new JLabel(); // Creates an empty JLabel
             tile.setSize((int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5)); // Sets the size
