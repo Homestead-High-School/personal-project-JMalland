@@ -6,6 +6,9 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 class Board extends JFrame implements ActionListener {
 
+    /*
+    *   Should make either a sidemenu, or selections from the player's hand, where, when selected, it highlights the border in yellow or something.
+    */
     private JFrame frame;
     private JPanel gamePanel = new JPanel();
     private JPanel mainPanel = new JPanel();
