@@ -48,6 +48,7 @@ public class CurvedButton extends JButton {
 
     public void setFont(Font f) {
         font = f;
+        repaint();
     }
 
     public void setText(String s) {
