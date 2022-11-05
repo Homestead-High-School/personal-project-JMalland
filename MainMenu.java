@@ -1,21 +1,17 @@
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import javax.swing.*;
 
 public class MainMenu extends JPanel {
     private int width = 0;
     private int height = 0;
-    private JPanel menu = new JPanel();
-    private ArrayList<Component> realComponents = new ArrayList<Component>();
-    private LinkedHashMap<Component, Float> list = new LinkedHashMap<Component, Float>();
     private final Font font = new Font("Serif", Font.PLAIN, 75);
 
     public MainMenu(int w, int h) {
         width = w; // Set the width
         height = h; // Set the height
 
-        list.put(Box.createVerticalGlue(), Box.CENTER_ALIGNMENT); // Add one to begin with, to keep the future components in line
+        add(Box.createVerticalGlue(), Box.CENTER_ALIGNMENT); // Add the glue to begin with, keeping future components aligned
         
         CurvedButton start = new CurvedButton("Start", 15, Color.yellow); // Create a rounded button to start the game when pressed
         start.setFont(font); // Set the default font
@@ -37,23 +33,13 @@ public class MainMenu extends JPanel {
         players.setPreferredSize(new Dimension(h, h)); // Set the Preferred size
         players.setMaximumSize(players.getPreferredSize()); // Set the Maximum size
         
-        addComponent(players, Box.CENTER_ALIGNMENT); // Add the Player Counter to the JPanel
-        addComponent(paddedSelector, Box.CENTER_ALIGNMENT); // Add the Player Selector to the JPanel
-        addComponent(paddedStart, Box.CENTER_ALIGNMENT); // Add the Start Button to the JPanel
+        add(players, Box.CENTER_ALIGNMENT); // Add the Player Counter to the JPanel
+        add(paddedSelector, Box.CENTER_ALIGNMENT); // Add the Player Selector to the JPanel
+        add(paddedStart, Box.CENTER_ALIGNMENT); // Add the Start Button to the JPanel
 
-        menu = new JPanel(new GridLayout(list.size(), 1));
-        for (Component c : list.keySet()) { // Loops through each component in the map
-            menu.add(c, list.get(c)); // Adds the component to the JPanel
-        }
-        menu.setPreferredSize(new Dimension(width*3 - width/3, height*3)); // Sets the Preferred size
-        menu.setMaximumSize(menu.getPreferredSize()); // Sets the Maximum Size
-
-        realComponents.addAll(list.keySet()); // Create a list of the components to be removed of all Fillers
-        for (int i=realComponents.size()-1; i>=0; i--) { // Loop through each item of the Menu JPanel
-            if (realComponents.get(i) instanceof Box.Filler) { // If the Component is a Filler
-                realComponents.remove(i); // Remove the Filler from the list of components
-            }
-        }
+        setLayout(new GridLayout(getComponents().length, 1));
+        setPreferredSize(new Dimension(width*3 - width/3, height*3)); // Sets the Preferred size
+        setMaximumSize(getPreferredSize()); // Sets the Maximum Size
     }
 
     private JPanel createPaddedRow(Component comp, int padding) {
@@ -68,22 +54,22 @@ public class MainMenu extends JPanel {
         return(temp); // Return the newly padded component as a JPanel
     }
 
-    private void addComponent(Component comp, float position) {
+    private void add(Component comp, float position) {
         // BoxLayout Styling: https://stackoverflow.com/questions/60422149/vertically-center-content-with-boxlayout
-        list.put(comp, position);
-        list.put(Box.createVerticalGlue(), Box.CENTER_ALIGNMENT);
+        super.add(comp, position);
+        super.add(Box.createVerticalGlue(), Box.CENTER_ALIGNMENT);
     }
 
-    @Override 
-    public Component getComponent(int n) {
-        if (n > realComponents.size()) { // Throw an exception if I'm stupid enough to hit it
-            throw new IllegalArgumentException("Index Out Of Bounds For Component List");
+    public Component getMenuComponent(int n) {
+        ArrayList<Component> list = new ArrayList<Component>();
+        for (Component c : getComponents()) { // Loop through each JPanel component
+            if (!(c instanceof Box.Filler)) { // Check to see if the component is a Filler
+                list.add(c); // Add it to the list if it isn't a Filler
+            }
         }
-
-        return(realComponents.get(n)); // Return the component from the JPanel
-    }
-    
-    public JPanel getAsJPanel() {
-        return(menu); // Returns the created JPanel
+        if (n >= list.size()) { // Throw an exception if I'm stupid enough to hit it
+            throw new IllegalArgumentException("Index Out Of Bounds For Component List: "+n);
+        }
+        return(list.get(n)); // Return the component from the JPanel
     }
 }

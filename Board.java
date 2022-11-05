@@ -26,8 +26,8 @@ class Board extends JFrame implements ActionListener {
     // The Board() constructor runs its private methods to generate the panels that are contained in the application 
     Board() {
         frame = new JFrame("Scrabble");
-        CurvedButton.setFrame(frame);
-        CurvedLabel.setFrame(frame);
+        CurvedButton.setFrame(frame); // Set the contentPane of the CurvedButton class
+        CurvedLabel.setFrame(frame); // Set the contentPane of the CurvedLabel class
         
         try {
             // set look and feel
@@ -36,11 +36,8 @@ class Board extends JFrame implements ActionListener {
         catch (Exception e) {
             System.err.println(e.getMessage());
         }
-
-        // Create the main menu
         
-        // https://stackoverflow.com/questions/70523527/how-to-stop-components-adapting-to-the-size-of-a-jpanel-that-is-inside-a-jscroll
-
+        // Using Layouts With Auto-Adapting Components: https://stackoverflow.com/questions/70523527/how-to-stop-components-adapting-to-the-size-of-a-jpanel-that-is-inside-a-jscroll
         mainPanel.setLayout(new BorderLayout()); // Set the BorderLayout for the main menu
         createMenu(); // Generate the Main Menu and add to mainPanel
 
@@ -105,8 +102,6 @@ class Board extends JFrame implements ActionListener {
         GridLayout grid = new GridLayout(ROWS,COLS); // Main Board layout
         JPanel board = new JPanel(grid); // Main Board panel
         
-        // https://stackoverflow.com/questions/29379441/java-set-transparency-on-color-color-without-using-rgbs
-        // https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
         for (int r=0; r<ROWS; r++) {
             for (int c=0; c<COLS; c++) {
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
@@ -120,6 +115,7 @@ class Board extends JFrame implements ActionListener {
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
                 temp.setOpacity(tile%2 == 1 ? 25 : 100); // Set tile opacity
                 temp.setSize(TILE_SIZE, TILE_SIZE); // Set tile size
+                temp.setContentAreaFilled(false); // Make it so it doesn't draw the default background
                 temp.setMaximumSize(new Dimension(TILE_SIZE, TILE_SIZE)); // Set the maximum size per each tile
                 board.add(temp); // Add tile to the grid
             }
@@ -134,11 +130,7 @@ class Board extends JFrame implements ActionListener {
         int padding = (ORIGINAL_WIDTH - HAND_LENGTH*(int)(TILE_SIZE*1.5))/(int)(TILE_SIZE*1.5)/2;
         JPanel hand = new JPanel(grid); // Main Hand Panel
         // Could use BoxLayout & createHorizontalStruts() to pad the Hand Panel
-        for (int i=0; i<padding; i++) { // Loop that runs 'padding' number of times
-            JLabel tile = new JLabel(); // Creates an empty JLabel
-            tile.setSize((int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5)); // Sets the size
-            hand.add(tile); // Adds it to the Hand panel, as left-padding
-        }
+        addPaddedLabel(hand, (int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5), padding); // Add padding, 'padding' number of times
         for (int i=0; i<7; i++) {
             CurvedLabel tile = new CurvedLabel("W", TILE_RADIUS, new Color(0xBA7F40));
             tile.setSize((int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5)); // Sets the size of the JLabel to the determined size
@@ -146,11 +138,7 @@ class Board extends JFrame implements ActionListener {
             tile.setBorder(BorderFactory.createLineBorder(Color.black, 1)); // Sets the border of the JLabel to black
             hand.add(tile); // Adds it to the Hand panel, representing a tile held by the player 
         }
-        for (int i=0; i<padding; i++) { // Loop that runs 'padding' number of times
-            JLabel tile = new JLabel(); // Creates an empty JLabel
-            tile.setSize((int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5)); // Sets the size
-            hand.add(tile); // Adds it to the Hand panel, as right-padding
-        }
+        addPaddedLabel(hand, (int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5), padding); // Add padding, 'padding' number of times
         setDefaultSizes(hand, ORIGINAL_WIDTH, (int)(TILE_SIZE*1.5)); // Sets all preferred sizes of the JPanel
         gamePanel.add(hand); // Create and add the hand to the application frame;
     }
@@ -159,9 +147,9 @@ class Board extends JFrame implements ActionListener {
     private void createMenu() {
         MainMenu screen = new MainMenu(MENU_WIDTH, MENU_HEIGHT); // Generate the Main Menu
 
-        CurvedLabel counter = (CurvedLabel)(screen.getComponent(0)); // The Counter that displays the number of players
-        JSlider selector = (JSlider)(((JPanel)(screen.getComponent(1))).getComponent(1)); // The JSlider that determines the number of players
-        CurvedButton startButton = (CurvedButton)(((JPanel)(screen.getComponent(2))).getComponent(1)); // The button that starts the game when pressed
+        CurvedLabel counter = (CurvedLabel)(screen.getMenuComponent(0)); // The Counter that displays the number of players
+        JSlider selector = (JSlider)(((JPanel)(screen.getMenuComponent(1))).getComponent(1)); // The JSlider that determines the number of players
+        CurvedButton startButton = (CurvedButton)(((JPanel)(screen.getMenuComponent(2))).getComponent(1)); // The button that starts the game when pressed
 
         selector.addChangeListener(new ChangeListener() {
             @Override
@@ -181,7 +169,7 @@ class Board extends JFrame implements ActionListener {
             }
         });
 
-        mainPanel.add(screen.getAsJPanel(), BorderLayout.CENTER); // Create and add the Menu to the JPanel
+        mainPanel.add(screen, BorderLayout.CENTER); // Create and add the Menu to the JPanel
     }
 
     // Sets the Preferred, Minimum, and Maximum size of a JComponent
@@ -189,6 +177,15 @@ class Board extends JFrame implements ActionListener {
         comp.setPreferredSize(new Dimension(width, height));
         comp.setMaximumSize(new Dimension(width*2, height*2));
         comp.setMinimumSize(new Dimension(width/2, height/2));
+    }
+
+    // Adds empty padding to a JPanel
+    private void addPaddedLabel(JPanel pane, int w, int h, int count) {
+        for (int i=0; i<count; i++) { // Loop that runs 'padding' number of times
+            JLabel tile = new JLabel(); // Creates an empty JLabel
+            tile.setSize(w, h); // Sets the size
+            pane.add(tile); // Adds it to the Hand panel, as right-padding
+        }
     }
 
     @Override
