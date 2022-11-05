@@ -12,10 +12,6 @@ import javax.swing.event.ChangeListener;
 
 import java.awt.*;
 class Board extends JFrame implements ActionListener {
-    
-    // Might make a JFrameManager class to manage screen shifts between component interactions
-    // Could utilize a listNode type object or TreeMap where Component A --> Component C
-    // Would make UI swaps easier and smoother.
 
     private JFrame frame;
     private JPanel gamePanel = new JPanel();
@@ -69,7 +65,7 @@ class Board extends JFrame implements ActionListener {
         frame.setMaximumSize(new Dimension(ORIGINAL_WIDTH*2, ORIGINAL_HEIGHT*2)); // Sets the Maximum size
         frame.setMinimumSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Sets the Minimum size
 
-        frame.addComponentListener(new ComponentAdapter() { // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-event
+        frame.addComponentListener(new ComponentAdapter() { // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-eventff
             public void componentResized(ComponentEvent componentEvent) { // Method to run every time window is resized
                 int width = frame.getWidth(); // Create a temporary width variable, just for simplicity
                 int height = frame.getHeight(); // Create a temporary height variable, just for simplicity
