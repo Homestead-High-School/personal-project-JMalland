@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-
 import javax.swing.*;
 
 public class CurvedLabel extends JLabel {

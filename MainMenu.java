@@ -1,7 +1,6 @@
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-
 import javax.swing.*;
 
 public class MainMenu extends JPanel {
