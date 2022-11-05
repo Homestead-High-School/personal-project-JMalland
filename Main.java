@@ -8,10 +8,15 @@ public class Main {
     public static void main(String[] args) {
         TreeMap<Character, HashMap<String, String>> map = parseAndStore("Words.txt"); // Get the sorted TreeMap
         int numWords = 0;
+        int maxWords = 0;
         for (char c : map.keySet()) { // Sorted by Character
             numWords += map.get(c).size();
+            for (String s : map.get(c).keySet()) {
+                if (s.length() > maxWords) maxWords = s.length();
+            }
         }
         System.out.println(numWords+" Words!");
+        System.out.println("Longest Word: "+maxWords);
         Scrabble basic = new Scrabble(map);
         String one = "HAPPY";
         String two = "UNHAPPY";
