@@ -1,7 +1,3 @@
-/*
-    The next thing I should look into is RoundedBorders, and Font sizes
-*/
-
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
