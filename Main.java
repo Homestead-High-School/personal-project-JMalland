@@ -79,13 +79,7 @@ public class Main {
                 tiles[r][c].addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        //System.out.println("Tile clicked @ ("+rIndex+", "+cIndex+").");
-                        //JButton b = tiles[rIndex][cIndex];
-                        //b.setLayout(new BorderLayout());
-                        // The code below provides an example of how to change the specific x and y coordinates of a JComponent
-                        //board.setBounds(board.getBounds().y+(rIndex*10), board.getBounds().x+(cIndex*10), board.getWidth(), board.getHeight());
-                        //System.out.println(b.getBounds().x+" "+b.getBounds().y);
-                        //b.setBounds(b.getBounds().x+1, b.getBounds().y+1, b.getWidth(), b.getHeight());
+                        System.out.println("Tile clicked @ ("+rIndex+", "+cIndex+").");
                     }
                 });
             }
