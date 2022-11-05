@@ -129,7 +129,6 @@ class Board extends JFrame implements ActionListener {
         GridLayout grid = new GridLayout(1, 7);
         int padding = (ORIGINAL_WIDTH - HAND_LENGTH*(int)(TILE_SIZE*1.5))/(int)(TILE_SIZE*1.5)/2;
         JPanel hand = new JPanel(grid); // Main Hand Panel
-        // Could use BoxLayout & createHorizontalStruts() to pad the Hand Panel
         addPaddedLabel(hand, (int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5), padding); // Add padding, 'padding' number of times
         for (int i=0; i<7; i++) {
             CurvedLabel tile = new CurvedLabel("W", TILE_RADIUS, new Color(0xBA7F40));
