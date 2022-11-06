@@ -55,7 +55,7 @@ class Board extends JFrame implements ActionListener {
         
         Toolkit.getDefaultToolkit().setDynamicLayout(false); // Ensures window resize keeps the right ratio: https://stackoverflow.com/questions/20925193/using-componentadapter-to-determine-when-frame-resize-is-finished 
         frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Set the Preferred size
-        frame.setMaximumSize(new Dimension(ORIGINAL_WIDTH*2, ORIGINAL_HEIGHT*2)); // Sets the Maximum size
+        frame.setMaximumSize(new Dimension(ORIGINAL_WIDTH, ORIGINAL_HEIGHT)); // Sets the Maximum size
         frame.setMinimumSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Sets the Minimum size
 
         frame.addComponentListener(new ComponentAdapter() { // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-eventff
@@ -129,7 +129,7 @@ class Board extends JFrame implements ActionListener {
 
     // Creates the JPanel that features each player's hand of tiles
     private void createHand() {
-        GridLayout grid = new GridLayout(1, 7);
+        GridLayout grid = new GridLayout(1, 9);
         int padding = (ORIGINAL_WIDTH - HAND_LENGTH*(int)(TILE_SIZE*1.5))/(int)(TILE_SIZE*1.5)/2;
         JPanel hand = new JPanel(grid); // Main Hand Panel
         addPaddedLabel(hand, (int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5), padding); // Add padding, 'padding' number of times
