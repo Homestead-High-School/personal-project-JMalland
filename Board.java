@@ -54,9 +54,10 @@ class Board extends JFrame implements ActionListener {
         frame.add(mainPanel); // Add the main menu to the JFrame
         
         Toolkit.getDefaultToolkit().setDynamicLayout(false); // Ensures window resize keeps the right ratio: https://stackoverflow.com/questions/20925193/using-componentadapter-to-determine-when-frame-resize-is-finished 
-        frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Set the Preferred size
-        frame.setMaximumSize(new Dimension(ORIGINAL_WIDTH, ORIGINAL_HEIGHT)); // Sets the Maximum size
-        frame.setMinimumSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Sets the Minimum size
+        setDefaultSizes(frame, FRAME_WIDTH, FRAME_HEIGHT); // Set the default sizes for the JFrame
+        //frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Set the Preferred size
+        //frame.setMaximumSize(new Dimension(ORIGINAL_WIDTH, ORIGINAL_HEIGHT)); // Sets the Maximum size
+        //frame.setMinimumSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Sets the Minimum size
 
         frame.addComponentListener(new ComponentAdapter() { // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-eventff
             public void componentResized(ComponentEvent componentEvent) { // Method to run every time window is resized
@@ -175,6 +176,7 @@ class Board extends JFrame implements ActionListener {
     }
 
     // Sets the Preferred, Minimum, and Maximum size of a JComponent
+    // Should still probably play around with the default starting sizes for FRAME_WIDTH & FRAME_HEIGHT
     private void setDefaultSizes(Component comp, int width, int height) {
         comp.setPreferredSize(new Dimension(width, height));
         comp.setMaximumSize(new Dimension(width*2, height*2));
