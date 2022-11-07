@@ -1,5 +1,6 @@
 import java.util.*;
 import java.io.File;
+import java.awt.Color;
 import java.awt.event.*;
 import javax.swing.*;
 public class Main {
@@ -71,6 +72,18 @@ public class Main {
         System.out.println("_: "+basic.getLetterValue(' ')+" "+basic.getLetterCount(' '));
         
         Board b = new Board();
+
+        CurvedButton start = b.getStart();
+        start.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Game Running...");
+                b.startGame();
+                Scrabble game = new Scrabble(map);
+                b.setHand(game.drawTiles());
+            }
+        });
+
         final JButton[][] tiles = b.getTiles();
         for (int r=0; r<tiles.length; r++) {
             for (int c=0; c<tiles[r].length; c++) {

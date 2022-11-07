@@ -18,8 +18,7 @@ public class Menu extends JPanel {
         height = h; // Set the height
         defaultPos = pos; // Set the default relative position
         axis = layout; // Set the layout style
-
-        add(Box.createVerticalGlue(), Box.CENTER_ALIGNMENT); // Add the glue to begin with, keeping future components aligned
+        add(axis == Menu.Y_AXIS ? Box.createVerticalGlue() : Box.createHorizontalGlue(), Box.CENTER_ALIGNMENT); // Add the glue to begin with, keeping future components aligned
     }
 
     public Component add(Component comp) {
@@ -27,7 +26,14 @@ public class Menu extends JPanel {
         comp.setPreferredSize(new Dimension(width, height));
         comp.setMaximumSize(comp.getPreferredSize());
         super.add(comp, defaultPos);
-        super.add((axis == Menu.Y_AXIS ? Box.createVerticalGlue() : Box.createHorizontalGlue()), Box.CENTER_ALIGNMENT);
+        if (axis == Menu.X_AXIS) { // Adds the components in different ways depending on the layout
+            super.add(Box.createHorizontalGlue(), Box.CENTER_ALIGNMENT); // Adds the horizontal glue
+            setLayout(new GridLayout(1, getComponents().length)); // Sets the layout of the Menu
+        }
+        else {
+            super.add(Box.createVerticalGlue(), Box.CENTER_ALIGNMENT); // Adds the vertical glue
+            setLayout(new GridLayout(getComponents().length, 1)); // Sets the layout of the Menu
+        }
         return(comp); // Needs to return something, otherwise method throws an error
     }
 
