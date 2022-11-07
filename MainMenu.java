@@ -2,6 +2,8 @@ import java.awt.*;
 import java.util.ArrayList;
 import javax.swing.*;
 
+// Create BoxPanel class, determinant being BoxLayout.X_AXIS and BoxLayout.Y_AXIS
+
 public class MainMenu extends JPanel {
     private int width = 0;
     private int height = 0;
