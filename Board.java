@@ -55,10 +55,7 @@ class Board extends JFrame implements ActionListener {
         
         Toolkit.getDefaultToolkit().setDynamicLayout(false); // Ensures window resize keeps the right ratio: https://stackoverflow.com/questions/20925193/using-componentadapter-to-determine-when-frame-resize-is-finished 
         setDefaultSizes(frame, FRAME_WIDTH, FRAME_HEIGHT); // Set the default sizes for the JFrame
-        //frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Set the Preferred size
-        //frame.setMaximumSize(new Dimension(ORIGINAL_WIDTH, ORIGINAL_HEIGHT)); // Sets the Maximum size
-        //frame.setMinimumSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Sets the Minimum size
-
+        
         frame.addComponentListener(new ComponentAdapter() { // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-eventff
             public void componentResized(ComponentEvent componentEvent) { // Method to run every time window is resized
                 int width = frame.getWidth(); // Create a temporary width variable, just for simplicity
@@ -135,10 +132,11 @@ class Board extends JFrame implements ActionListener {
         JPanel hand = new JPanel(grid); // Main Hand Panel
         addPaddedLabel(hand, (int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5), padding); // Add padding, 'padding' number of times
         for (int i=0; i<7; i++) {
-            CurvedLabel tile = new CurvedLabel("W", TILE_RADIUS, new Color(0xBA7F40));
-            tile.setSize((int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5)); // Sets the size of the JLabel to the determined size
+            CurvedButton tile = new CurvedButton("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100);
+            tile.setMaximumSize(new Dimension((int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5))); // Sets the size of the JLabel to the determined size
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*2.5)));
-            tile.setBorder(BorderFactory.createLineBorder(Color.black, 1)); // Sets the border of the JLabel to black
+            //tile.setBorder(BorderFactory.createLineBorder(Color.black, 1)); // Sets the border of the JLabel to black
+            tile.setContentAreaFilled(false);
             hand.add(tile); // Adds it to the Hand panel, representing a tile held by the player 
         }
         addPaddedLabel(hand, (int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5), padding); // Add padding, 'padding' number of times
@@ -148,7 +146,7 @@ class Board extends JFrame implements ActionListener {
 
     // Creates the JPanel that contains the components which make up the main menu
     private void createMenu() {
-        MainMenu screen = new MainMenu(MENU_WIDTH, MENU_HEIGHT); // Generate the Main Menu
+        Menu screen = new Menu(MENU_WIDTH, MENU_HEIGHT, Menu.CENTER, Menu.Y_AXIS); // Generate the Main Menu
 
         CurvedLabel counter = (CurvedLabel)(screen.getMenuComponent(0)); // The Counter that displays the number of players
         JSlider selector = (JSlider)(((JPanel)(screen.getMenuComponent(1))).getComponent(1)); // The JSlider that determines the number of players
