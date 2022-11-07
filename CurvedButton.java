@@ -81,11 +81,9 @@ public class CurvedButton extends JButton {
 
     @Override
     public void paintBorder(Graphics g) {
-        super.paintBorder(g); // Prevents duplicates: https://stackoverflow.com/questions/13773315/java-paintcomponent-paints-a-copy-of-the-top-gui-panel-for-no-apparent-reason
+        //super.paintBorder(g); // Prevents duplicates: https://stackoverflow.com/questions/13773315/java-paintcomponent-paints-a-copy-of-the-top-gui-panel-for-no-apparent-reason
         // Draw Button Border: https://stackoverflow.com/questions/13866252/button-with-round-edges
         g.setColor(Color.black);
         g.drawRoundRect(0, 0, getSize().width-1, getSize().height-1, (int)(radius * frame.getWidth()/1056.0), (int)(radius * frame.getHeight()/1056.0));
-    }
-
-    
+    }   
 }
