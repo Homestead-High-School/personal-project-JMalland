@@ -4,21 +4,36 @@ import javax.swing.*;
 
 // Create BoxPanel class, determinant being BoxLayout.X_AXIS and BoxLayout.Y_AXIS
 
-public class MainMenu extends JPanel {
+public class Menu extends JPanel {
+    public static final int Y_AXIS = BoxLayout.Y_AXIS;
+    public static final int X_AXIS = BoxLayout.X_AXIS;
+    public static final float CENTER = Box.CENTER_ALIGNMENT;
+    private final float defaultPos;
+    private final int axis;
     private int width = 0;
     private int height = 0;
     private final Font font = new Font("Serif", Font.PLAIN, 75);
 
-    public MainMenu(int w, int h) {
+    public Menu(int w, int h, float pos, int layout) {
         width = w; // Set the width
         height = h; // Set the height
+        defaultPos = pos; // Set the default relative position
+        axis = layout; // Set the layout style
 
         add(Box.createVerticalGlue(), Box.CENTER_ALIGNMENT); // Add the glue to begin with, keeping future components aligned
-        
-        CurvedButton start = createMenuButton("Start", Color.yellow, 15);
+
+        CurvedButton start = new CurvedButton("Start", 15, Color.yellow); // Create a rounded button to start the game when pressed
+        start.setFont(font); // Set the default font
+        start.setPreferredSize(new Dimension(w, h)); // Set the Preferred size
+        start.setMaximumSize(start.getPreferredSize()); // Set the Maximum size
         JPanel paddedStart = createPaddedRow(start, w/2); // Make the Start Button appear smaller and padded
 
-        JSlider select = createMenuSlider(2, 6, true);
+        JSlider select = new JSlider(2, 6); // Set the Player Selector, max and min values
+        select.setValue(2); // Set the default number of players
+        select.setMajorTickSpacing(1); // Make it so each interval is 1
+        select.setPaintTicks(true); // Make it so tick marks are painted at each interval
+        select.setPreferredSize(new Dimension(w, h)); // Set the Preferred size
+        select.setMaximumSize(select.getPreferredSize()); // Set the Maximum size
         JPanel paddedSelector = createPaddedRow(select, w/3); // Make the selector appear smaller and padded
         
         CurvedLabel players = new CurvedLabel("Players:    2"); // Set the default number of players
@@ -27,9 +42,9 @@ public class MainMenu extends JPanel {
         players.setPreferredSize(new Dimension(h, h)); // Set the Preferred size
         players.setMaximumSize(players.getPreferredSize()); // Set the Maximum size
         
-        add(players, Box.CENTER_ALIGNMENT); // Add the Player Counter to the JPanel
-        add(paddedSelector, Box.CENTER_ALIGNMENT); // Add the Player Selector to the JPanel
-        add(paddedStart, Box.CENTER_ALIGNMENT); // Add the Start Button to the JPanel
+        this.add(players); // Add the Player Counter to the JPanel
+        this.add(paddedSelector); // Add the Player Selector to the JPanel
+        this.add(paddedStart); // Add the Start Button to the JPanel
 
         setLayout(new GridLayout(getComponents().length, 1));
         setPreferredSize(new Dimension(width*3 - width/3, height*3)); // Sets the Preferred size
@@ -48,28 +63,11 @@ public class MainMenu extends JPanel {
         return(temp); // Return the newly padded component as a JPanel
     }
 
-    public CurvedButton createMenuButton(String text, Color c, int radius) {
-        CurvedButton start = new CurvedButton("Start", radius, c); // Create a rounded button to start the game when pressed
-        start.setFont(font); // Set the default font
-        start.setPreferredSize(new Dimension(width, height)); // Set the Preferred size
-        start.setMaximumSize(start.getPreferredSize()); // Set the Maximum size
-        return(start); // Return the new Button
-    }
-
-    public JSlider createMenuSlider(int min, int max, boolean ticks) {
-        JSlider select = new JSlider(min, max); // Set the Player Selector, max and min values
-        select.setValue(2); // Set the default number of players
-        select.setMajorTickSpacing(1); // Make it so each interval is 1
-        select.setPaintTicks(ticks); // Make it so tick marks are painted at each interval
-        select.setPreferredSize(new Dimension(width, height)); // Set the Preferred size
-        select.setMaximumSize(select.getPreferredSize()); // Set the Maximum size
-        return(select);
-    }
-
-    private void add(Component comp, float position) {
+    public Component add(Component comp) {
         // BoxLayout Styling: https://stackoverflow.com/questions/60422149/vertically-center-content-with-boxlayout
-        super.add(comp, position);
-        super.add(Box.createVerticalGlue(), Box.CENTER_ALIGNMENT);
+        super.add(comp, defaultPos);
+        super.add((axis == Menu.Y_AXIS ? Box.createVerticalGlue() : Box.createHorizontalGlue()), Box.CENTER_ALIGNMENT);
+        return(comp);
     }
 
     public Component getMenuComponent(int n) {
