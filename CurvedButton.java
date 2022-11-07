@@ -64,7 +64,13 @@ public class CurvedButton extends JButton {
         // Draw Button Background:  https://stackoverflow.com/questions/26036002/how-to-make-round-jbuttons-in-java
         // Setting Opacity:         https://stackoverflow.com/questions/29379441/java-set-transparency-on-color-color-without-using-rgbs
         // Setting Button Color:    https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
-        g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), opacity));
+        if (!getModel().isPressed()) {
+            g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), opacity));
+        }
+        else {
+            g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 2*opacity/3));
+        }
+
         g.fillRoundRect(0, 0, getSize().width, getSize().height, (int)(radius * frame.getWidth()/1056.0), (int)(radius * frame.getHeight()/1056.0));
 
         // End the method if text doesn't need to be painted
@@ -85,5 +91,5 @@ public class CurvedButton extends JButton {
         // Draw Button Border: https://stackoverflow.com/questions/13866252/button-with-round-edges
         g.setColor(Color.black);
         g.drawRoundRect(0, 0, getSize().width-1, getSize().height-1, (int)(radius * frame.getWidth()/1056.0), (int)(radius * frame.getHeight()/1056.0));
-    }   
+    }
 }
