@@ -2,6 +2,8 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import javax.swing.*;
 
+// Need to be able to paint a different opacity when button is pressed.
+
 public class CurvedButton extends JButton {
     private static JFrame frame;
     private String text = "";
