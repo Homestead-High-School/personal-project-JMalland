@@ -44,7 +44,7 @@ public class MainMenu extends JPanel {
         temp.add(comp, BorderLayout.CENTER); // Put the component in the center
         temp.add(paddedB, BorderLayout.EAST); // Put the right padding in the JPanel
         return(temp); // Return the newly padded component as a JPanel
-    }
+    } 
 
     public CurvedButton createMenuButton(String text, Color c, int radius) {
         CurvedButton start = new CurvedButton("Start", radius, c); // Create a rounded button to start the game when pressed
