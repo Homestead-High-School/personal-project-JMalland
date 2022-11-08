@@ -9,7 +9,7 @@ public class CurvedButton extends JButton {
     private String text = "";
     private int radius = 1;
     private int opacity = 100;
-    private int borderSize = 1;
+    private int borderSize = 2;
     private Color color = Color.white;
     private Color borderColor = Color.black;
     private Font font = new Font("Arial", Font.PLAIN, 14);

@@ -1,5 +1,6 @@
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -178,6 +179,9 @@ class Board extends JFrame implements ActionListener {
                     System.out.println("Tile #"+(index+1)+" Selected!");
                     Component[] list = array.getHand();
                     for (int i=0; i<list.length; i++) {
+                        if (!(list[i] instanceof CurvedButton)) {
+                            continue;
+                        }
                         CurvedButton temp = (CurvedButton)(list[i]); // Create a temporary button to store the tile
                         if (i == index && selected_tile != index) { // Check the tile to see if it's the selected one
                             temp.setBorder(Color.orange, 6); // Set the border of the selected tile orange
@@ -189,6 +193,7 @@ class Board extends JFrame implements ActionListener {
                     selected_tile = index == selected_tile ? selected_tile+1 : index;
                 }
             });
+            //array.add(Box.createHorizontalStrut((int)(TILE_SIZE)/6)); // Should act as a spacer for the letters
             array.add(tile); // Adds it to the hand panel, representing the tiles held by the player. 
         }
         PaddedPanel hand = new PaddedPanel(array, padding, 0, BoxLayout.X_AXIS);
