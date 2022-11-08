@@ -20,6 +20,7 @@ class Board extends JFrame implements ActionListener {
     private final int TILE_SIZE = 50;
     private final int TILE_RADIUS = 26; // Is actually double. Window starts out at half size
     private final int HAND_LENGTH = 7;
+    private final int H_TILE_SIZE = (int)(TILE_SIZE*1.5);
     private final int MENU_WIDTH = 300;
     private final int MENU_HEIGHT = 75;
     private final int ORIGINAL_WIDTH = 1056;
@@ -165,42 +166,36 @@ class Board extends JFrame implements ActionListener {
 
     // Creates the JPanel that features each player's hand of tiles
     private void createHand() {
-        int padding = (ORIGINAL_WIDTH - (HAND_LENGTH*(int)(TILE_SIZE*1.5)))/4; // Calculates the padding needed for the Player's Hand
-        Hand array = new Hand(7, (int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5));
-        array.setLayout(new GridLayout(1, 7));
+        int padding = (ORIGINAL_WIDTH - (HAND_LENGTH*H_TILE_SIZE))/4; // Calculates the padding needed for the Player's Hand
+        final CurvedButton[] list = new CurvedButton[7];
         for (int i=0; i<7; i++) {
-            final int index = i; // Is final so the action listener can access it
-            CurvedButton tile = new CurvedButton("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100);
+            final CurvedButton tile = new CurvedButton("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100);
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*2.5))); // Set the font of the tile
             tile.setContentAreaFilled(false); // Set it so the default background isn't painted
             tile.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    System.out.println("Tile #"+(index+1)+" Selected!");
-                    Component[] list = array.getHand();
-                    for (int i=0; i<list.length; i++) {
-                        if (!(list[i] instanceof CurvedButton)) {
-                            continue;
-                        }
-                        CurvedButton temp = (CurvedButton)(list[i]); // Create a temporary button to store the tile
-                        if (i == index && selected_tile != index) { // Check the tile to see if it's the selected one
+                    for (CurvedButton temp : list) { // Loop through each tile to check them individually
+                        if (temp == tile) { // Check the tile to see if it's the selected one
                             temp.setBorder(Color.orange, 6); // Set the border of the selected tile orange
                         }
                         else {
                             temp.setBorder(Color.black, 2); // Set the border of the other tiles black
                         }
                     }
-                    selected_tile = index == selected_tile ? selected_tile+1 : index;
                 }
             });
-            //array.add(Box.createHorizontalStrut((int)(TILE_SIZE)/6)); // Should act as a spacer for the letters
-            array.add(tile); // Adds it to the hand panel, representing the tiles held by the player. 
+            tile.setSize(H_TILE_SIZE, H_TILE_SIZE);
+            setDefaultSizes(tile, H_TILE_SIZE, H_TILE_SIZE);
+            list[i] = tile;
         }
+        PaddedPanel hand = new PaddedPanel(list, H_TILE_SIZE/10, H_TILE_SIZE, BoxLayout.X_AXIS);
+        // Padding == (FRAME_WIDTH - (6*H_TILE_SIZE/10) - (7*TILE_SIZE))/2;
+        PaddedPanel whole = new PaddedPanel(hand, 65, H_TILE_SIZE, BoxLayout.X_AXIS);
         // EmptyBorder: https://stackoverflow.com/questions/13547361/how-to-use-margins-and-paddings-with-java-gridlayout
         // Could probably use EmptyBorder with Tile, and adjust the setDefaultSizes() method for array.
-        PaddedPanel hand = new PaddedPanel(array, padding, 0, BoxLayout.X_AXIS);
-        setDefaultSizes(hand, ORIGINAL_WIDTH, (int)(TILE_SIZE*1.5)); // Sets all preferred sizes of the JPanel
-        gamePanel.add(hand); // Create and add the hand to the application frame;
+        setDefaultSizes(whole, ORIGINAL_WIDTH, H_TILE_SIZE); // Sets all preferred sizes of the JPanel
+        gamePanel.add(whole); // Create and add the hand to the application frame;
     }
 
     // Creates the JPanel that contains the components which make up the main menu
