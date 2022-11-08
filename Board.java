@@ -227,7 +227,7 @@ class Board extends JFrame implements ActionListener {
         screen.add(select); // Adds the Selector to the Menu
         screen.add(start); // Adds the Start Button to the Menu
 
-        setDefaultSizes(screen, MENU_WIDTH*3 - MENU_WIDTH/3, MENU_HEIGHT*3); // Sets the default sizes of the Menu
+        setDefaultSizes(screen, MENU_WIDTH*3 - MENU_WIDTH/2, MENU_HEIGHT*3); // Sets the default sizes of the Menu
 
         selector.addChangeListener(new ChangeListener() {
             @Override
