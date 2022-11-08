@@ -5,7 +5,7 @@ import java.awt.event.*;
 import javax.swing.*;
 public class Main {
     public static void main(String[] args) {
-        TreeMap<Character, HashMap<String, String>> map = parseAndStore("Words.txt"); // Get the sorted TreeMap
+        final TreeMap<Character, HashMap<String, String>> map = parseAndStore("Words.txt"); // Get the sorted TreeMap
         int numWords = 0;
         int maxWords = 0;
         for (char c : map.keySet()) { // Sorted by Character
@@ -71,7 +71,7 @@ public class Main {
         System.out.println("C: "+basic.getLetterValue('C')+" "+basic.getLetterCount('C'));
         System.out.println("_: "+basic.getLetterValue(' ')+" "+basic.getLetterCount(' '));
         
-        Board b = new Board();
+        final Board b = new Board();
 
         CurvedButton start = b.getStart();
         start.addActionListener(new ActionListener() {
