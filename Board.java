@@ -196,6 +196,7 @@ class Board extends JFrame implements ActionListener {
             //array.add(Box.createHorizontalStrut((int)(TILE_SIZE)/6)); // Should act as a spacer for the letters
             array.add(tile); // Adds it to the hand panel, representing the tiles held by the player. 
         }
+        // EmptyBorder: https://stackoverflow.com/questions/13547361/how-to-use-margins-and-paddings-with-java-gridlayout
         // Could probably use EmptyBorder with Tile, and adjust the setDefaultSizes() method for array.
         PaddedPanel hand = new PaddedPanel(array, padding, 0, BoxLayout.X_AXIS);
         setDefaultSizes(hand, ORIGINAL_WIDTH, (int)(TILE_SIZE*1.5)); // Sets all preferred sizes of the JPanel
