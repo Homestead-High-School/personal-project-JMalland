@@ -105,6 +105,7 @@ class Board extends JFrame implements ActionListener {
     public void setHand(char[] list) {
         JPanel whole = (JPanel)(gamePanel.getComponent(1));
         JPanel hand = (JPanel)(whole.getComponent(1));
+        System.out.println("Hand: "+hand.getWidth());
         for (int i=0; i<list.length; i++) {
             CurvedButton button = (CurvedButton)(hand.getComponent(i));
             button.setText(list[i]+"");
@@ -114,6 +115,7 @@ class Board extends JFrame implements ActionListener {
     public CurvedButton[] getHand() {
         JPanel whole = (JPanel)(gamePanel.getComponent(1));
         JPanel hand = (JPanel)(whole.getComponent(1));
+        System.out.println("Hand: "+hand.getWidth());
         CurvedButton[] list = new CurvedButton[7];
         for (int i=0; i<7; i++) {
             list[i] = (CurvedButton)(hand.getComponent(i));
@@ -141,7 +143,6 @@ class Board extends JFrame implements ActionListener {
         gamePanel = new JPanel(); // Clears the gamePanel
         gamePanel.setLayout(new BoxLayout(gamePanel, BoxLayout.Y_AXIS)); // BoxLayout layers the Board and the Player's Hand from top to bottom
         JPanel board = new JPanel(new GridLayout(ROWS,COLS)); // Main Board panel
-        
         for (int r=0; r<ROWS; r++) {
             for (int c=0; c<COLS; c++) {
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
@@ -155,6 +156,7 @@ class Board extends JFrame implements ActionListener {
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
                 temp.setOpacity(tile%2 == 1 ? 25 : 100); // Set tile opacity
                 temp.setSize(TILE_SIZE, TILE_SIZE); // Set tile size
+                temp.setYOffset(1.0/3.0);
                 temp.setContentAreaFilled(false); // Make it so it doesn't draw the default background
                 temp.setMaximumSize(new Dimension(TILE_SIZE, TILE_SIZE)); // Set the maximum size per each tile
                 board.add(temp); // Add tile to the grid
@@ -166,11 +168,10 @@ class Board extends JFrame implements ActionListener {
 
     // Creates the JPanel that features each player's hand of tiles
     private void createHand() {
-        int padding = (ORIGINAL_WIDTH - (HAND_LENGTH*H_TILE_SIZE))/4; // Calculates the padding needed for the Player's Hand
         final CurvedButton[] list = new CurvedButton[7];
         for (int i=0; i<7; i++) {
             final CurvedButton tile = new CurvedButton("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100);
-            tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*2.5))); // Set the font of the tile
+            tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*1.5))); // Set the font of the tile
             tile.setContentAreaFilled(false); // Set it so the default background isn't painted
             tile.addActionListener(new ActionListener() {
                 @Override
@@ -185,13 +186,13 @@ class Board extends JFrame implements ActionListener {
                     }
                 }
             });
-            tile.setSize(H_TILE_SIZE, H_TILE_SIZE);
-            setDefaultSizes(tile, H_TILE_SIZE, H_TILE_SIZE);
+            tile.setYOffset(1.0/3.0); // Reset the height offset of the text, for appearance purposes.
             list[i] = tile;
         }
-        PaddedPanel hand = new PaddedPanel(list, H_TILE_SIZE/10, H_TILE_SIZE, BoxLayout.X_AXIS);
-        // Padding == (FRAME_WIDTH - (6*H_TILE_SIZE/10) - (7*TILE_SIZE))/2;
-        PaddedPanel whole = new PaddedPanel(hand, 65, H_TILE_SIZE, BoxLayout.X_AXIS);
+        PaddedPanel hand = new PaddedPanel(list, H_TILE_SIZE/10 , H_TILE_SIZE, BoxLayout.X_AXIS);
+        // Padding == (FRAME_WIDTH - (6*TILE_SIZE/10) - (7*TILE_SIZE))/2;
+        int handWidth = (int)(7*H_TILE_SIZE/10.0) - (7*H_TILE_SIZE);
+        PaddedPanel whole = new PaddedPanel(hand, (int)((FRAME_WIDTH - (int)(7*H_TILE_SIZE/10.0) - (7*H_TILE_SIZE))/2.0), H_TILE_SIZE, BoxLayout.X_AXIS);
         // EmptyBorder: https://stackoverflow.com/questions/13547361/how-to-use-margins-and-paddings-with-java-gridlayout
         // Could probably use EmptyBorder with Tile, and adjust the setDefaultSizes() method for array.
         setDefaultSizes(whole, ORIGINAL_WIDTH, H_TILE_SIZE); // Sets all preferred sizes of the JPanel

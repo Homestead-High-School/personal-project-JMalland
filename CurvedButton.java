@@ -10,6 +10,8 @@ public class CurvedButton extends JButton {
     private int radius = 1;
     private int opacity = 100;
     private int borderSize = 2;
+    private double xOffset = 0.5;
+    private double yOffset = 0.25;
     private Color color = Color.white;
     private Color borderColor = Color.black;
     private Font font = new Font("Arial", Font.PLAIN, 14);
@@ -65,6 +67,16 @@ public class CurvedButton extends JButton {
         text = s;
         repaint();
     }
+
+    public void setXOffset(double x) {
+        xOffset = x;
+        repaint();
+    }
+
+    public void setYOffset(double y) {
+        yOffset = y;
+        repaint();
+    }
     
     @Override
     public void paintComponent(Graphics g) {
@@ -90,7 +102,7 @@ public class CurvedButton extends JButton {
         g.setFont(new Font(font.getName(), font.getStyle(), (int)(font.getSize()*frame.getWidth()/1056.0)));
         g.setColor(Color.black);
         Rectangle2D rect = g.getFontMetrics().getStringBounds(text, g);
-        g.drawString(text, (int)(getSize().width/2 - rect.getWidth()/2), (int)(getSize().height/2 + rect.getHeight()/2 - rect.getHeight()/4));
+        g.drawString(text, (int)(getSize().width/2 - rect.getWidth()*xOffset), (int)(getSize().height/2 + rect.getHeight()*yOffset));
     }
 
     @Override
