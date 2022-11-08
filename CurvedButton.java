@@ -9,7 +9,9 @@ public class CurvedButton extends JButton {
     private String text = "";
     private int radius = 1;
     private int opacity = 100;
-    private Color color = new Color(0xFFFFFF);
+    private int borderSize = 2;
+    private Color color = Color.white;
+    private Color borderColor = Color.black;
     private Font font = new Font("Arial", Font.PLAIN, 14);
 
     public CurvedButton() {
@@ -36,6 +38,12 @@ public class CurvedButton extends JButton {
 
     public static void setFrame(JFrame f) {
         frame = f;
+    }
+
+    public void setBorder(Color c, int s) {
+        borderColor = c;
+        borderSize = s;
+        repaint();
     }
 
     public void setOpacity(int o) {
@@ -88,8 +96,11 @@ public class CurvedButton extends JButton {
     @Override
     public void paintBorder(Graphics g) {
         //super.paintBorder(g); // Prevents duplicates: https://stackoverflow.com/questions/13773315/java-paintcomponent-paints-a-copy-of-the-top-gui-panel-for-no-apparent-reason
+        Graphics2D g2d = (Graphics2D)(g);
+        g2d.setColor(borderColor);
+        // Setting Stroke Thickness: https://stackoverflow.com/questions/4219511/draw-rectangle-border-thickness
+        g2d.setStroke(new BasicStroke((int)(borderSize * (frame.getWidth()/1056.0))));
         // Draw Button Border: https://stackoverflow.com/questions/13866252/button-with-round-edges
-        g.setColor(Color.black);
-        g.drawRoundRect(0, 0, getSize().width-1, getSize().height-1, (int)(radius * frame.getWidth()/1056.0), (int)(radius * frame.getHeight()/1056.0));
+        g2d.drawRoundRect(0, 0, getSize().width-1, getSize().height-1, (int)(radius * frame.getWidth()/1056.0), (int)(radius * frame.getHeight()/1056.0));
     }
 }

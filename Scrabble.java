@@ -43,6 +43,8 @@ public class Scrabble {
                 do { // Run the loop while the chosen character is empty
                     hand[i] = (char)(65+rand.nextInt(27)); // Choose a random character, from A-Z or SPACE
                     hand[i] = (hand[i]-65 == 26) ? 32 : hand[i]; // If the character was SPACE, fix the value
+                    // NEED TO DECREMENT THE OVERALL TILE COUNT
+                    // ENDS UP WITH TOO MANY INCORRECT LETTER AMOUNTS IN THE DEFAULT HANDS
                 } while (getLetterCount(hand[i]) == 0);
             }
             numTiles -= 7; // Remove 7 tiles from the count, since a hand is 7 large

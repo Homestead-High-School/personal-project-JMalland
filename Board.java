@@ -1,5 +1,6 @@
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -12,18 +13,22 @@ class Board extends JFrame implements ActionListener {
     private JFrame frame;
     private JPanel gamePanel = new JPanel();
     private JPanel mainPanel = new JPanel();
+    private CurvedButton startButton = new CurvedButton();
     private final int ROWS = Scrabble.getBoard().length;
     private final int COLS = Scrabble.getBoard()[0].length;
     private final int FONT_SIZE = 26; // Is actually double. Window starts out at half size
     private final int TILE_SIZE = 50;
     private final int TILE_RADIUS = 26; // Is actually double. Window starts out at half size
     private final int HAND_LENGTH = 7;
+    private final int H_TILE_SIZE = (int)(TILE_SIZE*1.5);
     private final int MENU_WIDTH = 300;
     private final int MENU_HEIGHT = 75;
     private final int ORIGINAL_WIDTH = 1056;
     private final int ORIGINAL_HEIGHT = 1056;
     private int FRAME_WIDTH = 528;
     private int FRAME_HEIGHT = 528;
+    private int player_count = 2;
+    private int selected_tile = 1;
     private boolean GameStarted = false;
  
     // The Board() constructor runs its private methods to generate the panels that are contained in the application 
@@ -40,8 +45,10 @@ class Board extends JFrame implements ActionListener {
         }
         
         // Using Layouts With Auto-Adapting Components: https://stackoverflow.com/questions/70523527/how-to-stop-components-adapting-to-the-size-of-a-jpanel-that-is-inside-a-jscroll
-        mainPanel.setLayout(new BorderLayout()); // Set the BorderLayout for the main menu
         createMenu(); // Generate the Main Menu and add to mainPanel
+
+        createBoard(); // Create the Scrabble Board
+        createHand(); // Create the Player's Hand
 
         mainPanel.setVisible(true); // Set the main menu visible, if not
     
@@ -72,9 +79,46 @@ class Board extends JFrame implements ActionListener {
         frame.setVisible(true); // Set the application frame visible
     }
     
+    public void startGame() {
+        frame.remove(mainPanel); // Remove all current panels to begin the gameplay
+        createBoard(); // Recreate the gamePanel
+        createHand(); // Recreate the gamePanel
+        frame.add(gamePanel); // Add the game panel to display the Scrabble board
+        frame.pack(); // Repaint the JFrame
+        GameStarted = true; // Set GameStarted status to true
+        System.out.println("Game Started: "+player_count+" Players"); // Display the beginning of the game
+    }
+    
     // Returns the JPanel for the Scrabble board
     public JPanel getBoard() {
         return((JPanel)(gamePanel.getComponent(0)));
+    }
+
+    public CurvedButton getStart() {
+        return(startButton); // Returns the Start Button
+    }
+
+    public int getPlayers() {
+        return(player_count); // Returns the number of players
+    }
+
+    public void setHand(char[] list) {
+        JPanel whole = (JPanel)(gamePanel.getComponent(1));
+        JPanel hand = (JPanel)(whole.getComponent(1));
+        for (int i=0; i<list.length; i++) {
+            CurvedButton button = (CurvedButton)(hand.getComponent(i));
+            button.setText(list[i]+"");
+        }
+    }
+
+    public CurvedButton[] getHand() {
+        JPanel whole = (JPanel)(gamePanel.getComponent(1));
+        JPanel hand = (JPanel)(whole.getComponent(1));
+        CurvedButton[] list = new CurvedButton[7];
+        for (int i=0; i<7; i++) {
+            list[i] = (CurvedButton)(hand.getComponent(i));
+        }
+        return(list);
     }
 
     // Returns all JButton tiles contained in the Scrabble board panel
@@ -122,28 +166,46 @@ class Board extends JFrame implements ActionListener {
 
     // Creates the JPanel that features each player's hand of tiles
     private void createHand() {
-        int padding = (ORIGINAL_WIDTH - (HAND_LENGTH*(int)(TILE_SIZE*1.5)))/4;
-        JPanel temp = new JPanel(new GridLayout(1, 7)); // Creates a temporary JPanel to hold the Hand
+        int padding = (ORIGINAL_WIDTH - (HAND_LENGTH*H_TILE_SIZE))/4; // Calculates the padding needed for the Player's Hand
+        final CurvedButton[] list = new CurvedButton[7];
         for (int i=0; i<7; i++) {
-            CurvedButton tile = new CurvedButton("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100);
-            tile.setMaximumSize(new Dimension((int)(TILE_SIZE*1.5), (int)(TILE_SIZE*1.5))); // Sets the size of the JLabel to the determined size
-            tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*2.5)));
-            //tile.setBorder(BorderFactory.createLineBorder(Color.black, 1)); // Sets the border of the JLabel to black
-            tile.setContentAreaFilled(false);
-            temp.add(tile); // Adds it to the Hand panel, representing a tile held by the player 
+            final CurvedButton tile = new CurvedButton("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100);
+            tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*2.5))); // Set the font of the tile
+            tile.setContentAreaFilled(false); // Set it so the default background isn't painted
+            tile.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    for (CurvedButton temp : list) { // Loop through each tile to check them individually
+                        if (temp == tile) { // Check the tile to see if it's the selected one
+                            temp.setBorder(Color.orange, 6); // Set the border of the selected tile orange
+                        }
+                        else {
+                            temp.setBorder(Color.black, 2); // Set the border of the other tiles black
+                        }
+                    }
+                }
+            });
+            tile.setSize(H_TILE_SIZE, H_TILE_SIZE);
+            setDefaultSizes(tile, H_TILE_SIZE, H_TILE_SIZE);
+            list[i] = tile;
         }
-        PaddedPanel hand = new PaddedPanel(temp, padding/2, 0, BoxLayout.X_AXIS);
-        setDefaultSizes(hand, ORIGINAL_WIDTH, (int)(TILE_SIZE*1.5)); // Sets all preferred sizes of the JPanel
-        gamePanel.add(hand); // Create and add the hand to the application frame;
+        PaddedPanel hand = new PaddedPanel(list, H_TILE_SIZE/10, H_TILE_SIZE, BoxLayout.X_AXIS);
+        // Padding == (FRAME_WIDTH - (6*H_TILE_SIZE/10) - (7*TILE_SIZE))/2;
+        PaddedPanel whole = new PaddedPanel(hand, 65, H_TILE_SIZE, BoxLayout.X_AXIS);
+        // EmptyBorder: https://stackoverflow.com/questions/13547361/how-to-use-margins-and-paddings-with-java-gridlayout
+        // Could probably use EmptyBorder with Tile, and adjust the setDefaultSizes() method for array.
+        setDefaultSizes(whole, ORIGINAL_WIDTH, H_TILE_SIZE); // Sets all preferred sizes of the JPanel
+        gamePanel.add(whole); // Create and add the hand to the application frame;
     }
 
     // Creates the JPanel that contains the components which make up the main menu
     private void createMenu() {
-        mainPanel = new JPanel(); // Clears the mainPanel
+        mainPanel = new JPanel(new BorderLayout()); // Clears and sets the layout manager for the mainPanel
         Menu screen = new Menu(MENU_WIDTH, MENU_HEIGHT, Menu.CENTER, Menu.Y_AXIS); // Generate the Main Menu
 
-        CurvedButton startButton = new CurvedButton("Start", 15, Color.yellow); // Creates a default start button
+        startButton = new CurvedButton("Start", 15, Color.yellow); // Creates a default start button
         startButton.setFont(new Font("Serif", Font.PLAIN, 75)); // Sets the font of the Start Button to size 75
+        startButton.setEnabled(true);
 
         final JSlider selector = new JSlider(2, 6); // Creates a JSlider between 2 and 6
         selector.setValue(2); // Sets the default player count to 2
@@ -160,26 +222,13 @@ class Board extends JFrame implements ActionListener {
         screen.add(select); // Adds the Selector to the Menu
         screen.add(start); // Adds the Start Button to the Menu
 
-        screen.setLayout(new GridLayout(screen.getComponents().length, 1)); // Sets the layout of the Menu
-        setDefaultSizes(screen, MENU_WIDTH*3 - MENU_WIDTH/3, MENU_HEIGHT*3); // Sets the default sizes of the Menu
+        setDefaultSizes(screen, MENU_WIDTH*3 - MENU_WIDTH/2, MENU_HEIGHT*3); // Sets the default sizes of the Menu
 
         selector.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                counter.setText("Players:    "+selector.getValue()); // Adjust the counter to match the slider's value
-            }
-        });
-
-        startButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.remove(mainPanel); // Remove all current panels to begin the gameplay
-                createBoard(); // Recreate the gamePanel
-                createHand(); // Recreate the gamePanel
-                frame.add(gamePanel); // Add the game panel to display the Scrabble board
-                frame.pack(); // Repaint the JFrame
-                GameStarted = true; // Set GameStarted status to true
-                System.out.println("Game Started: "+selector.getValue()+" Players"); // Display the beginning of the game
+                player_count = selector.getValue();
+                counter.setText("Players:    "+player_count); // Adjust the counter to match the slider's value
             }
         });
 
