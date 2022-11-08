@@ -54,15 +54,4 @@ public class PaddedPanel extends JPanel {
         g.setConstraints(comp, c);
         add(comp);
     }
-
-    private void addEmptyPadding(int layout) {
-        GridBagConstraints c = new GridBagConstraints();
-        JLabel pad = new JLabel();
-        int LR = layout == PaddedPanel.X_AXIS ? padding : 0;
-        int UD = layout == PaddedPanel.Y_AXIS ? padding : 0;
-        c.insets = new Insets(UD, LR, UD, LR);
-        GridBagLayout g = (GridBagLayout)(getLayout());
-        g.setConstraints(pad, c);
-        add(pad);
-    }
 }
