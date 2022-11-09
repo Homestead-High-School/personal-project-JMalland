@@ -15,12 +15,12 @@ class Board extends JFrame implements ActionListener {
     private JPanel mainPanel = new JPanel();
     private CurvedButton startButton = new CurvedButton();
     private final int ROWS = Scrabble.getBoard().length;
-    private final int COLS = Scrabble.getBoard()[0].length;
+    private final int COLS = Scrabble.getBoard()[0].length ;
     private final int FONT_SIZE = 26; // Is actually double. Window starts out at half size
     private final int TILE_SIZE = 50;
     private final int TILE_RADIUS = 26; // Is actually double. Window starts out at half size
     private final int HAND_LENGTH = 7;
-    private final int H_TILE_SIZE = (int)(TILE_SIZE*1.5);
+    private final int H_TILE_SIZE = (int)(TILE_SIZE*2);
     private final int MENU_WIDTH = 300;
     private final int MENU_HEIGHT = 75;
     private final int ORIGINAL_WIDTH = 1056;
@@ -64,7 +64,7 @@ class Board extends JFrame implements ActionListener {
             public void componentResized(ComponentEvent componentEvent) { // Method to run every time window is resized
                 int width = frame.getWidth(); // Create a temporary width variable, just for simplicity
                 int height = frame.getHeight(); // Create a temporary height variable, just for simplicity
-                double newSize = (width > FRAME_WIDTH || height > FRAME_HEIGHT) ? Math.max(width, height) : Math.min(width, height);
+                double newSize = (width > FRAME_WIDTH || height > FRAME_HEIGHT) ? Math.min(ORIGINAL_WIDTH, Math.max(width, height)) : Math.min(ORIGINAL_HEIGHT, Math.min(width, height));
                 if (width != height) {
                     System.out.println("Resized Window: "+width+" x "+height);
                     frame.setPreferredSize(new Dimension((int) newSize, (int) newSize)); // Update the window size to be smaller or larger
@@ -73,10 +73,21 @@ class Board extends JFrame implements ActionListener {
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
                 if (gamePanel.getComponents().length > 1) { // Resize the Player's Hand
                     JPanel hand = (JPanel)(gamePanel.getComponent(1)); // Get the Hand Panel to loop through the letter tiles
+                    int handHeight = 0;
                     for (Component c : hand.getComponents()) { // Loop through each tile in the Player's Hand
                         c.setPreferredSize(new Dimension((int)(H_TILE_SIZE * (newSize/ORIGINAL_WIDTH)), (int)(H_TILE_SIZE * (newSize/ORIGINAL_HEIGHT)))); // Recalculate the tile size, relative to the window
+                        if (handHeight == 0) {
+                            handHeight = c.getHeight();
+                        }
+                    if (hand.getHeight() < handHeight) {
+                        frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT + handHeight));
                     }
+                    }
+                    //hand.setPreferredSize(new Dimension((int) newSize, H_TILE_SIZE));
+                    System.out.println("Game Height: "+gamePanel.getHeight()+"\nHand Height: "+hand.getHeight()+"\nTile Height: "+hand.getComponent(0).getHeight());
                 }
+                System.out.println("Real: "+frame.getContentPane().getHeight());
+                System.out.println("Height: "+FRAME_HEIGHT);
                 frame.pack(); // Repack the frame to adjust the aspect ratios of each component in it.
             }
         });
@@ -193,7 +204,7 @@ class Board extends JFrame implements ActionListener {
                 }
             });
             tile.setYOffset(1.0/3.0); // Reset the height offset of the text, for appearance purposes.
-            tile.setPreferredSize(new Dimension(H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH, H_TILE_SIZE * FRAME_HEIGHT/ORIGINAL_HEIGHT)); // Set the size relative to the window size
+            tile.setPreferredSize(new Dimension(H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH, H_TILE_SIZE/2)); // Set the size relative to the window size
             next.add(tile); // Add the tile to the FlowLayout Panel
         }
         gamePanel.add(next); // Create and add the hand to the application frame;
