@@ -21,6 +21,7 @@ class Board extends JFrame implements ActionListener {
     private final int TILE_RADIUS = 26; // Is actually double. Window starts out at half size
     private final int HAND_LENGTH = 7;
     private final int H_TILE_SIZE = (int)(TILE_SIZE*1.5);
+    private final int H_PADDING = (int)(H_TILE_SIZE/10.0);
     private final int MENU_WIDTH = 300;
     private final int MENU_HEIGHT = 75;
     private final int ORIGINAL_WIDTH = 1056;
@@ -55,7 +56,10 @@ class Board extends JFrame implements ActionListener {
         frame.add(mainPanel); // Add the main menu to the JFrame
         
         Toolkit.getDefaultToolkit().setDynamicLayout(false); // Ensures window resize keeps the right ratio: https://stackoverflow.com/questions/20925193/using-componentadapter-to-determine-when-frame-resize-is-finished 
-        setDefaultSizes(frame, FRAME_WIDTH, FRAME_HEIGHT); // Set the default sizes for the JFrame
+        frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
+        frame.setPreferredSize(frame.getSize());
+        fr
+        //setDefaultSizes(frame, FRAME_WIDTH, FRAME_HEIGHT); // Set the default sizes for the JFrame
         
         frame.addComponentListener(new ComponentAdapter() { // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-eventff
             public void componentResized(ComponentEvent componentEvent) { // Method to run every time window is resized
@@ -75,7 +79,7 @@ class Board extends JFrame implements ActionListener {
                 frame.pack(); // Repack the frame to adjust the aspect ratios of each component in it.
             }
         });
-
+        //frame.setResizable(false);
         frame.setVisible(true); // Set the application frame visible
     }
     
@@ -187,15 +191,26 @@ class Board extends JFrame implements ActionListener {
                 }
             });
             tile.setYOffset(1.0/3.0); // Reset the height offset of the text, for appearance purposes.
+            setDefaultSizes(tile, H_TILE_SIZE, H_TILE_SIZE);
+            tile.setSize(new Dimension(H_TILE_SIZE, H_TILE_SIZE));
+            tile.setPreferredSize(new Dimension(H_TILE_SIZE, H_TILE_SIZE));
+            tile.setMaximumSize(new Dimension(H_TILE_SIZE*2, H_TILE_SIZE));
+            tile.setMinimumSize(new Dimension(H_TILE_SIZE/2, H_TILE_SIZE/2));
+            //tile.setMinimumSize(new Dimension(H_TILE_SIZE, H_TILE_SIZE));
+            //tile.setMaximumSize(new Dimension(H_TILE_SIZE, H_TILE_SIZE));
             list[i] = tile;
         }
-        PaddedPanel hand = new PaddedPanel(list, H_TILE_SIZE/10 , H_TILE_SIZE, BoxLayout.X_AXIS);
+        PaddedPanel hand = new PaddedPanel(list, H_PADDING , H_TILE_SIZE, BoxLayout.X_AXIS);
         // Padding == (FRAME_WIDTH - (6*TILE_SIZE/10) - (7*TILE_SIZE))/2;
-        int handWidth = (int)(7*H_TILE_SIZE/10.0) - (7*H_TILE_SIZE);
-        PaddedPanel whole = new PaddedPanel(hand, (int)((FRAME_WIDTH - (int)(7*H_TILE_SIZE/10.0) - (7*H_TILE_SIZE))/2.0), H_TILE_SIZE, BoxLayout.X_AXIS);
+        // (int)((FRAME_WIDTH - (int)(7*H_TILE_SIZE/10.0) - (7*H_TILE_SIZE))/2.0)
+        int handWidth = (7*H_PADDING) + (7*H_TILE_SIZE);
+        hand.setPreferredSize(new Dimension(handWidth, H_TILE_SIZE));
+        hand.setMaximumSize(new Dimension(handWidth*2, H_TILE_SIZE));
+        hand.setMinimumSize(new Dimension(handWidth/2, H_TILE_SIZE/2));
+        PaddedPanel whole = new PaddedPanel(hand, (FRAME_WIDTH - handWidth)/2, H_TILE_SIZE, BoxLayout.X_AXIS);
         // EmptyBorder: https://stackoverflow.com/questions/13547361/how-to-use-margins-and-paddings-with-java-gridlayout
         // Could probably use EmptyBorder with Tile, and adjust the setDefaultSizes() method for array.
-        setDefaultSizes(whole, ORIGINAL_WIDTH, H_TILE_SIZE); // Sets all preferred sizes of the JPanel
+        //setDefaultSizes(whole, ORIGINAL_WIDTH, H_TILE_SIZE); // Sets all preferred sizes of the JPanel
         gamePanel.add(whole); // Create and add the hand to the application frame;
     }
 
