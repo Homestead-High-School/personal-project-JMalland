@@ -14,24 +14,24 @@ class Board extends JFrame implements ActionListener {
     private JPanel gamePanel = new JPanel();
     private JPanel mainPanel = new JPanel();
     private CurvedButton startButton = new CurvedButton();
+    private final double MULT = 0.5;
     private final int ROWS = Scrabble.getBoard().length;
-    private final int COLS = Scrabble.getBoard()[0].length ;
-    private final int FONT_SIZE = 5; // Is actually double. Window starts out at half size
-    private final int TILE_SIZE = 10;
-    private final int TILE_RADIUS = 5; // Is actually double. Window starts out at half size
+    private final int COLS = Scrabble.getBoard()[0].length;
+    private final int FONT_SIZE = (int)(26); // Is actually double. Window starts out at half size
+    private final int TILE_SIZE = (int)(50*MULT); // 50
+    private final int TILE_RADIUS = (int)(26*MULT); // 26 - Is actually double. Window starts out at half size
     private final int HAND_LENGTH = 7;
-    private final int H_TILE_SIZE = (int)(TILE_SIZE*2);
+    private final int H_TILE_SIZE = (int)(TILE_SIZE*1.5);
     private final int H_Y_OFF = 3;
     private final int H_X_OFF = H_TILE_SIZE/8;
-    private final int MENU_WIDTH = 60;
-    private final int MENU_HEIGHT = 15;
-    private final int ORIGINAL_WIDTH = 212;
-    private final int ORIGINAL_HEIGHT = 212;
-    private int FRAME_WIDTH = 106;
-    private int FRAME_HEIGHT = 106;
+    private final int MENU_WIDTH = (int)(300*MULT); // 300
+    private final int MENU_HEIGHT = (int)(75*MULT); // 75
+    private final int ORIGINAL_WIDTH = (int)(1056*MULT); // 1056
+    private final int ORIGINAL_HEIGHT = (int)(1056*MULT); // 1056
+    private int FRAME_WIDTH = (int)(528*MULT); // 528
+    private int FRAME_HEIGHT = (int)(528*MULT); // 528
     private int player_count = 2;
-    
-    private int selected_tile = 1;
+    private int selected_tile = -1;
     private boolean GameStarted = false;
  
     // The Board() constructor runs its private methods to generate the panels that are contained in the application 
@@ -80,18 +80,18 @@ class Board extends JFrame implements ActionListener {
                     int handHeight = hand.getComponent(0).getHeight(); // Get the height of each tile in the hand
                     for (Component c : hand.getComponents()) { // Loop through each tile in the Player's Hand
                         c.setPreferredSize(new Dimension((int)(H_TILE_SIZE * (newSize/ORIGINAL_WIDTH)), (int)(H_TILE_SIZE * (newSize/ORIGINAL_HEIGHT)))); // Recalculate the tile size, relative to the window
+                        c.setFont(new Font("Serif", Font.PLAIN, 2*(int)(FONT_SIZE * (newSize/ORIGINAL_WIDTH))));
                     }
                     if (handHeight > hand.getHeight()) { // Increase Size
-                        hand.setPreferredSize(new Dimension(FRAME_WIDTH, handHeight));
-                        frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT - ((handHeight - hand.getHeight()) - H_Y_OFF)));
+                        frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT - ((handHeight - hand.getHeight()) - H_Y_OFF))); // Readjust the size of the frame to fit the hand
                     }
                     else if (handHeight < hand.getHeight()) { // Decrease Size
-                        hand.setPreferredSize(new Dimension(FRAME_WIDTH, handHeight));
-                        frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT - ((hand.getHeight() - handHeight) - H_Y_OFF)));
+                        frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT - ((hand.getHeight() - handHeight) - H_Y_OFF))); // Readjust the size of the frame to fit the hand
                     }
+                    hand.setPreferredSize(new Dimension(FRAME_WIDTH, handHeight)); // Update the default size of the Hand
                     FRAME_HEIGHT = frame.getHeight(); // Update Height
                 }
-                frame.pack();
+                frame.pack(); // Pack once more, in case the Hand was adjusted
             }
         });
 
@@ -185,6 +185,7 @@ class Board extends JFrame implements ActionListener {
 
     // Creates the JPanel that features each player's hand of tiles
     private void createHand() {
+        // Still need to fix Font Sizing
         // FlowLayout Help: https://docs.oracle.com/javase/tutorial/uiswing/layout/flow.html
         final CurvedButton[] list = new CurvedButton[7]; // List of tiles which make up the hand
         JPanel next = new JPanel(new FlowLayout(FlowLayout.CENTER, H_X_OFF, H_Y_OFF)); // FlowLayout allows spacing and centering, for a single row or column
@@ -196,12 +197,16 @@ class Board extends JFrame implements ActionListener {
             tile.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    for (CurvedButton temp : list) { // Loop through each tile to check them individually
-                        if (temp == copy) { // Check the tile to see if it's the selected one
-                            temp.setBorder(Color.orange, 6); // Set the border of the selected tile orange
+                    for (int i=0; i<list.length; i++) { // Loop through each tile to check them individually
+                        if (list[i] == copy && i != selected_tile) { // Check the tile to see if it's the selected one
+                            list[i].setBorder(Color.orange, 6); // Set the border of the selected tile orange
+                            selected_tile = i;
                         }
                         else {
-                            temp.setBorder(Color.black, 2); // Set the border of the other tiles black
+                            list[i].setBorder(Color.black, 2); // Set the border of the other tiles black
+                            if (selected_tile == i) { // Checks if the tile was previously selected
+                                selected_tile = -1; // Delete the selection
+                            }
                         }
                     }
                 }
@@ -209,7 +214,10 @@ class Board extends JFrame implements ActionListener {
             tile.setYOffset(1.0/3.0); // Reset the height offset of the text, for appearance purposes.
             tile.setPreferredSize(new Dimension(H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH, H_TILE_SIZE/2)); // Set the size relative to the window size
             next.add(tile); // Add the tile to the FlowLayout Panel
+            list[i] = tile; // Add the tile to the list of CurvedButtons
         }
+        frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT - (next.getComponent(0).getHeight() - next.getHeight()) + 2*H_Y_OFF)); // Recalculate the frame due to Hand sizing
+        FRAME_HEIGHT = frame.getPreferredSize().height; // Recalculate the height of the frame based on Hand sizing
         gamePanel.add(next); // Create and add the hand to the application frame;
     }
 
