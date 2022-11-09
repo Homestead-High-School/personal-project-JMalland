@@ -16,7 +16,7 @@ public class Main {
         }
         System.out.println(numWords+" Words!");
         System.out.println("Longest Word: "+maxWords);
-        Scrabble basic = new Scrabble(map);
+        final Scrabble basic = new Scrabble(map);
         String one = "HAPPY";
         String two = "UNHAPPY";
         String three = "HELP";
@@ -72,6 +72,27 @@ public class Main {
         System.out.println("_: "+basic.getLetterValue(' ')+" "+basic.getLetterCount(' '));
         
         final Board b = new Board();
+
+        final JPanel hand = b.getHandPanel();
+        hand.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == b.SELECTED_HAND) {
+                    System.out.println("Selected Tile: "+b.getSelectedTile());
+                }
+                else if (e.getClickCount() == b.PLACED_LETTER) {
+                    System.out.println("Placed Tile!");
+                    CurvedButton temp = (CurvedButton) b.getSelectedTile();
+                    basic.placeLetter(temp.getText().charAt(0), e.getX(), e.getY());
+                    JFrame frame = (JFrame) e.getSource();
+                    JPanel game = (JPanel) frame.getComponent(0);
+                    JPanel board = (JPanel) game.getComponent(0);
+                    CurvedButton tile = (CurvedButton) board.getComponent((e.getX()+1)*(e.getY()+1) - 1);
+                    tile.setText(temp.getText());
+                }
+            }
+        });
+
 
         CurvedButton start = b.getStart();
         start.addActionListener(new ActionListener() {
