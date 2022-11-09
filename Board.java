@@ -5,16 +5,19 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import java.awt.*;
-class Board extends JFrame implements ActionListener {
+class Board extends JFrame {
 
     /*
     *   Should make either a sidemenu, or selections from the player's hand, where, when selected, it highlights the border in yellow or something.
     */
-    private JFrame frame;
+    private final JFrame frame;
     private JPanel gamePanel = new JPanel();
     private JPanel mainPanel = new JPanel();
     private CurvedButton startButton = new CurvedButton();
-    private final double MULT = 0.5;
+    private JPanel handPanel = new JPanel();
+    private final double MULT = 1;
+    public final int SELECTED_HAND = ("HAND").hashCode();
+    public final int PLACED_LETTER = ("TILE").hashCode();
     private final int ROWS = Scrabble.getBoard().length;
     private final int COLS = Scrabble.getBoard()[0].length;
     private final int FONT_SIZE = (int)(26); // Is actually double. Window starts out at half size
@@ -55,7 +58,7 @@ class Board extends JFrame implements ActionListener {
 
         mainPanel.setVisible(true); // Set the main menu visible, if not
     
-        frame.add(mainPanel); // Add the main menu to the JFrame
+        frame.add(mainPanel);//mainPanel); // Add the main menu to the JFrame
         
         Toolkit.getDefaultToolkit().setDynamicLayout(false); // Ensures window resize keeps the right ratio: https://stackoverflow.com/questions/20925193/using-componentadapter-to-determine-when-frame-resize-is-finished 
         frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT));
@@ -72,25 +75,15 @@ class Board extends JFrame implements ActionListener {
                     System.out.println("Resized Window: "+width+" x "+height);
                     frame.setPreferredSize(new Dimension((int) newSize, (int) newSize)); // Update the window size to be smaller or larger
                 }
-                frame.pack();
+                if (gamePanel.getComponents().length > 1) {
+                    JPanel hand = (JPanel)(gamePanel.getComponent(1)); // Store the Hand panel to readjust component sizes
+                    for (Component c : hand.getComponents()) { // Loop through each tile and adjust size
+                        c.setPreferredSize(new Dimension((int)(H_TILE_SIZE * newSize/ORIGINAL_WIDTH), (int)(H_TILE_SIZE * newSize/ORIGINAL_WIDTH))); // Set the size relative to the window size
+                    }
+                    hand.setPreferredSize(new Dimension(ORIGINAL_WIDTH, hand.getComponent(0).getHeight() + H_Y_OFF)); // Recalculate Hand dimensions based on window size
+                }
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
-                if (gamePanel.getComponents().length > 1) { // Resize the Player's Hand
-                    JPanel hand = (JPanel)(gamePanel.getComponent(1)); // Get the Hand Panel to loop through the letter tiles
-                    int handHeight = hand.getComponent(0).getHeight(); // Get the height of each tile in the hand
-                    for (Component c : hand.getComponents()) { // Loop through each tile in the Player's Hand
-                        c.setPreferredSize(new Dimension((int)(H_TILE_SIZE * (newSize/ORIGINAL_WIDTH)), (int)(H_TILE_SIZE * (newSize/ORIGINAL_HEIGHT)))); // Recalculate the tile size, relative to the window
-                        c.setFont(new Font("Serif", Font.PLAIN, 2*(int)(FONT_SIZE * (newSize/ORIGINAL_WIDTH))));
-                    }
-                    if (handHeight > hand.getHeight()) { // Increase Size
-                        frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT - ((handHeight - hand.getHeight()) - H_Y_OFF))); // Readjust the size of the frame to fit the hand
-                    }
-                    else if (handHeight < hand.getHeight()) { // Decrease Size
-                        frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT - ((hand.getHeight() - handHeight) - H_Y_OFF))); // Readjust the size of the frame to fit the hand
-                    }
-                    hand.setPreferredSize(new Dimension(FRAME_WIDTH, handHeight)); // Update the default size of the Hand
-                    FRAME_HEIGHT = frame.getHeight(); // Update Height
-                }
                 frame.pack(); // Pack once more, in case the Hand was adjusted
             }
         });
@@ -119,6 +112,24 @@ class Board extends JFrame implements ActionListener {
 
     public int getPlayers() {
         return(player_count); // Returns the number of players
+    }
+
+    public JPanel getHandPanel() {
+        return(handPanel);
+    }
+
+    // Returns whether or not the player has selected a tile
+    public boolean tileIsSelected() {
+        return(selected_tile > 0);
+    }
+
+    // Returns the tile selected by the player
+    public JButton getSelectedTile() {
+        if (selected_tile < 0) { // Throw an exception if I'm stupid enough to hit it
+            throw new IllegalArgumentException("Tile Index Out Of Bounds For Selected Tile");
+        }
+        JPanel hand = (JPanel)(gamePanel.getComponent(1)); // Store the Hand for access to child components
+        return((CurvedButton)(hand.getComponent(selected_tile))); // Convert the tile to CurvedButton and return
     }
 
     public void setHand(char[] list) {
@@ -162,13 +173,18 @@ class Board extends JFrame implements ActionListener {
         JPanel board = new JPanel(new GridLayout(ROWS,COLS)); // Main Board panel
         for (int r=0; r<ROWS; r++) {
             for (int c=0; c<COLS; c++) {
+                final int rIdx = r;
+                final int cIdx = c;
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
-                CurvedButton temp = new CurvedButton("", TILE_RADIUS, Color.white); // Blank Tile, represented by '0'
+                final CurvedButton temp;
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
                     temp = new CurvedButton((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(0x4274FF));
                 }
                 else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'
                     temp = new CurvedButton((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(0xD7381C));
+                }
+                else {
+                    temp = new CurvedButton("", TILE_RADIUS, Color.white); // Blank Tile, represented by '0'
                 }
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
                 temp.setOpacity(tile%2 == 1 ? 25 : 100); // Set tile opacity
@@ -176,6 +192,13 @@ class Board extends JFrame implements ActionListener {
                 temp.setYOffset(1.0/3.0);
                 temp.setContentAreaFilled(false); // Make it so it doesn't draw the default background
                 temp.setMaximumSize(new Dimension(TILE_SIZE, TILE_SIZE)); // Set the maximum size per each tile
+                temp.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        if (tileIsSelected()) {
+                            frame.dispatchEvent(new MouseEvent(frame, MouseEvent.MOUSE_CLICKED, 0, 0, rIdx, cIdx, PLACED_LETTER, false));
+                        }
+                    }
+                });
                 board.add(temp); // Add tile to the grid
             }
         }
@@ -188,7 +211,9 @@ class Board extends JFrame implements ActionListener {
         // Still need to fix Font Sizing
         // FlowLayout Help: https://docs.oracle.com/javase/tutorial/uiswing/layout/flow.html
         final CurvedButton[] list = new CurvedButton[7]; // List of tiles which make up the hand
-        JPanel next = new JPanel(new FlowLayout(FlowLayout.CENTER, H_X_OFF, H_Y_OFF)); // FlowLayout allows spacing and centering, for a single row or column
+        handPanel.removeAll();
+        handPanel.setLayout(new FlowLayout(FlowLayout.CENTER, H_X_OFF, H_Y_OFF)); // FlowLayout allows spacing and centering, for a single row or column
+        frame.dispatchEvent(new FocusEvent(frame, ("HAND").hashCode()));
         for (int i=0; i<7; i++) {
             CurvedButton tile = new CurvedButton("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100); // Create the letter tile
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*1.5))); // Set the font of the tile
@@ -200,7 +225,8 @@ class Board extends JFrame implements ActionListener {
                     for (int i=0; i<list.length; i++) { // Loop through each tile to check them individually
                         if (list[i] == copy && i != selected_tile) { // Check the tile to see if it's the selected one
                             list[i].setBorder(Color.orange, 6); // Set the border of the selected tile orange
-                            selected_tile = i;
+                            selected_tile = i; // Set the selected tile
+                            handPanel.dispatchEvent(new MouseEvent(frame, MouseEvent.MOUSE_CLICKED, 20, 0, 0, 0, SELECTED_HAND, false));
                         }
                         else {
                             list[i].setBorder(Color.black, 2); // Set the border of the other tiles black
@@ -212,13 +238,15 @@ class Board extends JFrame implements ActionListener {
                 }
             });
             tile.setYOffset(1.0/3.0); // Reset the height offset of the text, for appearance purposes.
-            tile.setPreferredSize(new Dimension(H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH, H_TILE_SIZE/2)); // Set the size relative to the window size
-            next.add(tile); // Add the tile to the FlowLayout Panel
+            tile.setPreferredSize(new Dimension(H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH, H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH)); // Set the size relative to the window size
+            handPanel.add(tile); // Add the tile to the FlowLayout Panel
             list[i] = tile; // Add the tile to the list of CurvedButtons
         }
-        frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT - (next.getComponent(0).getHeight() - next.getHeight()) + 2*H_Y_OFF)); // Recalculate the frame due to Hand sizing
-        FRAME_HEIGHT = frame.getPreferredSize().height; // Recalculate the height of the frame based on Hand sizing
-        gamePanel.add(next); // Create and add the hand to the application frame;
+        //frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT - (next.getComponent(0).getHeight() - next.getHeight()) + 2*H_Y_OFF)); // Recalculate the frame due to Hand sizing
+        //FRAME_HEIGHT = frame.getPreferredSize().height; // Recalculate the height of the frame based on Hand sizing
+        setDefaultSizes(handPanel, ORIGINAL_WIDTH, H_TILE_SIZE);
+        
+        gamePanel.add(handPanel); // Create and add the hand to the application frame;
     }
 
     // Creates the JPanel that contains the components which make up the main menu
@@ -267,11 +295,8 @@ class Board extends JFrame implements ActionListener {
         comp.setSize(new Dimension(width, height));
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        // Might be able to have the Board() object with custom ActionListener outside of class?
-        if (gameStarted()) {
-            System.out.println("The game is running...");
-        }
+    private void testKeyEvent(KeyEvent e) {
+        System.out.println("Event: "+e);
+        frame.dispatchEvent(e);
     }
 }
