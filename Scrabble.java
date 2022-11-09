@@ -46,6 +46,7 @@ public class Scrabble {
                     // NEED TO DECREMENT THE OVERALL TILE COUNT
                     // ENDS UP WITH TOO MANY INCORRECT LETTER AMOUNTS IN THE DEFAULT HANDS
                 } while (getLetterCount(hand[i]) == 0);
+                tiles[hand[i]-65 < 0 ? 26 : hand[i]-65] -= 1; // Decrements the count
             }
             numTiles -= 7; // Remove 7 tiles from the count, since a hand is 7 large
             return(hand); // Return the chosen hand
