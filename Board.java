@@ -78,7 +78,7 @@ class Board extends JFrame implements ActionListener {
                 if (gamePanel.getComponents().length > 1) { // Resize the Player's Hand
                     JPanel hand = (JPanel)(gamePanel.getComponent(1)); // Get the Hand Panel to loop through the letter tiles
                     int handHeight = hand.getComponent(0).getHeight(); // Get the height of each tile in the hand
-                    int adjusted = (hand.getHeight() < handHeight ? handHeight - hand.getHeight() : hand.getHeight - handHeight) = H_Y_OFF;
+                    int adjusted = (hand.getHeight() < handHeight ? handHeight - hand.getHeight() : hand.getHeight() - handHeight) = H_Y_OFF;
                     for (Component c : hand.getComponents()) { // Loop through each tile in the Player's Hand
                         c.setPreferredSize(new Dimension((int)(H_TILE_SIZE * (newSize/ORIGINAL_WIDTH)), (int)(H_TILE_SIZE * (newSize/ORIGINAL_HEIGHT)))); // Recalculate the tile size, relative to the window
                     }
