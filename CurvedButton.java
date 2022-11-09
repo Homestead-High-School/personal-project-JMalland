@@ -5,6 +5,7 @@ import javax.swing.*;
 // Need to be able to paint a different opacity when button is pressed.
 
 public class CurvedButton extends JButton {
+    private Dimension max = new Dimension(0, 0);
     private static JFrame frame;
     private String text = "";
     private int radius = 1;
@@ -112,6 +113,9 @@ public class CurvedButton extends JButton {
         g2d.setColor(borderColor);
         // Setting Stroke Thickness: https://stackoverflow.com/questions/4219511/draw-rectangle-border-thickness
         g2d.setStroke(new BasicStroke((int)(borderSize * (frame.getWidth()/1056.0))));
+        if ((int)(borderSize * (frame.getWidth()/1056.0)) < 2) {
+            g2d.setStroke(new BasicStroke(2));
+        }
         // Draw Button Border: https://stackoverflow.com/questions/13866252/button-with-round-edges
         g2d.drawRoundRect(0, 0, getSize().width-1, getSize().height-1, (int)(radius * frame.getWidth()/1056.0), (int)(radius * frame.getHeight()/1056.0));
     }
