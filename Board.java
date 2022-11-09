@@ -22,6 +22,15 @@ class Board extends JFrame implements ActionListener {
     private final int TILE_RADIUS = (int)(26*MULT); // 26 - Is actually double. Window starts out at half size
     private final int HAND_LENGTH = 7;
     private final int H_TILE_SIZE = (int)(TILE_SIZE*1.5);
+    private final int H_Y_OFF = 3;
+    private final int H_X_OFF = H_TILE_SIZE/8;
+    private final int MENU_WIDTH = (int)(300*MULT); // 300
+    private final int MENU_HEIGHT = (int)(75*MULT); // 75
+    private final int ORIGINAL_WIDTH = (int)(1056*MULT); // 1056
+    private final int ORIGINAL_HEIGHT = (int)(1056*MULT); // 1056
+    private int FRAME_WIDTH = (int)(528*MULT); // 528
+    private int FRAME_HEIGHT = (int)(528*MULT); // 528
+    private int player_count = 2;
     private int selected_tile = -1;
     private boolean GameStarted = false;
  
@@ -30,6 +39,7 @@ class Board extends JFrame implements ActionListener {
         frame = new JFrame("Scrabble");
         CurvedButton.setFrame(frame); // Set the contentPane of the CurvedButton class
         CurvedLabel.setFrame(frame); // Set the contentPane of the CurvedLabel class
+        
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         }
@@ -84,7 +94,7 @@ class Board extends JFrame implements ActionListener {
                 frame.pack(); // Pack once more, in case the Hand was adjusted
             }
         });
-        //frame.setResizable(false);
+
         frame.setVisible(true); // Set the application frame visible
     }
     
