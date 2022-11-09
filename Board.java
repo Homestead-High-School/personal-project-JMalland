@@ -55,23 +55,28 @@ class Board extends JFrame implements ActionListener {
         frame.add(mainPanel); // Add the main menu to the JFrame
         
         Toolkit.getDefaultToolkit().setDynamicLayout(false); // Ensures window resize keeps the right ratio: https://stackoverflow.com/questions/20925193/using-componentadapter-to-determine-when-frame-resize-is-finished 
-        setDefaultSizes(frame, FRAME_WIDTH, FRAME_HEIGHT); // Set the default sizes for the JFrame
+        frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT));
+        frame.setMaximumSize(new Dimension(FRAME_WIDTH*2, FRAME_HEIGHT*2));
+        frame.setMinimumSize(frame.getPreferredSize());
+        //setDefaultSizes(frame, FRAME_WIDTH, FRAME_HEIGHT); // Set the default sizes for the JFrame
         
         frame.addComponentListener(new ComponentAdapter() { // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-eventff
             public void componentResized(ComponentEvent componentEvent) { // Method to run every time window is resized
                 int width = frame.getWidth(); // Create a temporary width variable, just for simplicity
                 int height = frame.getHeight(); // Create a temporary height variable, just for simplicity
+                double newSize = (width > FRAME_WIDTH || height > FRAME_HEIGHT) ? Math.max(width, height) : Math.min(width, height);
                 if (width != height) {
                     System.out.println("Resized Window: "+width+" x "+height);
-                    if (width > FRAME_WIDTH || height > FRAME_HEIGHT) { // Frame was resized to larger than previously
-                        frame.setPreferredSize(new Dimension(Math.max(width, height), Math.max(width, height))); // Set size to the largest dimension
-                    }
-                    else { // Frame was resized to smaller than previously
-                        frame.setPreferredSize(new Dimension(Math.min(width, height), Math.min(width, height))); // Set size to the smallest dimension
-                    }
+                    frame.setPreferredSize(new Dimension((int) newSize, (int) newSize)); // Update the window size to be smaller or larger
                 }
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
+                if (gamePanel.getComponents().length > 1) { // Resize the Player's Hand
+                    JPanel hand = (JPanel)(gamePanel.getComponent(1)); // Get the Hand Panel to loop through the letter tiles
+                    for (Component c : hand.getComponents()) { // Loop through each tile in the Player's Hand
+                        c.setPreferredSize(new Dimension((int)(H_TILE_SIZE * (newSize/ORIGINAL_WIDTH)), (int)(H_TILE_SIZE * (newSize/ORIGINAL_HEIGHT)))); // Recalculate the tile size, relative to the window
+                    }
+                }
                 frame.pack(); // Repack the frame to adjust the aspect ratios of each component in it.
             }
         });
@@ -103,9 +108,7 @@ class Board extends JFrame implements ActionListener {
     }
 
     public void setHand(char[] list) {
-        JPanel whole = (JPanel)(gamePanel.getComponent(1));
-        JPanel hand = (JPanel)(whole.getComponent(1));
-        System.out.println("Hand: "+hand.getWidth());
+        JPanel hand = (JPanel)(gamePanel.getComponent(1));
         for (int i=0; i<list.length; i++) {
             CurvedButton button = (CurvedButton)(hand.getComponent(i));
             button.setText(list[i]+"");
@@ -168,16 +171,19 @@ class Board extends JFrame implements ActionListener {
 
     // Creates the JPanel that features each player's hand of tiles
     private void createHand() {
-        final CurvedButton[] list = new CurvedButton[7];
+        // FlowLayout Help: https://docs.oracle.com/javase/tutorial/uiswing/layout/flow.html
+        final CurvedButton[] list = new CurvedButton[7]; // List of tiles which make up the hand
+        JPanel next = new JPanel(new FlowLayout(FlowLayout.CENTER, H_TILE_SIZE/8, 3)); // FlowLayout allows spacing and centering, for a single row or column
         for (int i=0; i<7; i++) {
-            final CurvedButton tile = new CurvedButton("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100);
+            CurvedButton tile = new CurvedButton("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100); // Create the letter tile
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*1.5))); // Set the font of the tile
             tile.setContentAreaFilled(false); // Set it so the default background isn't painted
+            final CurvedButton copy = tile; // A Final clone of the tile, so it can be accessed by the EventListener
             tile.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     for (CurvedButton temp : list) { // Loop through each tile to check them individually
-                        if (temp == tile) { // Check the tile to see if it's the selected one
+                        if (temp == copy) { // Check the tile to see if it's the selected one
                             temp.setBorder(Color.orange, 6); // Set the border of the selected tile orange
                         }
                         else {
@@ -187,16 +193,10 @@ class Board extends JFrame implements ActionListener {
                 }
             });
             tile.setYOffset(1.0/3.0); // Reset the height offset of the text, for appearance purposes.
-            list[i] = tile;
+            tile.setPreferredSize(new Dimension(H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH, H_TILE_SIZE * FRAME_HEIGHT/ORIGINAL_HEIGHT)); // Set the size relative to the window size
+            next.add(tile); // Add the tile to the FlowLayout Panel
         }
-        PaddedPanel hand = new PaddedPanel(list, H_TILE_SIZE/10 , H_TILE_SIZE, BoxLayout.X_AXIS);
-        // Padding == (FRAME_WIDTH - (6*TILE_SIZE/10) - (7*TILE_SIZE))/2;
-        int handWidth = (int)(7*H_TILE_SIZE/10.0) - (7*H_TILE_SIZE);
-        PaddedPanel whole = new PaddedPanel(hand, (int)((FRAME_WIDTH - (int)(7*H_TILE_SIZE/10.0) - (7*H_TILE_SIZE))/2.0), H_TILE_SIZE, BoxLayout.X_AXIS);
-        // EmptyBorder: https://stackoverflow.com/questions/13547361/how-to-use-margins-and-paddings-with-java-gridlayout
-        // Could probably use EmptyBorder with Tile, and adjust the setDefaultSizes() method for array.
-        setDefaultSizes(whole, ORIGINAL_WIDTH, H_TILE_SIZE); // Sets all preferred sizes of the JPanel
-        gamePanel.add(whole); // Create and add the hand to the application frame;
+        gamePanel.add(next); // Create and add the hand to the application frame;
     }
 
     // Creates the JPanel that contains the components which make up the main menu
@@ -213,8 +213,8 @@ class Board extends JFrame implements ActionListener {
         selector.setMajorTickSpacing(1); // Sets the tick spacing to each number
         selector.setPaintTicks(true); // Paints the ticks on the slider
 
-        PaddedPanel start = new PaddedPanel(startButton, MENU_WIDTH/2, MENU_HEIGHT, BoxLayout.X_AXIS); // Creates a panel with padding on the left and right
-        PaddedPanel select = new PaddedPanel(selector, MENU_WIDTH/3, MENU_HEIGHT, BoxLayout.X_AXIS); // Creates a panel with padding on the left and right
+        PaddedPanel start = new PaddedPanel(startButton, MENU_WIDTH/2, BoxLayout.X_AXIS); // Creates a panel with padding on the left and right
+        PaddedPanel select = new PaddedPanel(selector, MENU_WIDTH/3, BoxLayout.X_AXIS); // Creates a panel with padding on the left and right
 
         final CurvedLabel counter = new CurvedLabel("Players:    2"); // Creates the Player Counter display
         counter.setFont(new Font("Serif", Font.PLAIN, 75)); // Sets the font of the Counter to size 75
@@ -242,6 +242,7 @@ class Board extends JFrame implements ActionListener {
         comp.setPreferredSize(new Dimension(width, height));
         comp.setMaximumSize(new Dimension(width*2, height*2));
         comp.setMinimumSize(new Dimension(width/2, height/2));
+        comp.setSize(new Dimension(width, height));
     }
 
     @Override
