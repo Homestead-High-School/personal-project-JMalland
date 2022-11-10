@@ -11,6 +11,8 @@ class Board extends JFrame {
     */
     public final int SELECTED_HAND = ("HAND").hashCode();
     public final int PLACED_LETTER = ("TILE").hashCode();
+    public final int DRAW_HAND = ("DRAW").hashCode();
+    public final int GAME_RUNNING = ("ON").hashCode();
     private final JFrame frame;
     private JPanel gamePanel = new JPanel();
     private JPanel mainPanel = new JPanel();
@@ -99,6 +101,7 @@ class Board extends JFrame {
         frame.pack(); // Repaint the JFrame
         GameStarted = true; // Set GameStarted status to true
         System.out.println("Game Started: "+player_count+" Players"); // Display the beginning of the game
+        dispatchEvent(new CustomEvent(frame, DRAW_HAND));
     }
 
     // Should be remade
@@ -252,6 +255,13 @@ class Board extends JFrame {
         startButton.setFont(new Font("Serif", Font.PLAIN, 75)); // Sets the font of the Start Button to size 75
         startButton.setEnabled(true);
 
+        startButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispatchEvent(new CustomEvent(startButton, GAME_RUNNING));
+            }
+        });
+
         final JSlider selector = new JSlider(2, 6); // Creates a JSlider between 2 and 6
         selector.setValue(2); // Sets the default player count to 2
         selector.setMajorTickSpacing(1); // Sets the tick spacing to each number
@@ -278,6 +288,12 @@ class Board extends JFrame {
         });
 
         mainPanel.add(screen, BorderLayout.CENTER); // Create and add the Menu to the JPanel
+    }
+
+    private void dispatchEvent(CustomEvent e) {
+        for (CustomListener c : listeners) {
+            c.actionPerformed(e);
+        }
     }
 
     // Returns the JPanel for the players hand
