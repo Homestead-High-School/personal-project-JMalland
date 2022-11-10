@@ -1,7 +1,6 @@
 import java.util.TreeMap;
 import java.util.HashMap;
 import java.util.Random;
-import java.awt.Point;
 import java.util.Comparator;
 
 public class Scrabble {
@@ -80,12 +79,12 @@ public class Scrabble {
         // https://stackoverflow.com/questions/2784514/sort-arraylist-of-custom-objects-by-property
         TreeMap<Point, Character> map = new TreeMap<Point, Character>(new Comparator<Point>() { // Sort By Columns
             @Override
-            public int compare(Point o1, Point o2) {
-                if ((rowOrCol && o1.x != o2.x) || (!rowOrCol && o1.y != o2.y)) { // Each x value is the column of the point
-                    return(rowOrCol ? o1.x - o2.x : o1.y - o2.y); // Sort by column/row placement first
+            public int compare(Point a, Point b) {
+                if ((rowOrCol && a.getRow() != b.getRow()) || (!rowOrCol && a.getCol() != b.getCol())) { // Each x value is the column of the point
+                    return(rowOrCol ? a.getRow() - b.getRow() : a.getCol() - b.getCol()); // Sort by column/row placement first
                 }
                 else { // Each y value is the row of the point
-                    return(rowOrCol ? o1.y - o2.y : o1.x - o2.x); // Sort by row/column placement second
+                    return(rowOrCol ? a.getCol() - b.getCol() : a.getRow() - b.getRow()); // Sort by row/column placement second
                 }
             }
         });
@@ -93,7 +92,7 @@ public class Scrabble {
         String current = ""; // String to store the current word, formed by row or column
         int position = -1; // Stores the position of the current word to mark when the loop shifts rows or columns
         for (Point p : map.keySet()) { // Loop through each character, forming each possible word in the list
-            int posUsed = rowOrCol ? p.x : p.y; // Use X if 'rowOrCol' is true, otherwise use Y
+            int posUsed = rowOrCol ? p.getRow() : p.getCol(); // Use X if 'rowOrCol' is true, otherwise use Y
             if (position == -1 || posUsed != position || map.get(p) == ' ') { // The point doesn't follow the previous one
                 if (isLegalWord(current)) { // Check to see if the word is valid
                     position = posUsed; // Set the current position
