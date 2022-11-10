@@ -7,12 +7,7 @@ public class PaddedPanel extends JPanel {
     private int padding = 0;
     private int layout = 0;
 
-    public PaddedPanel(int padding, int layout) {
-        this.layout = layout;
-        setLayout(new GridBagLayout());
-        GridBagLayout g = (GridBagLayout)(getLayout());
-    }
-
+    // Provides padding for a list of components
     public PaddedPanel(Component[] comps, int padding, int layout) {
         this.padding = padding;
         this.layout = layout;
@@ -22,6 +17,7 @@ public class PaddedPanel extends JPanel {
         }
     }
 
+    // Provides padding for a single component
     public PaddedPanel(Component comp, int padding, int layout) {
         this.padding = padding;
         this.layout = layout;
@@ -29,6 +25,7 @@ public class PaddedPanel extends JPanel {
         addPadding(comp);
     }
 
+    // Adds padding to a component contained within the panel
     public void addPadding(Component comp) {
         // Keeping Components Square: https://stackoverflow.com/questions/48623643/how-to-make-gridbaglayout-specific-size
         // Sizing Components With GridBagLayout: https://stackoverflow.com/questions/4842261/margin-padding-in-gridbaglayout-java
