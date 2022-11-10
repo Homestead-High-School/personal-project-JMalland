@@ -69,6 +69,10 @@ public class CurvedButton extends JButton {
         repaint();
     }
 
+    public String findText() {
+        return(text);
+    }
+
     public void setXOffset(double x) {
         xOffset = x;
         repaint();
