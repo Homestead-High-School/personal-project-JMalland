@@ -100,16 +100,19 @@ class Board extends JFrame {
         GameStarted = true; // Set GameStarted status to true
         System.out.println("Game Started: "+player_count+" Players"); // Display the beginning of the game
     }
-    
-    // Returns the JPanel for the Scrabble board
-    public JPanel getBoard() {
-        return((JPanel)(gamePanel.getComponent(0)));
-    }
 
+    // Should be remade
+    // Returns whether or not the game has been started
+    public boolean gameStarted() {
+        return(GameStarted);
+    }
+    
+    // Should be remade
     public CurvedButton getStart() {
         return(startButton); // Returns the Start Button
     }
 
+    // Should be remade
     public int getPlayers() {
         return(player_count); // Returns the number of players
     }
@@ -121,16 +124,6 @@ class Board extends JFrame {
             CurvedButton button = (CurvedButton)(hand.getComponent(i));
             button.setText(list[i]+"");
         }
-    }
-
-    // Returns the JPanel for the players hand
-    private JPanel getHand() {
-        return((JPanel)(gamePanel.getComponent(1)));
-    }
-
-    // Returns the a tile from the players hand at the given index
-    private Tile getTile(int i) {
-        return((Tile)(getHand().getComponent(i)));
     }
 
     // Highlights the selected tile within the players hand
@@ -193,11 +186,6 @@ class Board extends JFrame {
         return(map); // Return the newly created HashMap
     }
 
-    // Returns whether or not the game has been started
-    public boolean gameStarted() {
-        return(GameStarted);
-    }
- 
     // Creates the JPanel which holds each JButton that makes up the Scrabble board 
     private void createBoard() {
         gamePanel = new JPanel(); // Clears the gamePanel
@@ -234,11 +222,10 @@ class Board extends JFrame {
 
     // Creates the JPanel that features each player's hand of tiles
     private void createHand() {
-        // Still need to fix Font Sizing
         // FlowLayout Help: https://docs.oracle.com/javase/tutorial/uiswing/layout/flow.html
         JPanel hand = new JPanel(new FlowLayout(FlowLayout.CENTER, H_X_OFF, H_Y_OFF)); // FlowLayout allows spacing and centering, for a single row or column
         frame.dispatchEvent(new FocusEvent(frame, ("HAND").hashCode()));
-        for (int i=0; i<7; i++) {
+        for (int i=0; i<HAND_LENGTH; i++) {
             final int index = i;
             Tile tile = new Tile("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100); // Create the letter tile
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*1.5))); // Set the font of the tile
@@ -258,10 +245,7 @@ class Board extends JFrame {
             tile.setPreferredSize(new Dimension(H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH, H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH)); // Set the size relative to the window size
             hand.add(tile); // Add the tile to the FlowLayout Panel
         }
-        //frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT - (next.getComponent(0).getHeight() - next.getHeight()) + 2*H_Y_OFF)); // Recalculate the frame due to Hand sizing
-        //FRAME_HEIGHT = frame.getPreferredSize().height; // Recalculate the height of the frame based on Hand sizing
-        setDefaultSizes(hand, ORIGINAL_WIDTH, H_TILE_SIZE);
-        
+        setDefaultSizes(hand, ORIGINAL_WIDTH, H_TILE_SIZE); // Set the default sizes
         gamePanel.add(hand); // Create and add the hand to the application frame;
     }
 
@@ -300,6 +284,16 @@ class Board extends JFrame {
         });
 
         mainPanel.add(screen, BorderLayout.CENTER); // Create and add the Menu to the JPanel
+    }
+
+    // Returns the JPanel for the players hand
+    private JPanel getHand() {
+        return((JPanel)(gamePanel.getComponent(1)));
+    }
+
+    // Returns the a tile from the players hand at the given index
+    private Tile getTile(int i) {
+        return((Tile)(getHand().getComponent(i)));
     }
 
     // Sets the Preferred, Minimum, and Maximum size of a JComponent
