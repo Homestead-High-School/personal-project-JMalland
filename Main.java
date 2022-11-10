@@ -1,9 +1,6 @@
 import java.util.*;
 import java.io.File;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.event.*;
-import javax.swing.*;
 public class Main {
     public static void main(String[] args) {
         final TreeMap<Character, HashMap<String, String>> map = parseAndStore("Words.txt"); // Get the sorted TreeMap
