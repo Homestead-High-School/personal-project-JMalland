@@ -17,7 +17,7 @@ class Board extends JFrame {
     private CurvedButton startButton = new CurvedButton();
     private HashSet<CustomListener> listeners = new HashSet<CustomListener>();
     private HashSet<Tile> placedTiles = new HashSet<Tile>();
-    private final double MULT = 1;
+    private final double MULT = 0.5;
     private final int ROWS = Scrabble.getBoard().length;
     private final int COLS = Scrabble.getBoard()[0].length;
     private final int FONT_SIZE = (int)(26*MULT); // 26 Is actually double. Window starts out at half size
@@ -121,8 +121,9 @@ class Board extends JFrame {
     public void setHand(char[] list) {
         JPanel hand = (JPanel)(gamePanel.getComponent(1));
         for (int i=0; i<list.length; i++) {
-            CurvedButton button = (CurvedButton)(hand.getComponent(i));
+            Tile button = (Tile)(hand.getComponent(i));
             button.setText(list[i]+"");
+            button.setValue(Scrabble.getLetterValue(list[i]));
         }
     }
 
@@ -131,11 +132,10 @@ class Board extends JFrame {
         if (!(c instanceof Tile)) { // Checks to see if the tile is a valid selection
             return; // Return, if tile is not valid
         }
+        getTile(selected_tile).setBorder(Color.black, 2);
         Component[] list = getHand().getComponents(); // Stores the list of tiles in the players hand
-        c.setBorder(Color.orange, 6); // Set the selected border to orange
         for (int i=0; i<list.length; i++) {
             Tile t = (Tile) list[i];
-            t.setBorder(Color.black, 2); // Reset tile border to default
             if (list[i] == (Component) c) {
                 if (selected_tile == i || t.findText().equals("")) { // Checks if the selected tile was previously selected
                     selected_tile = -1; // Deselects the selected tile
@@ -150,20 +150,17 @@ class Board extends JFrame {
 
     // Places the letter from the selected tile within the players hand
     public void placeTile(Tile c) {
-        if (selected_tile < 0 || !(c instanceof Tile)) { // Check to see if the tile can be placed
+        if (selected_tile < 0 || !(c instanceof Tile) || c == getTile(selected_tile)) { // Check to see if the tile can be placed
             return; // Return, if no tile is selected
         }
         Tile select = getTile(selected_tile);
         c.setText(select.findText()); // Add the text to the inputted tile
         select.setText(""); // Clear the text from the selected tile
-        if (!c.findText().equals("")) { // Check if the tiles contain the right text
-            // COULD INSTEAD GREY OUT THE TILE
-            select.setPointingTo(c); // Set the hand tile pointing to the placed tile
-            c.setPointingTo(select); // Set the placed tile pointing to the hand tile
-            placedTiles.add(c); // Add the placed tile to the list of tiles
-            select.setBorder(Color.black, 2); // Reset selection border to default
-            selected_tile = -1; // Clear the tile selection
-        }
+        // COULD INSTEAD GREY OUT THE TILE
+        select.setPointingTo(c); // Set the hand tile pointing to the placed tile
+        c.setPointingTo(select); // Set the placed tile pointing to the hand tile
+        placedTiles.add(c); // Add the placed tile to the list of tiles
+        selectTile(select); // Clear the tile selection
     }
 
     // Recalls all tiles placed on the board, starting the play over
@@ -195,13 +192,13 @@ class Board extends JFrame {
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
                 final Tile temp; // I hate how ugly this line looks
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
-                    temp = new Tile((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(0x4274FF), tile%2 == 1 ? 25 : 100);
+                    temp = new Tile((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(0x4274FF), tile%2 == 1 ? 25 : 100, tile, 1);
                 }
                 else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'
-                    temp = new Tile((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(0xD7381C), tile%2 == 1 ? 25 : 100);
+                    temp = new Tile((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(0xD7381C), tile%2 == 1 ? 25 : 100, 1, tile);
                 }
                 else { // Blank Tile, represented by '0'
-                    temp = new Tile("", TILE_RADIUS, Color.white, 100);
+                    temp = new Tile("", TILE_RADIUS, Color.white, 100, 1, 1);
                 }
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
                 temp.setPoint(new Point(r, c)); // Sets the [row][col] Point the tile is placed at
@@ -225,7 +222,7 @@ class Board extends JFrame {
         frame.dispatchEvent(new FocusEvent(frame, ("HAND").hashCode()));
         for (int i=0; i<HAND_LENGTH; i++) {
             final int index = i;
-            Tile tile = new Tile("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100); // Create the letter tile
+            Tile tile = new Tile("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, 1, 1); // Create the letter tile
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*1.5))); // Set the font of the tile
             tile.setContentAreaFilled(false); // Set it so the default background isn't painted
             tile.addActionListener(new ActionListener() {
@@ -290,6 +287,9 @@ class Board extends JFrame {
 
     // Returns the a tile from the players hand at the given index
     private Tile getTile(int i) {
+        if (i < 0) {
+            return(new Tile());
+        }
         return((Tile)(getHand().getComponent(i)));
     }
 
