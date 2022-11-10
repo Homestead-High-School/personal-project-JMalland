@@ -154,10 +154,9 @@ class Board extends JFrame {
             return; // Return, if no tile is selected
         }
         Tile select = getTile(selected_tile);
-        String text = select.findText(); // Store the text to be placed
+        c.setText(select.findText()); // Add the text to the inputted tile
         select.setText(""); // Clear the text from the selected tile
-        c.setText(text); // Add the text to the inputted tile
-        if (select.findText().equals("")) { // Check if the selected tile contains no text
+        if (!c.findText().equals("")) { // Check if the tiles contain the right text
             // COULD INSTEAD GREY OUT THE TILE
             select.setPointingTo(c); // Set the hand tile pointing to the placed tile
             c.setPointingTo(select); // Set the placed tile pointing to the hand tile
