@@ -19,7 +19,7 @@ class Board extends JFrame {
     private CurvedButton startButton = new CurvedButton();
     private HashSet<CustomListener> listeners = new HashSet<CustomListener>();
     private HashSet<Tile> placedTiles = new HashSet<Tile>();
-    private final double MULT = 0.5;
+    private final double MULT = 1;
     private final int ROWS = Scrabble.getBoard().length;
     private final int COLS = Scrabble.getBoard()[0].length;
     private final int FONT_SIZE = (int)(26*MULT); // 26 Is actually double. Window starts out at half size
@@ -79,13 +79,13 @@ class Board extends JFrame {
                 }
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
-                if (gamePanel.getComponents().length > 1) {
-                    JPanel hand = (JPanel)(gamePanel.getComponent(1)); // Store the Hand panel to readjust component sizes
+                /*if (gamePanel.getComponents().length > 1) {
+                    PaddedPanel hand = (JPanel)(gamePanel.getComponent(1)); // Store the Hand panel to readjust component sizes
                     for (Component tile : hand.getComponents()) { // Loop through each tile and adjust size
                         tile.setPreferredSize(new Dimension(H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH, H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH)); // Set the size relative to the window size
                     }
                     hand.setPreferredSize(new Dimension(ORIGINAL_WIDTH, hand.getComponent(0).getHeight() + H_Y_OFF)); // Recalculate Hand dimensions based on window size
-                }
+                }*/
                 frame.pack(); // Pack once more, in case the Hand was adjusted
             }
         });
@@ -122,9 +122,9 @@ class Board extends JFrame {
 
     // Sets the letters on each tile within the players hand
     public void setHand(char[] list) {
-        JPanel hand = (JPanel)(gamePanel.getComponent(1));
+        PaddedPanel hand = getHand();
         for (int i=0; i<list.length; i++) {
-            Tile button = (Tile)(hand.getComponent(i));
+            Tile button = (Tile)(hand.getJComponent(i));
             button.setText(list[i]+"");
             button.setValue(Scrabble.getLetterValue(list[i]));
         }
@@ -188,8 +188,8 @@ class Board extends JFrame {
 
     // Creates the JPanel which holds each JButton that makes up the Scrabble board 
     private void createBoard() {
-        gamePanel = new JPanel(); // Clears the gamePanel
-        gamePanel.setLayout(new BoxLayout(gamePanel, BoxLayout.Y_AXIS)); // BoxLayout layers the Board and the Player's Hand from top to bottom
+        gamePanel = new JPanel(new GridBagLayout()); // Clears the gamePanel
+        //gamePanel.setLayout(new BoxLayout(gamePanel, BoxLayout.Y_AXIS)); // BoxLayout layers the Board and the Player's Hand from top to bottom
         JPanel board = new JPanel(new GridLayout(ROWS,COLS)); // Main Board panel
         for (int r=0; r<ROWS; r++) {
             for (int c=0; c<COLS; c++) {
@@ -216,17 +216,26 @@ class Board extends JFrame {
             }
         }
         setDefaultSizes(board, COLS*TILE_SIZE, ROWS*TILE_SIZE); // Sets all preferred sizes of the JPanel
+        GridBagConstraints g = new GridBagConstraints();
+        GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
+        g.weightx = 1;
+        g.weighty = 1;
+        g.gridx = 0;
+        g.gridy = 0;
+        g.fill = GridBagConstraints.BOTH;
+        l.setConstraints(board, g);
         gamePanel.add(board); // Create and add the board to the application frame
     }
 
     // Creates the JPanel that features each player's hand of tiles
     private void createHand() {
         // FlowLayout Help: https://docs.oracle.com/javase/tutorial/uiswing/layout/flow.html
-        JPanel hand = new JPanel(new FlowLayout(FlowLayout.CENTER, H_X_OFF, H_Y_OFF)); // FlowLayout allows spacing and centering, for a single row or column
+        CurvedButton[] list = new CurvedButton[HAND_LENGTH];
+        //PaddedPanel hand = new JPanel(new FlowLayout(FlowLayout.CENTER, H_X_OFF, H_Y_OFF)); // FlowLayout allows spacing and centering, for a single row or column
         frame.dispatchEvent(new FocusEvent(frame, ("HAND").hashCode()));
         for (int i=0; i<HAND_LENGTH; i++) {
             final int index = i;
-            Tile tile = new Tile("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, 1, 1); // Create the letter tile
+            final Tile tile = new Tile("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, 1, 1); // Create the letter tile
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*1.5))); // Set the font of the tile
             tile.setContentAreaFilled(false); // Set it so the default background isn't painted
             tile.addActionListener(new ActionListener() {
@@ -241,9 +250,19 @@ class Board extends JFrame {
                 }
             });
             tile.setPreferredSize(new Dimension(H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH, H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH)); // Set the size relative to the window size
-            hand.add(tile); // Add the tile to the FlowLayout Panel
+            //hand.add(tile); // Add the tile to the FlowLayout Panel
+            list[i] = tile;
         }
-        setDefaultSizes(hand, ORIGINAL_WIDTH, H_TILE_SIZE); // Set the default sizes
+        PaddedPanel hand = new PaddedPanel(list, H_X_OFF, 130, FRAME_WIDTH, PaddedPanel.X_AXIS);
+        //setDefaultSizes(hand, ORIGINAL_WIDTH, H_TILE_SIZE); // Set the default sizes
+        GridBagConstraints g = new GridBagConstraints();
+        GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
+        g.weightx = 1;
+        g.weighty = (double)(H_TILE_SIZE + H_Y_OFF) / FRAME_WIDTH;
+        g.gridx = 0;
+        g.gridy = 1;
+        g.fill = GridBagConstraints.BOTH;
+        l.setConstraints(hand, g);
         gamePanel.add(hand); // Create and add the hand to the application frame;
     }
 
@@ -268,8 +287,11 @@ class Board extends JFrame {
         selector.setMajorTickSpacing(1); // Sets the tick spacing to each number
         selector.setPaintTicks(true); // Paints the ticks on the slider
 
-        PaddedPanel start = new PaddedPanel(startButton, MENU_WIDTH/2, BoxLayout.X_AXIS); // Creates a panel with padding on the left and right
-        PaddedPanel select = new PaddedPanel(selector, MENU_WIDTH/3, BoxLayout.X_AXIS); // Creates a panel with padding on the left and right
+        PaddedPanel start = new PaddedPanel(startButton, MENU_WIDTH, FRAME_WIDTH, BoxLayout.X_AXIS); // Creates a panel with padding on the left and right
+        PaddedPanel select = new PaddedPanel(selector, MENU_WIDTH/2, FRAME_WIDTH, BoxLayout.X_AXIS); // Creates a panel with padding on the left and right
+
+        System.out.println("Start Padding: "+((double)(MENU_WIDTH) / FRAME_WIDTH));
+        System.out.println("Select Padding: "+(MENU_WIDTH / 2.0 / FRAME_WIDTH));
 
         final CurvedLabel counter = new CurvedLabel("Players:    2"); // Creates the Player Counter display
         counter.setFont(new Font("Serif", Font.PLAIN, 75)); // Sets the font of the Counter to size 75
@@ -298,8 +320,8 @@ class Board extends JFrame {
     }
 
     // Returns the JPanel for the players hand
-    private JPanel getHand() {
-        return((JPanel)(gamePanel.getComponent(1)));
+    private PaddedPanel getHand() {
+        return((PaddedPanel)(gamePanel.getComponent(1)));
     }
 
     // Returns the a tile from the players hand at the given index
@@ -307,7 +329,7 @@ class Board extends JFrame {
         if (i < 0) {
             return(new Tile());
         }
-        return((Tile)(getHand().getComponent(i)));
+        return((Tile)(getHand().getJComponent(i)));
     }
 
     // Sets the Preferred, Minimum, and Maximum size of a JComponent
