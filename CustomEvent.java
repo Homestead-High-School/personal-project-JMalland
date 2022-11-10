@@ -6,6 +6,10 @@ public class CustomEvent extends ActionEvent {
     private int c = 0;
     private int index = 0;
 
+    public CustomEvent(Component c, int id) {
+        super(c, id, "");
+    }
+    
     public CustomEvent(Component c, int id, int index) {
         super(c, id, "");
         this.index = index;
