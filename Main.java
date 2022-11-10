@@ -74,7 +74,15 @@ public class Main {
         b.addCustomListener(new CustomListener() {
             @Override
             public void actionPerformed(CustomEvent e) {
-                if (e.getID() == b.SELECTED_HAND) {
+                if (e.getID() == b.GAME_RUNNING) {
+                    System.out.println("Game Running.");
+                    b.startGame();
+                }
+                else if (e.getID() == b.DRAW_HAND) {
+                    System.out.println("Hand Drawn.");
+                    b.setHand(basic.drawTiles());
+                }
+                else if (e.getID() == b.SELECTED_HAND) {
                     System.out.println("Selected Tile.");
                     //b.selectTile(e.getSource(), e.getIndex());
                 }
@@ -82,17 +90,6 @@ public class Main {
                     System.out.println("Placed Tile.");
                     //b.placeTile(e.getSource(), e.getRow(), e.getCol());
                 }
-            }
-        });
-
-        CurvedButton start = b.getStart();
-        start.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("Game Running...");
-                b.startGame();
-                Scrabble game = new Scrabble(map);
-                b.setHand(game.drawTiles());
             }
         });
     }
