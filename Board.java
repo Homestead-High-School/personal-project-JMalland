@@ -202,10 +202,9 @@ class Board extends JFrame {
                     temp = new Tile((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(0xD7381C), tile%2 == 1 ? 25 : 100);
                 }
                 else { // Blank Tile, represented by '0'
-                    temp = new Tile("", TILE_RADIUS, Color.white);
+                    temp = new Tile("", TILE_RADIUS, Color.white, 100);
                 }
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
-                temp.setYOffset(1.0/3.0);
                 temp.setPoint(new Point(r, c)); // Sets the [row][col] Point the tile is placed at
                 temp.setContentAreaFilled(false); // Make it so it doesn't draw the default background
                 temp.addActionListener(new ActionListener() {
@@ -241,7 +240,6 @@ class Board extends JFrame {
                     }
                 }
             });
-            tile.setYOffset(1.0/3.0); // Reset the height offset of the text, for appearance purposes.
             tile.setPreferredSize(new Dimension(H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH, H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH)); // Set the size relative to the window size
             hand.add(tile); // Add the tile to the FlowLayout Panel
         }
@@ -254,7 +252,7 @@ class Board extends JFrame {
         mainPanel = new JPanel(new BorderLayout()); // Clears and sets the layout manager for the mainPanel
         Menu screen = new Menu(MENU_WIDTH, MENU_HEIGHT, Menu.CENTER, Menu.Y_AXIS); // Generate the Main Menu
 
-        startButton = new CurvedButton("Start", 15, Color.yellow); // Creates a default start button
+        startButton = new CurvedButton("Start", 15, Color.yellow, 100); // Creates a default start button
         startButton.setFont(new Font("Serif", Font.PLAIN, 75)); // Sets the font of the Start Button to size 75
         startButton.setEnabled(true);
 
