@@ -55,7 +55,7 @@ public class Scrabble {
         }
     }
 
-    public int getLetterValue(char c) {
+    public static int getLetterValue(char c) {
         return(c == 32 ? Scrabble.values[26] : Scrabble.values[c-65]);
     }
 
