@@ -152,6 +152,7 @@ class Board extends JFrame {
     }
 
     // Places the letter from the selected tile within the players hand
+    // May want to dispatch a CustomEvent containing the coords/letter placed to Main.java
     public void placeTile(Tile c) {
         if (selected_tile < 0 || !(c instanceof Tile) || c == getTile(selected_tile)) { // Check to see if the tile can be placed
             return; // Return, if no tile is selected
