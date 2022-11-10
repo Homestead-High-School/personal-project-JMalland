@@ -1,6 +1,7 @@
 import java.util.*;
 import java.io.File;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.*;
 import javax.swing.*;
 public class Main {
@@ -73,26 +74,19 @@ public class Main {
         
         final Board b = new Board();
 
-        final JPanel hand = b.getHandPanel();
-        hand.addMouseListener(new MouseAdapter() {
+        b.addCustomListener(new CustomListener() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getClickCount() == b.SELECTED_HAND) {
-                    System.out.println("Selected Tile: "+b.getSelectedTile());
+            public void actionPerformed(CustomEvent e) {
+                if (e.getID() == b.SELECTED_HAND) {
+                    System.out.println("Selected Tile.");
+                    //b.selectTile(e.getSource(), e.getIndex());
                 }
-                else if (e.getClickCount() == b.PLACED_LETTER) {
-                    System.out.println("Placed Tile!");
-                    CurvedButton temp = (CurvedButton) b.getSelectedTile();
-                    basic.placeLetter(temp.getText().charAt(0), e.getX(), e.getY());
-                    JFrame frame = (JFrame) e.getSource();
-                    JPanel game = (JPanel) frame.getComponent(0);
-                    JPanel board = (JPanel) game.getComponent(0);
-                    CurvedButton tile = (CurvedButton) board.getComponent((e.getX()+1)*(e.getY()+1) - 1);
-                    tile.setText(temp.getText());
+                else if (e.getID() == b.PLACED_LETTER) {
+                    System.out.println("Placed Tile.");
+                    //b.placeTile(e.getSource(), e.getRow(), e.getCol());
                 }
             }
         });
-
 
         CurvedButton start = b.getStart();
         start.addActionListener(new ActionListener() {
@@ -104,20 +98,6 @@ public class Main {
                 b.setHand(game.drawTiles());
             }
         });
-
-        final JButton[][] tiles = b.getTiles();
-        for (int r=0; r<tiles.length; r++) {
-            for (int c=0; c<tiles[r].length; c++) {
-                final int rIndex = r;
-                final int cIndex = c;
-                tiles[r][c].addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        System.out.println("Tile clicked @ ("+rIndex+", "+cIndex+").");
-                    }
-                });
-            }
-        }
     }
 
     public static TreeMap<Character, HashMap<String, String>> parseAndStore(String file) {
