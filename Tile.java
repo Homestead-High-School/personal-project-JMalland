@@ -2,17 +2,32 @@ import java.awt.*;
 
 public class Tile extends CurvedButton {
     Tile pointsTo = null;
+    int letterBonus = 1;
+    int wordBonus = 1;
+    int tileValue = 0;
     String originalText = "";
     Point point = null;
+
+    public Tile() {
+        super();
+    }
     
-    public Tile(String s, int r) {
+    public Tile(String s, int r, int l, int w) {
         super(s, r);
         originalText = s;
+        letterBonus = l;
+        wordBonus = w;
     }
 
-    public Tile(String s, int r, Color c, int o) {
+    public Tile(String s, int r, Color c, int o, int l, int w) {
         super(s, r, c, o);
         originalText = s;
+        letterBonus = l;
+        wordBonus = w;
+    }
+
+    public void setValue(int v) {
+        tileValue = v;
     }
 
     public void setPoint(Point p) {
@@ -21,6 +36,14 @@ public class Tile extends CurvedButton {
 
     public Point getPoint() {
         return(point);
+    }
+
+    public int getWordBonus() {
+        return(wordBonus);    
+    }
+
+    public int getLetterBonus() {
+        return(letterBonus);
     }
 
     // Sets the text of the Tile while saving the original text
