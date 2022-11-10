@@ -26,7 +26,7 @@ public class Main {
                 E                 O
                 L                 U
             H A P P Y       P R E P
-        */
+        */ 
         for (int r=0; r<12; r++) {
             for (int c=0; c<12; c++) {
                 if (c < one.length() && r == 11) {
