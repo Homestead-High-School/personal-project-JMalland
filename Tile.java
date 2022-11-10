@@ -10,11 +10,6 @@ public class Tile extends CurvedButton {
         originalText = s;
     }
 
-    public Tile(String s, int r, Color c) {
-        super(s, r, c);
-        originalText = s;
-    }
-
     public Tile(String s, int r, Color c, int o) {
         super(s, r, c, o);
         originalText = s;

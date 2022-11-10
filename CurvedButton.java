@@ -5,33 +5,28 @@ import javax.swing.*;
 // Need to be able to paint a different opacity when button is pressed.
 
 public class CurvedButton extends JButton {
-    private Dimension max = new Dimension(0, 0);
     private static JFrame frame;
     private String text = "";
     private int radius = 1;
     private int opacity = 100;
     private int borderSize = 2;
     private double xOffset = 0.5;
-    private double yOffset = 0.25;
+    private double yOffset = 1.0/3.0;
     private Color color = Color.white;
     private Color borderColor = Color.black;
     private Font font = new Font("Arial", Font.PLAIN, 14);
 
     public CurvedButton() {
-        super();
+        
     }
 
+    // Text, Radius
     public CurvedButton(String s, int r) {
         text = s;
         radius = r;
     }
 
-    public CurvedButton(String s, int r, Color c) {
-        text = s;
-        radius = r;
-        color = c;
-    }
-
+    // Text, Radius, Color, Opacity
     public CurvedButton(String s, int r, Color c, int o) {
         text = s;
         radius = r;
@@ -39,48 +34,40 @@ public class CurvedButton extends JButton {
         opacity = o;
     }
 
+    // Sets the JFrame the button models it's size after
+    // Probably not needed
     public static void setFrame(JFrame f) {
         frame = f;
     }
 
+    // Sets the border color and size
     public void setBorder(Color c, int s) {
         borderColor = c;
         borderSize = s;
         repaint();
     }
 
-    public void setOpacity(int o) {
-        opacity = o;
-        repaint();
-    }
-
+    // Sets the color of the button
     public void setColor(Color c) {
         color = c;
         repaint();
     }
 
+    // Sets the font of the button
     public void setFont(Font f) {
         font = f;
         repaint();
     }
 
+    // Sets the text of the button
     public void setText(String s) {
         text = s;
         repaint();
     }
 
+    // Returns only the text contained within this class
     public String findText() {
         return(text);
-    }
-
-    public void setXOffset(double x) {
-        xOffset = x;
-        repaint();
-    }
-
-    public void setYOffset(double y) {
-        yOffset = y;
-        repaint();
     }
     
     @Override
