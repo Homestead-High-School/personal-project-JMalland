@@ -119,7 +119,6 @@ class Board extends JFrame {
 
     // Sets the letters on each tile within the players hand
     public void setHand(char[] list) {
-        GridPanel hand = getHand();
         for (int i=0; i<list.length; i++) {
             Tile button = getTile(i);
             button.setText(list[i]+"");
@@ -279,7 +278,6 @@ class Board extends JFrame {
         
         // Would add the Recall and Shuffle buttons up here, if adding directly to JPanel.
         for (int i=1; i<HAND_LENGTH*2 + 1; i++) {
-            final int index = i;
             final Tile tile = new Tile("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, 1, 1); // Create the letter tile
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*1.5))); // Set the font of the tile
             tile.setContentAreaFilled(false); // Set it so the default background isn't painted

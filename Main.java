@@ -64,10 +64,10 @@ public class Main {
         boolean temp = basic.validWordPlacement();
         System.out.println("Words Are Valid: "+temp);
         
-        System.out.println("A: "+basic.getLetterValue('A')+" "+basic.getLetterCount('A'));
-        System.out.println("B: "+basic.getLetterValue('B')+" "+basic.getLetterCount('B'));
-        System.out.println("C: "+basic.getLetterValue('C')+" "+basic.getLetterCount('C'));
-        System.out.println("_: "+basic.getLetterValue(' ')+" "+basic.getLetterCount(' '));
+        System.out.println("A: "+Scrabble.getLetterValue('A')+" "+basic.getLetterCount('A'));
+        System.out.println("B: "+Scrabble.getLetterValue('B')+" "+basic.getLetterCount('B'));
+        System.out.println("C: "+Scrabble.getLetterValue('C')+" "+basic.getLetterCount('C'));
+        System.out.println("_: "+Scrabble.getLetterValue(' ')+" "+basic.getLetterCount(' '));
         
         final Board b = new Board();
 
