@@ -225,6 +225,9 @@ class Board extends JFrame {
         JPanel b = new JPanel(); // Empty JPanel to act as bottom spacing.
         l.setConstraints(b, createConstraints(1, H_Y_OFF/1.0/FRAME_WIDTH, 0, 3, GridBagConstraints.VERTICAL));
         CurvedButton[] list = new CurvedButton[HAND_LENGTH];
+        JPanel t = new JPanel(new GridBagLayout());
+        GridBagLayout z = (GridBagLayout) t.getLayout();
+        // Would add the Recall and Shuffle buttons up here, if adding directly to JPanel.
         for (int i=0; i<HAND_LENGTH; i++) {
             final int index = i;
             final Tile tile = new Tile("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, 1, 1); // Create the letter tile
@@ -242,7 +245,13 @@ class Board extends JFrame {
                 }
             });
             tile.setSize(H_TILE_SIZE, H_TILE_SIZE);
+            z.setConstraints(tile, createConstraints(1, 1, 0, i, /* Need to insert gridwidth & gridheight */GridBagConstraints.BOTH));
+            t.add(tile);
+            JLabel temp = new JLabel();
+            // z.setConstraints(temp, createConstraints(H_X_OFF/1.0/FRAME_WIDTH, H_X_OFF/1.0/H_TILE_SIZE, 0, i, /* This won't work. Extend i. */GridBagConstraints.BOTH));
+            // t.add(temp); // <-- Not goint to work right /\
             list[i] = tile;
+            // Should directly add tiles to the GridBagLayout. PaddedPanel not needed necessarily
         }
         PaddedPanel hand = new PaddedPanel(list, H_X_OFF, (FRAME_WIDTH - (7*(H_TILE_SIZE + H_X_OFF)/2.0)), FRAME_WIDTH, FRAME_HEIGHT, PaddedPanel.X_AXIS);
         GridBagConstraints g = createConstraints(1, 0.125, 0, 2, GridBagConstraints.BOTH); // 0.147727 or 0.116666 seem to be the right ratios
