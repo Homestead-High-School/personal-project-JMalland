@@ -5,6 +5,8 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.util.Random;
+
 class Board extends JFrame {
     /*
     *   Should make either a sidemenu, or selections from the player's hand, where, when selected, it highlights the border in yellow or something.
@@ -12,6 +14,7 @@ class Board extends JFrame {
     public final int SELECTED_HAND = ("HAND").hashCode();
     public final int PLACED_LETTER = ("TILE").hashCode();
     public final int RECALLED_TILES = ("RECALL").hashCode();
+    public final int SHUFFLED_TILES = ("SHUFFLE").hashCode();
     public final int DRAW_HAND = ("DRAW").hashCode();
     public final int GAME_RUNNING = ("ON").hashCode();
     private final JFrame frame;
@@ -118,7 +121,7 @@ class Board extends JFrame {
     public void setHand(char[] list) {
         GridPanel hand = getHand();
         for (int i=0; i<list.length; i++) {
-            Tile button = (Tile)(hand.getComponent(i));
+            Tile button = getTile(i);
             button.setText(list[i]+"");
             button.setValue(Scrabble.getLetterValue(list[i]));
         }
@@ -130,7 +133,7 @@ class Board extends JFrame {
             return; // Return, if tile is not valid
         }
         getTile(selected_tile).setBorder(Color.black, 2);
-        Component[] list = getHand().getComponents(); // Stores the list of tiles in the players hand
+        Component[] list = getHand().getTileComponents(); // Stores the list of tiles in the players hand
         for (int i=0; i<list.length; i++) {
             Tile t = (Tile) list[i];
             if (list[i] == (Component) c) {
@@ -152,8 +155,8 @@ class Board extends JFrame {
             return; // Return, if no tile is selected
         }
         Tile select = getTile(selected_tile);
-        c.setText(select.findText()); // Add the text to the inputted tile
-        select.setText(""); // Clear the text from the selected tile
+        c.swapText(select.findText()); // Add the text to the inputted tile
+        select.swapText(""); // Clear the text from the selected tile
         // COULD INSTEAD GREY OUT THE TILE
         select.setPointingTo(c); // Set the hand tile pointing to the placed tile
         c.setPointingTo(select); // Set the placed tile pointing to the hand tile
@@ -166,11 +169,29 @@ class Board extends JFrame {
     public void recallTiles() {
         for (Tile p : placedTiles) { // Loop through each Tile placed on the board
             Tile t = p.getPointingTo(); // Store the hand tile
-            p.setText(p.getOriginalText()); // Swap the placed tile text with its original
-            t.setText(t.getOriginalText()); // Swap the hand tile text with its original
+            p.setText(p.getOriginal()); // Swap the placed tile text with its original
+            t.setText(t.getOriginal()); // Swap the hand tile text with its original
         }
         placedTiles.clear(); // Wipe the set of all placed tiles, since they were recalled
         dispatchEvent(new CustomEvent(frame, RECALLED_TILES));
+    }
+
+    public void shuffleTiles() {
+        // Shuffling: https://stackoverflow.com/questions/1519736/random-shuffling-of-an-array
+        Component[] list = getHand().getTileComponents();
+        Random rand = new Random();
+        for (int i=0; i<list.length; i++) {
+            Tile a = (Tile) list[i];
+            Tile b = (Tile) list[rand.nextInt(list.length-i) + i];
+            String temp = a.findText();
+            Tile point = a.getPointingTo();
+            String originA = a.getOriginal();
+            String originB = b.getOriginal();
+            a.swapText(b.findText());
+            b.swapText(temp);
+            a.setOriginal(originB);
+            b.setOriginal(originA);
+        }
     }
 
     // Creates a HashMap of the Point/Character locations of placed tiles on the board
@@ -235,6 +256,20 @@ class Board extends JFrame {
         CurvedButton shuffle = new CurvedButton("Shuffle", TILE_RADIUS, new Color(0xFC6603), 100);
         shuffle.setSize(H_TILE_SIZE/2, H_TILE_SIZE/2);
         shuffle.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
+
+        recall.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispatchEvent(new CustomEvent(recall, RECALLED_TILES)); // Dispatch Recall
+                recallTiles();
+            }
+        });
+        shuffle.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispatchEvent(new CustomEvent(shuffle, SHUFFLED_TILES)); // Dispatch Shuffle
+                shuffleTiles();
+            }
+        });
         
         temp.add(recall, 0, 1, 1, 1, GridBagConstraints.BOTH); // Add Recall Button
         temp.add(shuffle, 1, 1, 1, 1, GridBagConstraints.BOTH); // Add Shuffle Button
@@ -249,7 +284,7 @@ class Board extends JFrame {
         temp.add(right, 0, HAND_LENGTH*2, 1, 2, GridBagConstraints.BOTH); // Add Right Padding
         
         // Would add the Recall and Shuffle buttons up here, if adding directly to JPanel.
-        for (int i=1; i<HAND_LENGTH*2; i++) {
+        for (int i=0; i<HAND_LENGTH*2; i++) {
             final int index = i;
             final Tile tile = new Tile("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, 1, 1); // Create the letter tile
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*1.5))); // Set the font of the tile
@@ -257,12 +292,7 @@ class Board extends JFrame {
             tile.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (index == 6) {
-                        recallTiles();
-                    }
-                    else {
-                        selectTile(tile);
-                    }
+                    selectTile(tile);
                 }
             });
             if (i%2 == 0) {
@@ -357,10 +387,10 @@ class Board extends JFrame {
 
     // Returns the a tile from the players hand at the given index
     private Tile getTile(int i) {
-        if (i+2 < 0) {
+        if (i < 0) {
             return(new Tile());
         }
-        return((Tile)(getHand().getComponent(i+2)));
+        return((Tile)(getHand().getTileComponents()[i]));
     }
 
     // Sets the Preferred, Minimum, and Maximum size of a JComponent
