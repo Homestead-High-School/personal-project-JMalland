@@ -34,6 +34,10 @@ public class Tile extends CurvedButton {
         point = p;
     }
 
+    public void setOriginal(String s) {
+        originalText = s;
+    }
+
     public Point getPoint() {
         return(point);
     }
@@ -47,14 +51,13 @@ public class Tile extends CurvedButton {
     }
 
     // Sets the text of the Tile while saving the original text
-    @Override
-    public void setText(String s) {
+    public void swapText(String s) {
         originalText = super.findText(); // Store the original text from the parent class
         super.setText(s); // Set the text from the parent class
     }
 
     // Returns the original text of the Tile
-    public String getOriginalText() {
+    public String getOriginal() {
         return(originalText);
     }
     
