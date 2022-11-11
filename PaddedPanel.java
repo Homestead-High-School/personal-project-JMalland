@@ -86,14 +86,15 @@ public class PaddedPanel extends JPanel {
         c.gridy = row + h_offset;
         c.gridwidth = w;
         c.gridheight = h;
+        c.fill = GridBagConstraints.BOTH;
         if (w/2 > 0) {
             w_offset = w/2;
         }
         if (h/2 > 0) {
             System.out.println("Increased H: "+h/2);
             h_offset = h/2;
+            c.fill = GridBagConstraints.NONE;
         }
-        c.fill = GridBagConstraints.BOTH;
         GridBagLayout g = (GridBagLayout) getLayout();
         g.setConstraints(comp, c);
         components.add(comp);
