@@ -216,7 +216,6 @@ class Board extends JFrame {
                 }
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
                 temp.setPoint(new Point(r, c)); // Sets the [row][col] Point the tile is placed at
-                temp.setContentAreaFilled(false); // Make it so it doesn't draw the default background
                 temp.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         placeTile(temp);
@@ -244,43 +243,42 @@ class Board extends JFrame {
         
         // JButtons for Shuffle/Recall
         final CurvedButton recall = new CurvedButton("Recall", TILE_RADIUS, new Color(0x036FFC), 100);
-        recall.setSize(H_TILE_SIZE/2, H_TILE_SIZE/2);
-        recall.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
+        recall.setSize(H_TILE_SIZE/2, H_TILE_SIZE/2); // Sets the size of the Recall button
+        recall.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE)); // Sets the font size
         final CurvedButton shuffle = new CurvedButton("Shuffle", TILE_RADIUS, new Color(0xFC6603), 100);
-        shuffle.setSize(H_TILE_SIZE/2, H_TILE_SIZE/2);
-        shuffle.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
+        shuffle.setSize(H_TILE_SIZE/2, H_TILE_SIZE/2); // Sets the size of the Shuffle button
+        shuffle.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE)); // Sets the font size
 
         recall.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 dispatchEvent(new CustomEvent(recall, RECALLED_TILES)); // Dispatch Recall
-                recallTiles();
+                recallTiles(); // Recalls all placed tiles
             }
         });
         shuffle.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispatchEvent(new CustomEvent(shuffle, SHUFFLED_TILES)); // Dispatch Shuffle
-                shuffleTiles();
+                shuffleTiles(); // Shuffles all tiles in the hand
             }
         });
         
-        temp.add(recall, 0, 1, 1, 1, GridBagConstraints.BOTH); // Add Recall Button
-        temp.add(shuffle, 1, 1, 1, 1, GridBagConstraints.BOTH); // Add Shuffle Button
+        temp.add(recall, 0, 1, 1, 1, GridBagConstraints.BOTH); // Add Recall Button at [0][1]
+        temp.add(shuffle, 1, 1, 1, 1, GridBagConstraints.BOTH); // Add Shuffle Button at [1][1]
         
         // JPanels for side padding
         JPanel left = new JPanel(); // Left padding
-        left.setSize((ORIGINAL_WIDTH - (7*(H_TILE_SIZE + H_X_OFF) + H_TILE_SIZE/2))/2, H_TILE_SIZE);
+        left.setSize((ORIGINAL_WIDTH - (7*(H_TILE_SIZE + H_X_OFF) + H_TILE_SIZE/2))/2, H_TILE_SIZE); // Set the size of the left padding
         JPanel right = new JPanel(); // Right padding
-        right.setSize(left.getSize());
+        right.setSize(left.getSize()); // Set the size of the right padding
 
-        temp.add(left, 0, 0, 1, 2, GridBagConstraints.BOTH); // Add Left Padding
-        temp.add(right, 0, HAND_LENGTH*2 + 1, 1, 2, GridBagConstraints.BOTH); // Add Right Padding
+        temp.add(left, 0, 0, 1, 2, GridBagConstraints.BOTH); // Add Left Padding at [0][0]
+        temp.add(right, 0, (HAND_LENGTH+1)*2, 1, 2, GridBagConstraints.BOTH); // Add Right Padding at [0][-1]
         
         // Would add the Recall and Shuffle buttons up here, if adding directly to JPanel.
-        for (int i=1; i<HAND_LENGTH*2 + 1; i++) {
+        for (int i=0; i<HAND_LENGTH*2; i++) {
             final Tile tile = new Tile("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, 1, 1); // Create the letter tile
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*1.5))); // Set the font of the tile
-            tile.setContentAreaFilled(false); // Set it so the default background isn't painted
             tile.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -289,11 +287,12 @@ class Board extends JFrame {
             });
             if (i%2 == 1) {
                 tile.setSize(H_TILE_SIZE, H_TILE_SIZE); // Gridwidth = 1, gridheight = 2;
-                temp.add(tile, 0, i+1, 1, 2, GridBagConstraints.BOTH);
+                temp.add(tile, 0, i+2, 1, 2, GridBagConstraints.BOTH);
             }
             else {
                 JLabel x = new JLabel();
-                temp.add(x, 0, i+1, 1, 2, GridBagConstraints.BOTH);
+                x.setSize(H_X_OFF, H_TILE_SIZE);
+                temp.add(x, 0, i+2, 1, 2, GridBagConstraints.BOTH);
             }
             // Should directly add tiles to the GridBagLayout. PaddedPanel not needed necessarily
         }
