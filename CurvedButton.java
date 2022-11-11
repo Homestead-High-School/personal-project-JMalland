@@ -17,13 +17,14 @@ public class CurvedButton extends JButton {
     private Font font = new Font("Arial", Font.PLAIN, 14);
 
     public CurvedButton() {
-        
+
     }
 
     // Text, Radius
     public CurvedButton(String s, int r) {
         text = s;
         radius = r;
+        setContentAreaFilled(false);
     }
 
     // Text, Radius, Color, Opacity
@@ -32,6 +33,7 @@ public class CurvedButton extends JButton {
         radius = r;
         color = c;
         opacity = o;
+        setContentAreaFilled(false);
     }
 
     // Sets the JFrame the button models it's size after

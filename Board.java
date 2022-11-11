@@ -239,7 +239,7 @@ class Board extends JFrame {
         JPanel a = new JPanel(); // Empty JPanel to act as top spacing
         l.setConstraints(a, createConstraints(1, H_Y_OFF/1.0/FRAME_HEIGHT, 0, 1, 1, 1, GridBagConstraints.VERTICAL));
         JPanel b = new JPanel(); // Empty JPanel to act as bottom spacing.
-        l.setConstraints(b, createConstraints(1, H_Y_OFF/1.0/FRAME_WIDTH, 0, 3, 1, 1, GridBagConstraints.VERTICAL));
+        l.setConstraints(b, createConstraints(1, H_Y_OFF/1.0/FRAME_HEIGHT, 0, 3, 1, 1, GridBagConstraints.VERTICAL));
         
         // JButtons for Shuffle/Recall
         final CurvedButton recall = new CurvedButton("Recall", TILE_RADIUS, new Color(0x036FFC), 100);
