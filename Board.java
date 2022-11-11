@@ -11,6 +11,7 @@ class Board extends JFrame {
     */
     public final int SELECTED_HAND = ("HAND").hashCode();
     public final int PLACED_LETTER = ("TILE").hashCode();
+    public final int RECALLED_TILES = ("RECALL").hashCode();
     public final int DRAW_HAND = ("DRAW").hashCode();
     public final int GAME_RUNNING = ("ON").hashCode();
     private final JFrame frame;
@@ -79,13 +80,6 @@ class Board extends JFrame {
                 }
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
-                /*if (gamePanel.getComponents().length > 1) {
-                    PaddedPanel hand = (JPanel)(gamePanel.getComponent(1)); // Store the Hand panel to readjust component sizes
-                    for (Component tile : hand.getComponents()) { // Loop through each tile and adjust size
-                        tile.setPreferredSize(new Dimension(H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH, H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH)); // Set the size relative to the window size
-                    }
-                    hand.setPreferredSize(new Dimension(ORIGINAL_WIDTH, hand.getComponent(0).getHeight() + H_Y_OFF)); // Recalculate Hand dimensions based on window size
-                }*/
                 frame.pack(); // Pack once more, in case the Hand was adjusted
             }
         });
@@ -136,7 +130,7 @@ class Board extends JFrame {
             return; // Return, if tile is not valid
         }
         getTile(selected_tile).setBorder(Color.black, 2);
-        Component[] list = getHand().getComponents(); // Stores the list of tiles in the players hand
+        Component[] list = getHand().getJComponents(); // Stores the list of tiles in the players hand
         for (int i=0; i<list.length; i++) {
             Tile t = (Tile) list[i];
             if (list[i] == (Component) c) {
@@ -165,6 +159,7 @@ class Board extends JFrame {
         c.setPointingTo(select); // Set the placed tile pointing to the hand tile
         placedTiles.add(c); // Add the placed tile to the list of tiles
         selectTile(select); // Clear the tile selection
+        dispatchEvent(new CustomEvent(c, PLACED_LETTER));
     }
 
     // Recalls all tiles placed on the board, starting the play over
@@ -175,6 +170,7 @@ class Board extends JFrame {
             t.setText(t.getOriginalText()); // Swap the hand tile text with its original
         }
         placedTiles.clear(); // Wipe the set of all placed tiles, since they were recalled
+        dispatchEvent(new CustomEvent(frame, RECALLED_TILES));
     }
 
     // Creates a HashMap of the Point/Character locations of placed tiles on the board
@@ -215,24 +211,20 @@ class Board extends JFrame {
                 board.add(temp); // Add tile to the grid
             }
         }
-        setDefaultSizes(board, COLS*TILE_SIZE, ROWS*TILE_SIZE); // Sets all preferred sizes of the JPanel
-        GridBagConstraints g = new GridBagConstraints();
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
-        g.weightx = 1;
-        g.weighty = 1;
-        g.gridx = 0;
-        g.gridy = 0;
-        g.fill = GridBagConstraints.BOTH;
-        l.setConstraints(board, g);
+        GridBagConstraints g = createConstraints(1, 1, 0, 0, GridBagConstraints.BOTH);
+        l.setConstraints(board, g); // Set the constraints on the board
         gamePanel.add(board); // Create and add the board to the application frame
     }
 
     // Creates the JPanel that features each player's hand of tiles
     private void createHand() {
-        // FlowLayout Help: https://docs.oracle.com/javase/tutorial/uiswing/layout/flow.html
+        GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
+        JPanel a = new JPanel(); // Empty JPanel to act as top spacing
+        l.setConstraints(a, createConstraints(1, H_Y_OFF/1.0/FRAME_HEIGHT, 0, 1, GridBagConstraints.VERTICAL));
+        JPanel b = new JPanel(); // Empty JPanel to act as bottom spacing.
+        l.setConstraints(b, createConstraints(1, H_Y_OFF/1.0/FRAME_WIDTH, 0, 3, GridBagConstraints.VERTICAL));
         CurvedButton[] list = new CurvedButton[HAND_LENGTH];
-        //PaddedPanel hand = new JPanel(new FlowLayout(FlowLayout.CENTER, H_X_OFF, H_Y_OFF)); // FlowLayout allows spacing and centering, for a single row or column
-        frame.dispatchEvent(new FocusEvent(frame, ("HAND").hashCode()));
         for (int i=0; i<HAND_LENGTH; i++) {
             final int index = i;
             final Tile tile = new Tile("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, 1, 1); // Create the letter tile
@@ -249,21 +241,37 @@ class Board extends JFrame {
                     }
                 }
             });
-            tile.setPreferredSize(new Dimension(H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH, H_TILE_SIZE * FRAME_WIDTH/ORIGINAL_WIDTH)); // Set the size relative to the window size
-            //hand.add(tile); // Add the tile to the FlowLayout Panel
+            tile.setSize(H_TILE_SIZE, H_TILE_SIZE);
             list[i] = tile;
         }
-        PaddedPanel hand = new PaddedPanel(list, H_X_OFF, 130, FRAME_WIDTH, PaddedPanel.X_AXIS);
-        //setDefaultSizes(hand, ORIGINAL_WIDTH, H_TILE_SIZE); // Set the default sizes
-        GridBagConstraints g = new GridBagConstraints();
-        GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
-        g.weightx = 1;
-        g.weighty = (double)(H_TILE_SIZE + H_Y_OFF) / FRAME_WIDTH;
-        g.gridx = 0;
-        g.gridy = 1;
-        g.fill = GridBagConstraints.BOTH;
-        l.setConstraints(hand, g);
+        PaddedPanel hand = new PaddedPanel(list, H_X_OFF, (FRAME_WIDTH - (7*(H_TILE_SIZE + H_X_OFF)/2.0)), FRAME_WIDTH, FRAME_HEIGHT, PaddedPanel.X_AXIS);
+        GridBagConstraints g = createConstraints(1, 0.125, 0, 2, GridBagConstraints.BOTH); // 0.147727 or 0.116666 seem to be the right ratios
+        CurvedButton recall = new CurvedButton("Recall", TILE_RADIUS, new Color(0x036FFC), 100);
+        recall.setSize(TILE_SIZE, TILE_SIZE);
+        recall.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
+        CurvedButton shuffle = new CurvedButton("Shuffle", TILE_RADIUS, new Color(0xFC6603), 100);
+        shuffle.setSize(TILE_SIZE, TILE_SIZE);
+        shuffle.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
+        //hand.insertComponent(recall, 0, 0, 1, 1);
+        //hand.insertComponent(shuffle, 0, 0, 1, 3);
+        hand.insertComponent(createHandOptions(), 0, 0, 1, 3);
+        l.setConstraints(hand, g); // Set the constraints on the hand
+        gamePanel.add(a); // Add the top layer
         gamePanel.add(hand); // Create and add the hand to the application frame;
+        gamePanel.add(b); // Add the bottom layer
+    }
+
+    public PaddedPanel createHandOptions() {
+        GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
+        CurvedButton recall = new CurvedButton("Recall", TILE_RADIUS, new Color(0x036FFC), 100);
+        recall.setSize(TILE_SIZE, TILE_SIZE);
+        recall.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
+        CurvedButton shuffle = new CurvedButton("Shuffle", TILE_RADIUS, new Color(0xFC6603), 100);
+        shuffle.setSize(TILE_SIZE, TILE_SIZE);
+        shuffle.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
+        PaddedPanel options = new PaddedPanel(new Component[] {recall, new JPanel(), shuffle}, H_Y_OFF, H_Y_OFF*1.5, TILE_SIZE, TILE_SIZE*2 + H_Y_OFF + H_TILE_SIZE, PaddedPanel.Y_AXIS);
+        //l.setConstraints(options, createConstraints(1, 1, 0, 2, GridBagConstraints.BOTH));
+        return(options);
     }
 
     // Creates the JPanel that contains the components which make up the main menu
@@ -274,6 +282,7 @@ class Board extends JFrame {
         startButton = new CurvedButton("Start", 15, Color.yellow, 100); // Creates a default start button
         startButton.setFont(new Font("Serif", Font.PLAIN, 75)); // Sets the font of the Start Button to size 75
         startButton.setEnabled(true);
+        startButton.setSize(MENU_WIDTH, MENU_HEIGHT);
 
         startButton.addActionListener(new ActionListener() {
             @Override
@@ -286,9 +295,10 @@ class Board extends JFrame {
         selector.setValue(2); // Sets the default player count to 2
         selector.setMajorTickSpacing(1); // Sets the tick spacing to each number
         selector.setPaintTicks(true); // Paints the ticks on the slider
+        selector.setSize(2*MENU_WIDTH/3, MENU_HEIGHT);
 
-        PaddedPanel start = new PaddedPanel(startButton, MENU_WIDTH, FRAME_WIDTH, BoxLayout.X_AXIS); // Creates a panel with padding on the left and right
-        PaddedPanel select = new PaddedPanel(selector, MENU_WIDTH/2, FRAME_WIDTH, BoxLayout.X_AXIS); // Creates a panel with padding on the left and right
+        PaddedPanel start = new PaddedPanel(startButton, MENU_WIDTH, FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.X_AXIS); // Creates a panel with padding on the left and right
+        PaddedPanel select = new PaddedPanel(selector, MENU_WIDTH/2, FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.X_AXIS); // Creates a panel with padding on the left and right
 
         System.out.println("Start Padding: "+((double)(MENU_WIDTH) / FRAME_WIDTH));
         System.out.println("Select Padding: "+(MENU_WIDTH / 2.0 / FRAME_WIDTH));
@@ -313,6 +323,16 @@ class Board extends JFrame {
         mainPanel.add(screen, BorderLayout.CENTER); // Create and add the Menu to the JPanel
     }
 
+    private GridBagConstraints createConstraints(double xLbs, double yLbs, int x, int y, int fill) {
+        GridBagConstraints g = new GridBagConstraints();
+        g.weightx = xLbs;
+        g.weighty = yLbs;
+        g.gridx = x;
+        g.gridy = y;
+        g.fill = fill;
+        return(g);
+    }
+
     private void dispatchEvent(CustomEvent e) {
         for (CustomListener c : listeners) {
             c.actionPerformed(e);
@@ -321,7 +341,7 @@ class Board extends JFrame {
 
     // Returns the JPanel for the players hand
     private PaddedPanel getHand() {
-        return((PaddedPanel)(gamePanel.getComponent(1)));
+        return((PaddedPanel)(gamePanel.getComponent(2)));
     }
 
     // Returns the a tile from the players hand at the given index

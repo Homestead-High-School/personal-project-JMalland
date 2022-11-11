@@ -87,8 +87,12 @@ public class Main {
                     //b.selectTile(e.getSource(), e.getIndex());
                 }
                 else if (e.getID() == b.PLACED_LETTER) {
-                    System.out.println("Placed Tile.");
+                    Tile t = (Tile) e.getSource();
+                    System.out.println("Placed Tile @ ["+t.getPoint().r+"]["+t.getPoint().c+"]. Contains Letter: "+t.findText()+".");
                     //b.placeTile(e.getSource(), e.getRow(), e.getCol());
+                }
+                else if (e.getID() == b.RECALLED_TILES) {
+                    System.out.println("Recalled Placed Tiles.");
                 }
             }
         });
