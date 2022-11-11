@@ -158,8 +158,7 @@ class Board extends JFrame {
         c.swapText(select.findText()); // Add the text to the inputted tile
         select.swapText(""); // Clear the text from the selected tile
         // COULD INSTEAD GREY OUT THE TILE
-        select.setPointingTo(c); // Set the hand tile pointing to the placed tile
-        c.setPointingTo(select); // Set the placed tile pointing to the hand tile
+        select.setPointingTo(c); // Set the hand tile pointing to the placed tile and vice versa
         placedTiles.add(c); // Add the placed tile to the list of tiles
         selectTile(select); // Clear the tile selection
         dispatchEvent(new CustomEvent(c, PLACED_LETTER));
@@ -169,6 +168,8 @@ class Board extends JFrame {
     public void recallTiles() {
         for (Tile p : placedTiles) { // Loop through each Tile placed on the board
             Tile t = p.getPointingTo(); // Store the hand tile
+            System.out.println("A: "+t.findText()+", "+t.getOriginal()+", "+t.getPoint());
+            System.out.println("B: "+p.findText()+", "+p.getOriginal()+", "+p.getPoint());
             p.setText(p.getOriginal()); // Swap the placed tile text with its original
             t.setText(t.getOriginal()); // Swap the hand tile text with its original
         }
@@ -180,17 +181,10 @@ class Board extends JFrame {
         // Shuffling: https://stackoverflow.com/questions/1519736/random-shuffling-of-an-array
         Component[] list = getHand().getTileComponents();
         Random rand = new Random();
-        for (int i=0; i<list.length; i++) {
+        for (int i=0; i<list.length-1; i++) {
             Tile a = (Tile) list[i];
             Tile b = (Tile) list[rand.nextInt(list.length-i) + i];
-            String temp = a.findText();
-            Tile point = a.getPointingTo();
-            String originA = a.getOriginal();
-            String originB = b.getOriginal();
-            a.swapText(b.findText());
-            b.swapText(temp);
-            a.setOriginal(originB);
-            b.setOriginal(originA);
+            Tile.swapTiles(a, b);
         }
     }
 
@@ -250,10 +244,10 @@ class Board extends JFrame {
         l.setConstraints(b, createConstraints(1, H_Y_OFF/1.0/FRAME_WIDTH, 0, 3, 1, 1, GridBagConstraints.VERTICAL));
         
         // JButtons for Shuffle/Recall
-        CurvedButton recall = new CurvedButton("Recall", TILE_RADIUS, new Color(0x036FFC), 100);
+        final CurvedButton recall = new CurvedButton("Recall", TILE_RADIUS, new Color(0x036FFC), 100);
         recall.setSize(H_TILE_SIZE/2, H_TILE_SIZE/2);
         recall.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
-        CurvedButton shuffle = new CurvedButton("Shuffle", TILE_RADIUS, new Color(0xFC6603), 100);
+        final CurvedButton shuffle = new CurvedButton("Shuffle", TILE_RADIUS, new Color(0xFC6603), 100);
         shuffle.setSize(H_TILE_SIZE/2, H_TILE_SIZE/2);
         shuffle.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
 
@@ -281,10 +275,10 @@ class Board extends JFrame {
         right.setSize(left.getSize());
 
         temp.add(left, 0, 0, 1, 2, GridBagConstraints.BOTH); // Add Left Padding
-        temp.add(right, 0, HAND_LENGTH*2, 1, 2, GridBagConstraints.BOTH); // Add Right Padding
+        temp.add(right, 0, HAND_LENGTH*2 + 1, 1, 2, GridBagConstraints.BOTH); // Add Right Padding
         
         // Would add the Recall and Shuffle buttons up here, if adding directly to JPanel.
-        for (int i=0; i<HAND_LENGTH*2; i++) {
+        for (int i=1; i<HAND_LENGTH*2 + 1; i++) {
             final int index = i;
             final Tile tile = new Tile("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, 1, 1); // Create the letter tile
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*1.5))); // Set the font of the tile
@@ -295,7 +289,7 @@ class Board extends JFrame {
                     selectTile(tile);
                 }
             });
-            if (i%2 == 0) {
+            if (i%2 == 1) {
                 tile.setSize(H_TILE_SIZE, H_TILE_SIZE); // Gridwidth = 1, gridheight = 2;
                 temp.add(tile, 0, i+1, 1, 2, GridBagConstraints.BOTH);
             }
