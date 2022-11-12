@@ -41,8 +41,8 @@ class Board extends JFrame {
     private final int MENU_HEIGHT = (int)(75*MULT); // 75
     private final int MIN_WIDTH = (int)(MULT*375);
     private final int MIN_HEIGHT = (int)(MULT*450);
-    private final int MAX_WIDTH = (int)(1000*MULT); // 1056
-    private final int MAX_HEIGHT = (int)(MULT*1200); // 1056
+    private final int MAX_WIDTH = (int)(843*MULT); // If exceeds 843, duplicate tiles appear on bottom row
+    private final int MAX_HEIGHT = (int)(MULT*1012); // If exceeds 1012, duplicate tiles appear on bottom row
     private int FRAME_WIDTH = MIN_WIDTH; // 528
     private int FRAME_HEIGHT = MIN_HEIGHT; // 528
     private int player_count = 2;
@@ -90,9 +90,11 @@ class Board extends JFrame {
                     height = frame.getHeight(); // Updates the height variable
                     if (width > MAX_WIDTH || height > MAX_HEIGHT) { // Checks to see if the new dimensions are within the maximum
                         frame.setPreferredSize(new Dimension(MAX_WIDTH, MAX_HEIGHT)); // Resets the frame to display at max size
+                        frame.pack();
                     }
                     else if (width < MIN_WIDTH || height < MIN_HEIGHT) { // Checks to see if the new dimensions are within the minimum
                         frame.setPreferredSize(new Dimension(MIN_WIDTH, MIN_HEIGHT)); // Resets the frame to display at min size
+                        frame.pack();
                     }
                 }
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
@@ -228,7 +230,7 @@ class Board extends JFrame {
         left.setSize(SB_HEIGHT/3, SB_HEIGHT/3);
         left.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
         left.setYOffset(1.0/4.0);
-        //scoreboard.add(left, 1, 0, 1, 1, GridBagConstraints.BOTH);
+        scoreboard.add(left, 1, 0, 1, 1, GridBagConstraints.BOTH);
 
         scoreboard.add(makePadding(SB_HEIGHT/3, SB_HEIGHT/3), 0, 0, 1, 1, GridBagConstraints.BOTH);
         scoreboard.add(makePadding(SB_HEIGHT/3, SB_HEIGHT/3), 2, 0, 1, 1, GridBagConstraints.BOTH);
@@ -237,7 +239,7 @@ class Board extends JFrame {
         right.setSize(SB_HEIGHT/3, SB_HEIGHT/3);
         right.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
         right.setYOffset(1.0/4.0);
-        //scoreboard.add(right, 1, 3, 1, 1, GridBagConstraints.BOTH);
+        scoreboard.add(right, 1, 3, 1, 1, GridBagConstraints.BOTH);
 
         scoreboard.add(makePadding(SB_HEIGHT/3, SB_HEIGHT/3), 0, 3, 1, 1, GridBagConstraints.BOTH);
         scoreboard.add(makePadding(SB_HEIGHT/3, SB_HEIGHT/3), 2, 3, 1, 1, GridBagConstraints.BOTH);
