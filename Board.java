@@ -172,7 +172,7 @@ class Board extends JFrame {
         }
         Tile select = getTile(selected_tile);
         
-        recallTile(c.getPointingTo());
+        recallTile(c.getPointingTo()); // Replace the tile already placed there, if there is one
 
         c.swapText(select.findText()); // Add the text to the inputted tile
         select.swapText(""); // Clear the text from the selected tile
