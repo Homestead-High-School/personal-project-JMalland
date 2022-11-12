@@ -449,7 +449,6 @@ class Board extends JFrame {
     }
 
     // Sets the Preferred, Minimum, and Maximum size of a JComponent
-    // Should still probably play around with the default starting sizes for FRAME_WIDTH & FRAME_HEIGHT
     private void setDefaultSizes(Component comp, int width, int height) {
         comp.setPreferredSize(new Dimension(width, height));
         comp.setMaximumSize(new Dimension(width*2, height*2));
