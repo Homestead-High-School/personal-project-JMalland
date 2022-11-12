@@ -28,8 +28,8 @@ public class Tile extends CurvedButton {
 
     // Method to swap the properties of two tiles, while keeping their location the same
     public static void swapTiles(Tile a, Tile b) {
-        String aText = a.findText(); // Temp to hold this A's text
-        String aOrigin = a.originalText; // Temp to hold this A's original text
+        String aText = a.findText(); // Temp to hold A's text
+        String aOrigin = a.originalText; // Temp to hold A's original text
         Tile aPointing = a.pointsTo; // Temp to hold the tile A points towards
         Tile bPointing = b.pointsTo; // Temp to hold the tile B points towards
         int aLBonus = a.letterBonus; // Temp to hold A's word bonus

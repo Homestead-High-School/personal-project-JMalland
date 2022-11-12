@@ -22,8 +22,8 @@ public class GridPanel extends JPanel {
             components.add(c);
         }
         GridBagLayout l = (GridBagLayout) getLayout();
-        int dimension = layout == X_AXIS ? c.getSize().width : c.getSize().height;
-        GridBagConstraints g = createConstraints(dimension/1.0/width, dimension/1.0/height, col, row, w, h, fill);
+        double dimension = layout == X_AXIS ? c.getSize().width : c.getSize().height;
+        GridBagConstraints g = createConstraints(dimension/width, dimension/height, col, row, w, h, fill);
         l.setConstraints(c, g);
         add(c);
     }
