@@ -148,30 +148,24 @@ class Board extends JFrame {
         if (!(c instanceof Tile)) { // Checks to see if the tile is a valid selection
             return; // Return, if tile is not valid
         }
+
         getTile(selected_tile).setBorder(Color.black, 2); // Deselects the previously selected tile
-        Component[] list = getHand().getTileComponents(); // Stores the list of tiles in the players hand
-        for (int i=0; i<list.length; i++) { // Loops through each Hand tile
-            Tile t = (Tile) list[i]; // Stores each Hand tile for easy access
-            if (list[i] == (Component) c) { // Checks if the tile is the selected tile
-                if (selected_tile == i || t.findText().equals("")) { // Checks if the selected tile was previously selected
-                    selected_tile = -1; // Deselects the selected tile
-                }
-                else {
-                    t.setBorder(Color.orange, 6); // Set tile border to orange
-                    selected_tile = i; // Sets the selected tile
-                }
-            }
+
+        Point point = c.getPoint(); // Stores the location of the chosen tile, if it's a Board tile
+        int index = c.getIndex(); // Stores the index of the chosen tile, if it's a Hand tile
+        int calculated_tile = point == null ? -1 : calculateTile(point.getRow(), point.getCol()); // Calculates the index of the chosen tile, if it's a Board tile
+
+        if (calculated_tile >= 7 && selected_tile != calculated_tile) { // Checks if the chosen tile is a Board tile
+            selected_tile = calculated_tile; // Sets the selected tile equal to the Board index of the chosen tile
+            c.setBorder(Color.orange, 6); // Sets the chosen tile's border to orange
         }
-        Point point = c.getPoint(); // Stores the location of the current tile for easy access
-        if (point != null) { // Checks if the current tile is a Board tile
-            int calculated_tile = calculateTile(point.getRow(), point.getCol()); // Stores the location of the current tile 
-            if (selected_tile != calculated_tile) { // Checks if the selected tile isn't being reselected
-                selected_tile = calculated_tile; // Sets the selected tile equal to the current
-                c.setBorder(Color.orange, 6); // Sets the border of the current tile to orange
-            }
-            else { // The selected tile was selected previously
-                selected_tile = -1; // Deselects the selected tile
-            }
+        else if (index >= 0 && selected_tile != index) { // Checks if the chosen tile is a Hand tile
+            selected_tile = index; // Sets the selected tile equal to the Hand index of the chosen tile
+            c.setBorder(Color.orange, 6); // Sets the chosen tile's border to orange
+        }
+        else { // The selected tile was selected previously
+            selected_tile = -1; // Sets the selected tile to none
+            c.setBorder(Color.black, 2); // Deselects the chosen tile, as it was previously selected
         }
     }
 
@@ -181,6 +175,7 @@ class Board extends JFrame {
         if (selected_tile < 0 || !(c instanceof Tile) || c == getTile(selected_tile)) { // Check to see if the tile can be placed
             return; // Return, if no tile is selected
         }
+
         Tile select = getTile(selected_tile); // Store the selected tile
         Tile old = c.getPointingTo(); // Store the previously placed tile, if there is one
         boolean isBoardTile = selected_tile > 7; // Check if the selected tile is a Board tile
@@ -282,30 +277,27 @@ class Board extends JFrame {
         for (int r=0; r<ROWS; r++) { // Loops through each row on the board
             for (int c=0; c<COLS; c++) { // Loops through each col on the board
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
-                final Tile temp = new Tile("", TILE_RADIUS, new Color(0xBA7F40), 37, 1, 1); // Blank Tile, represented by '0'
+                final Tile temp = new Tile("", TILE_RADIUS, new Color(0xBA7F40), 37, 1, 1, r, c); // Blank Tile, represented by '0'
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
                     temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(0x4274FF), tile%2 == 1 ? 25 : 100, tile, 1);
                 }
                 else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'
                     temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(0xD7381C), tile%2 == 1 ? 25 : 100, 1, tile);
                 }
-                //else { // Blank Tile, represented by '0'
-                  //  temp = new Tile("", TILE_RADIUS, new Color(0xBA7F40), 37, 1, 1);
-                //}
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
                 temp.setPoint(new Point(r, c)); // Sets the [row][col] Point the tile is placed at
                 temp.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        if (selected_tile != -1 && calculateTile(temp.getPoint().r, temp.getPoint().c) != selected_tile) {
-                            placeTile(temp);
+                        if (selected_tile != -1 && calculateTile(temp.getPoint().r, temp.getPoint().c) != selected_tile) { // Checks if the selected tile is valid and is not the same tile
+                            placeTile(temp); // Places the selected tile onto the chosen one
                         }
-                        else if (temp.findText().length() == 1) {
-                            selectTile(temp);
+                        else if (temp.findText().length() == 1) { // Checks that the chosen tile holds a valid letter
+                            selectTile(temp); // Selects the chosen tile
                         }
                     }
                 });
-                temp.setSize(TILE_SIZE, TILE_SIZE);
-                board.add(temp, r, c, 1, 1, GridBagConstraints.BOTH);
+                temp.setSize(TILE_SIZE, TILE_SIZE); // Sets the size of the tile. Used in determining weights for the GridPanel
+                board.add(temp, r, c, 1, 1, GridBagConstraints.BOTH); // Adds the tile to the Board
             }
         }
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
@@ -330,7 +322,7 @@ class Board extends JFrame {
         
         // Would add the Recall and Shuffle buttons up here, if adding directly to JPanel.
         for (int i=0; i<=HAND_LENGTH*2; i++) {
-            final Tile tile = new Tile("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, 1, 1); // Create the letter tile
+            final Tile tile = new Tile("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, i/2); // Create the letter tile
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*1.5))); // Set the font of the tile
             tile.addActionListener(new ActionListener() {
                 @Override
@@ -488,7 +480,6 @@ class Board extends JFrame {
             return((Tile)(getHand().getTileComponents()[i]));
         }
         else {
-            System.out.println("Returned Tile: "+(i-7));
             return((Tile)(getBoard().getComponent(i-7)));
         }
     }

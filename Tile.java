@@ -8,23 +8,24 @@ public class Tile extends CurvedButton {
     String originalText = "";
     String prevText = "";
     Point point = null;
+    int index = -1;
 
     public Tile() {
         super();
     }
     
-    public Tile(String s, int r, int l, int w) {
-        super(s, r);
+    public Tile(String s, int r, Color c, int o, int i) {
+        super(s, r, c, o);
         originalText = s;
-        letterBonus = l;
-        wordBonus = w;
+        index = i;
     }
 
-    public Tile(String s, int r, Color c, int o, int l, int w) {
+    public Tile(String s, int r, Color c, int o, int l, int w, int row, int col) {
         super(s, r, c, o);
         originalText = s;
         letterBonus = l;
         wordBonus = w;
+        point = new Point(row, col);
     }
 
     // Method to swap the properties of two tiles, while keeping their location the same
@@ -55,30 +56,14 @@ public class Tile extends CurvedButton {
         b.tileValue = aTileVal;
         b.setPoint(aPoint);
     }
-
-    public static void swapData(Tile a, Tile b) {
-        // Temp variables to hold all of A's settings to be used in changing B's
-        Color aColor = a.getColor();
-        int aOpacity = a.getOpacity();
-        Color aBorderC = a.getBorderColor();
-        int aBorderS = a.getBorderSize();
-        Font aFont = a.getFont();
-        // Swaps all of Tile A's settings with B's
-        a.setColor(b.getColor());
-        a.setOpacity(b.getOpacity());
-        a.setBorder(b.getBorderColor(), b.getBorderSize());
-        a.setFont(b.getFont());
-        // Swaps all of Tile B's settings with A's original settings
-        b.setColor(aColor);
-        b.setOpacity(aOpacity);
-        b.setBorder(aBorderC, aBorderS);
-        b.setFont(aFont);
-    }
-
+    
     public void resetProperties(String s, int r, Color c, int o, int l, int w) {
-        Tile current = new Tile(s, r, c, o, l, w);
-        Tile.swapTiles(this, current);
-        Tile.swapData(this, current);
+        super.setColor(c);
+        super.setOpacity(o);
+        super.setText(s);
+        originalText = s;
+        letterBonus = l;
+        wordBonus = w;
     }
 
     public void setValue(int v) {
@@ -91,6 +76,10 @@ public class Tile extends CurvedButton {
 
     public void setOriginal(String s) {
         originalText = s;
+    }
+
+    public int getIndex() {
+        return(index);
     }
 
     public Point getPoint() {
