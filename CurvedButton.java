@@ -42,6 +42,14 @@ public class CurvedButton extends JButton {
         frame = f;
     }
 
+    public void setYOffset(double y) {
+        yOffset = y;
+    }
+
+    public void setXOffset(double x) {
+        xOffset = x;
+    }
+
     // Sets the border color and size
     public void setBorder(Color c, int s) {
         borderColor = c;
