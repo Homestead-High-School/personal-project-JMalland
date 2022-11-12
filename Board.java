@@ -13,7 +13,8 @@ class Board extends JFrame {
     */
     private final double widthRatio = 9.0; // Width has a ratio of 3
     private final double heightRatio = 16.0; // Height has a ratio of 4
-    private final double ratioMargin = 0.50; // 50% Aspect Ratio Acceptable Margin
+    private final double widthMargin = 0.50; // 50% Width Ratio Acceptable Margin
+    private final double heightMargin = 0.20; // 20% Height Ratio Acceptable Margin
     public final int SELECTED_HAND = ("HAND").hashCode();
     public final int PLACED_LETTER = ("TILE").hashCode();
     public final int RECALLED_TILES = ("RECALL").hashCode();
@@ -79,7 +80,10 @@ class Board extends JFrame {
                 double width = frame.getWidth(); // Stores the width as a double for easy division
                 double height = frame.getHeight(); // Stores the height as a double for easy division
                 System.out.println("Window Resized: "+width+" x "+height);
-                if (width/height != widthRatio/heightRatio && Math.abs(1 - (width/height)/(widthRatio/heightRatio)) > ratioMargin) {
+                double widthCheck = Math.abs(1-(width/height)/(widthRatio/heightRatio));
+                double heightCheck = Math.abs(1-(height/width)/(heightRatio/widthRatio));
+                System.out.println(widthCheck+" || "+heightCheck);
+                if (width/height != widthRatio/heightRatio && (widthCheck > widthMargin || heightCheck < heightMargin)) {
                     if (Math.abs(FRAME_WIDTH - width) > Math.abs(FRAME_HEIGHT - height)) { // Checks to see if Width is increasing
                         frame.setPreferredSize(new Dimension((int)(width), (int)(FRAME_HEIGHT * (width / FRAME_WIDTH)))); // Adjusts height to match
                     }
