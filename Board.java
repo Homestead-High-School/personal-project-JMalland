@@ -11,6 +11,7 @@ class Board extends JFrame {
     /*
     *   Should make either a sidemenu, or selections from the player's hand, where, when selected, it highlights the border in yellow or something.
     */
+    // Actual ratios are more towards 19/15;
     private final double widthRatio = 9.0; // Width has a ratio of 3
     private final double heightRatio = 16.0; // Height has a ratio of 4
     private final double widthMargin = 0.50; // 50% Width Ratio Acceptable Margin
@@ -41,9 +42,9 @@ class Board extends JFrame {
     private final int MENU_WIDTH = (int)(300*MULT); // 300
     private final int MENU_HEIGHT = (int)(75*MULT); // 75
     private final int MIN_WIDTH = (int)(MULT*375);
-    private final int MIN_HEIGHT = (int)(MULT*450);
-    private final int MAX_WIDTH = (int)(843*MULT); // If exceeds 843, duplicate tiles appear on bottom row
-    private final int MAX_HEIGHT = (int)(MULT*1012); // If exceeds 1012, duplicate tiles appear on bottom row
+    private final int MIN_HEIGHT = (int)(MULT*475);
+    private final int MAX_WIDTH = (int)(825*MULT); // If exceeds 843, duplicate tiles appear on bottom row
+    private final int MAX_HEIGHT = (int)(MULT*1045); // If exceeds 1012, duplicate tiles appear on bottom row
     private int FRAME_WIDTH = MIN_WIDTH; // 528
     private int FRAME_HEIGHT = MIN_HEIGHT; // 528
     private int player_count = 2;
