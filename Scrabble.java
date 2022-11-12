@@ -63,6 +63,10 @@ public class Scrabble {
         return(c == 32 ? Scrabble.tiles[26] : Scrabble.tiles[c-65]);
     }
 
+    public void recallTiles() {
+        items.clear();
+    }
+
     public void placeLetter(char l, int r, int c) {
         if (r > map.length || c > map[0].length) { // Throw an exception if I'm stupid enough to make such a horrible mistake
             throw new IllegalArgumentException("Index Out Of Bounds For Map Placement");

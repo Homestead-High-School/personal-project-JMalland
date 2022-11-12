@@ -57,16 +57,41 @@ public class CurvedButton extends JButton {
         repaint();
     }
 
+    public Color getBorderColor() {
+        return(borderColor);
+    }
+
+    public int getBorderSize() {
+        return(borderSize);
+    }
+
     // Sets the color of the button
     public void setColor(Color c) {
         color = c;
         repaint();
     }
 
+    public Color getColor() {
+        return(color);
+    }
+
+    public void setOpacity(int o) {
+        opacity = o;
+    }
+
+    public int getOpacity() {
+        return(opacity);
+    }
+
     // Sets the font of the button
     public void setFont(Font f) {
         font = f;
         repaint();
+    }
+
+    @Override
+    public Font getFont() {
+        return(font);
     }
 
     // Sets the text of the button

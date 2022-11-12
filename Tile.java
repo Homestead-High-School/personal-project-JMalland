@@ -6,6 +6,7 @@ public class Tile extends CurvedButton {
     int wordBonus = 1;
     int tileValue = 0;
     String originalText = "";
+    String prevText = "";
     Point point = null;
 
     public Tile() {
@@ -28,14 +29,15 @@ public class Tile extends CurvedButton {
 
     // Method to swap the properties of two tiles, while keeping their location the same
     public static void swapTiles(Tile a, Tile b) {
-        String aText = a.findText(); // Temp to hold A's text
-        String aOrigin = a.originalText; // Temp to hold A's original text
-        Tile aPointing = a.pointsTo; // Temp to hold the tile A points towards
-        Tile bPointing = b.pointsTo; // Temp to hold the tile B points towards
-        int aLBonus = a.letterBonus; // Temp to hold A's word bonus
-        int aWBonus = a.wordBonus; // Temp to hold A's letter bonus
-        int aTileVal = a.tileValue; // Temp to hold A's tile value
-        Point aPoint = a.point; // Temp to hold the Point A is at
+        // Temp variables to hold all of A's properties to be used in setting B's
+        String aText = a.findText(); 
+        String aOrigin = a.originalText;
+        Tile aPointing = a.pointsTo;
+        Tile bPointing = b.pointsTo;
+        int aLBonus = a.letterBonus;
+        int aWBonus = a.wordBonus;
+        int aTileVal = a.tileValue;
+        Point aPoint = a.point;
         // Swaps all of Tile A's properties with B's
         a.setText(b.findText());
         a.setOriginal(b.getOriginal());
@@ -52,6 +54,31 @@ public class Tile extends CurvedButton {
         b.wordBonus = aWBonus;
         b.tileValue = aTileVal;
         b.setPoint(aPoint);
+    }
+
+    public static void swapData(Tile a, Tile b) {
+        // Temp variables to hold all of A's settings to be used in changing B's
+        Color aColor = a.getColor();
+        int aOpacity = a.getOpacity();
+        Color aBorderC = a.getBorderColor();
+        int aBorderS = a.getBorderSize();
+        Font aFont = a.getFont();
+        // Swaps all of Tile A's settings with B's
+        a.setColor(b.getColor());
+        a.setOpacity(b.getOpacity());
+        a.setBorder(b.getBorderColor(), b.getBorderSize());
+        a.setFont(b.getFont());
+        // Swaps all of Tile B's settings with A's original settings
+        b.setColor(aColor);
+        b.setOpacity(aOpacity);
+        b.setBorder(aBorderC, aBorderS);
+        b.setFont(aFont);
+    }
+
+    public void resetProperties(String s, int r, Color c, int o, int l, int w) {
+        Tile current = new Tile(s, r, c, o, l, w);
+        Tile.swapTiles(this, current);
+        Tile.swapData(this, current);
     }
 
     public void setValue(int v) {
@@ -80,15 +107,21 @@ public class Tile extends CurvedButton {
 
     // Sets the text of the Tile while saving the original text
     public void swapText(String s) {
-        originalText = super.findText(); // Store the original text from the parent class
-        super.setText(s); // Set the text from the parent class
+        prevText = super.findText(); // Stores the previous text
+        super.setText(s); // Resets the current text to match 's'
     }
 
     // Returns the original text of the Tile
     public String getOriginal() {
         return(originalText);
     }
+
+    // Returns the previous text of the Tile
+    public String getPrev() {
+        return(prevText);
+    }
     
+    // Determines which tile the current one corresponds to.
     public void setPointingTo(Tile p) {
         pointsTo = p; // Sets the current tile pointing towards Tile 'p'
         if (p != null) { // Checks if Tile 'p' isn't null

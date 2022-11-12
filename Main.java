@@ -14,18 +14,18 @@ public class Main {
         }
         System.out.println(numWords+" Words!");
         System.out.println("Longest Word: "+maxWords);
-        final Scrabble basic = new Scrabble(map);
+        Scrabble basic = new Scrabble(map);
         String one = "HAPPY";
         String two = "UNHAPPY";
         String three = "HELP";
         String four = "HUGS";
-        String five = "SOUP";
-        String six = "PERP";
+        String five = "SONG";
+        String six = "PIN";
         /* End Result:
             U N H A P P Y   H U G S
                 E                 O
-                L                 U
-            H A P P Y       P R E P
+                L             P I N
+            H A P P Y             G
         */ 
         for (int r=0; r<12; r++) {
             for (int c=0; c<12; c++) {
@@ -37,9 +37,9 @@ public class Main {
                     basic.placeLetter(three.charAt(r-8), r, c);
                     System.out.print(three.charAt(r-8)+" ");
                 }
-                else if (r == 11 && c > 7) {
-                    basic.placeLetter(six.charAt(c-8), r, c);
-                    System.out.print(six.charAt(c-8)+" ");
+                else if (r == 10 && c > 8 && c < 11) {
+                    basic.placeLetter(six.charAt(c-9), r, c);
+                    System.out.print(six.charAt(c-9)+" ");
                 }
                 else if (r == 8 && c > 7 && c < 12) {
                     basic.placeLetter(four.charAt(c-8), r, c);
@@ -70,6 +70,7 @@ public class Main {
         System.out.println("_: "+Scrabble.getLetterValue(' ')+" "+basic.getLetterCount(' '));
         
         final Board b = new Board();
+        final Scrabble real = new Scrabble(map);
 
         b.addCustomListener(new CustomListener() {
             @Override
@@ -81,6 +82,7 @@ public class Main {
                 else if (e.getID() == b.DRAW_HAND) {
                     System.out.println("Hand Drawn.");
                     b.setHand(basic.drawTiles());
+                    //b.setHand(new char[] {'P', 'I', 'N', 'I', 'N', 'G', 'S'});
                 }
                 else if (e.getID() == b.SELECTED_HAND) {
                     System.out.println("Selected Tile.");
@@ -89,10 +91,16 @@ public class Main {
                 else if (e.getID() == b.PLACED_LETTER) {
                     Tile t = (Tile) e.getSource();
                     System.out.println("Placed Tile @ ["+t.getPoint().r+"]["+t.getPoint().c+"]. Contains Letter: "+t.findText()+".");
+                    real.placeLetter(e.getChar(), e.getRow(), e.getCol());
                     //b.placeTile(e.getSource(), e.getRow(), e.getCol());
+                }
+                else if (e.getID() == b.FINALIZED_PLAY) {
+                    System.out.println("Submitted Play Is Valid: "+real.validWordPlacement());
+                    b.getTilesPlaced();
                 }
                 else if (e.getID() == b.RECALLED_TILES) {
                     System.out.println("Recalled Placed Tiles.");
+                    real.recallTiles();
                 }
             }
         });
