@@ -147,24 +147,17 @@ class Board extends JFrame {
             return; // Return, if tile is not valid
         }
 
-        getTile(selected_tile).setBorder(Color.black, 2); // Deselects the previously selected tile
+        int previous_tile = selected_tile; // Stores the index of the previously selected tile
+        c.setBorder(Color.orange, 6); // Sets the chosen tile's border to orange
 
         Point point = c.getPoint(); // Stores the location of the chosen tile, if it's a Board tile
         int index = c.getIndex(); // Stores the index of the chosen tile, if it's a Hand tile
         int calculated_tile = point == null ? -1 : calculateTile(point.getRow(), point.getCol()); // Calculates the index of the chosen tile, if it's a Board tile
 
-        if (calculated_tile >= 7 && selected_tile != calculated_tile) { // Checks if the chosen tile is a Board tile
-            selected_tile = calculated_tile; // Sets the selected tile equal to the Board index of the chosen tile
-            c.setBorder(Color.orange, 6); // Sets the chosen tile's border to orange
-        }
-        else if (index >= 0 && selected_tile != index) { // Checks if the chosen tile is a Hand tile
-            selected_tile = index; // Sets the selected tile equal to the Hand index of the chosen tile
-            c.setBorder(Color.orange, 6); // Sets the chosen tile's border to orange
-        }
-        else { // The selected tile was selected previously
-            selected_tile = -1; // Sets the selected tile to none
-            c.setBorder(Color.black, 2); // Deselects the chosen tile, as it was previously selected
-        }
+        selected_tile = index >= 0 ? index : calculated_tile; // Stores the index of the selected tile, relative to whether or not it is a Board or Hand tile
+
+        getTile(previous_tile).setBorder(Color.black, 2); // Sets the border of the previously selected tile to default
+        selected_tile = previous_tile == selected_tile ? -1 : selected_tile; // Deselects the selected tile if it was previously selected
     }
 
     // Places the letter from the selected tile within the players hand
@@ -214,7 +207,7 @@ class Board extends JFrame {
         p.setPointingTo(null); // Set it so the placed tile no longer points to anything
         recallTile(pointingAt); // Recalls the tile Tile 'p' was pointing to
         if (p.getPoint() != null) {
-            dispatchEvent(new CustomEvent(p, RECALLED_TILE, p.getPoint().r, p.getPoint().c));
+            dispatchEvent(new CustomEvent(p, RECALLED_TILE, p.getPoint().r, p.getPoint().c)); // Trigger an ActionEvent to signal a Board Tile was recalled
         }
     }
 
