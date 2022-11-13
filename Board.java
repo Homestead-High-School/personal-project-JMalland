@@ -109,6 +109,7 @@ class Board extends JFrame {
         frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Sets the default dimensions
     }
     
+    // Starts the game, and switches from mainPanel to gamePanel
     public void startGame() {
         frame.remove(mainPanel); // Remove all current panels to begin the gameplay
         createBoard(); // Recreate the gamePanel
