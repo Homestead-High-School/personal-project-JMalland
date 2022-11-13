@@ -81,8 +81,8 @@ public class Main {
                 }
                 else if (e.getID() == b.DRAW_HAND) {
                     System.out.println("Hand Drawn.");
-                    //b.setHand(basic.drawTiles(b.getBlankAmount()));
-                    b.setHand(new char[] {'L', 'I', 'T', 'I', 'P', 'T', 'M'});
+                    b.setHand(basic.drawTiles(b.getBlankAmount()));
+                    //b.setHand(new char[] {'L', 'I', 'T', 'I', 'P', 'T', 'M'});
                 }
                 else if (e.getID() == b.SELECTED_HAND) {
                     System.out.println("Selected Tile.");

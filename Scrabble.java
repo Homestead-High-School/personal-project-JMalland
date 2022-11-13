@@ -159,10 +159,6 @@ public class Scrabble {
         boolean row = calcRowOrCol(true);
         boolean col = calcRowOrCol(false);
         boolean areConnected = areConnected(true);
-        for (char c : items.values()) {
-            System.out.print(c+", ");
-        }
-        System.out.println();
         //System.out.println("Connected: "+areConnected+" Row: "+row+" Col: "+col);
         return(areConnected && row && col); // Check that the words formed by rows and columns are valid
     }

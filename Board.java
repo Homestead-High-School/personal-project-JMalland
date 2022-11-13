@@ -168,7 +168,14 @@ class Board extends JFrame {
         selected_tile = index >= 0 ? index : calculated_tile; // Stores the index of the selected tile, relative to whether or not it is a Board or Hand tile
 
         getTile(previous_tile).setBorder(Color.black, 2); // Sets the border of the previously selected tile to default
-        selected_tile = previous_tile == selected_tile ? -1 : selected_tile; // Deselects the selected tile if it was previously selected
+        
+        if (previous_tile == selected_tile) { // Checks if the selected tile was previously selected
+            selected_tile = -1; // Deselects the selected tile if it was previously selected
+        }
+        else if (c.findText().equals("")) { // Checks if the selected tile is empty
+            c.setBorder(Color.black, 2); // Set the current tile back to its default
+            selected_tile = previous_tile; // Reselects the previous tile
+        }
     }
 
     // Places the letter from the selected tile within the players hand
