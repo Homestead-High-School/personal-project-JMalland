@@ -80,24 +80,19 @@ class Board extends JFrame {
         
         Toolkit.getDefaultToolkit().setDynamicLayout(false); // Ensures window resize keeps the right ratio: https://stackoverflow.com/questions/20925193/using-componentadapter-to-determine-when-frame-resize-is-finished 
         
-        frame.addComponentListener(new ComponentAdapter() { // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-eventff
+        frame.addComponentListener(new ComponentAdapter() {
+            // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-eventff
             public void componentResized(ComponentEvent componentEvent) { // Method to run every time window is resized
                 double width = frame.getWidth(); // Stores the width as a double for easy division
                 double height = frame.getHeight(); // Stores the height as a double for easy division
                 double widthCheck = Math.abs(1-(width/height)/(widthRatio/heightRatio));
                 double heightCheck = Math.abs(1-(height/width)/(heightRatio/widthRatio));
                 if (width/height != widthRatio/heightRatio && (widthCheck > widthMargin || heightCheck < heightMargin)) {
-                    if (width > MAX_WIDTH || height > MAX_HEIGHT) { // Checks to see if the new dimensions are within the maximum
-                        frame.setPreferredSize(new Dimension(MAX_WIDTH, MAX_HEIGHT)); // Resets the frame to display at max size
-                    }
-                    else if (width < MIN_WIDTH || height < MIN_HEIGHT) { // Checks to see if the new dimensions are within the minimum
-                        frame.setPreferredSize(new Dimension(MIN_WIDTH, MIN_HEIGHT)); // Resets the frame to display at min size
-                    }
-                    else if (Math.abs(FRAME_WIDTH - width) > Math.abs(FRAME_HEIGHT - height)) { // Checks to see if Width is increasing
-                        frame.setPreferredSize(new Dimension((int)(width), (int)(FRAME_HEIGHT * (width / FRAME_WIDTH)))); // Adjusts height to match
+                    if (Math.abs(FRAME_WIDTH - width) > Math.abs(FRAME_HEIGHT - height)) { // Checks to see if Width is increasing
+                        frame.setPreferredSize(new Dimension(Math.min(MAX_WIDTH, Math.max((int)(width), MIN_WIDTH)), Math.min(MAX_HEIGHT, Math.max((int)(FRAME_HEIGHT * (width / FRAME_WIDTH)), MIN_HEIGHT)))); // Adjusts height to match
                     }
                     else if (Math.abs(FRAME_HEIGHT - height) > Math.abs(FRAME_WIDTH - width)) { // Checks to see if Height is increasing
-                        frame.setPreferredSize(new Dimension((int)(FRAME_WIDTH * (height / FRAME_HEIGHT)), (int)(height))); // Adjusts width to match
+                        frame.setPreferredSize(new Dimension(Math.min(MAX_WIDTH, Math.max((int)(FRAME_WIDTH * (height / FRAME_HEIGHT)), MIN_WIDTH)), Math.min(MAX_HEIGHT, Math.max((int)(height), MIN_HEIGHT)))); // Adjusts width to match
                     }
                 }
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
