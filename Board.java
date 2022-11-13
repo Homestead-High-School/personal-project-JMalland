@@ -8,6 +8,9 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.util.Random;
 
+// Will need to recolor placed tiles, as well as implement a number at bottom L/R corner that depicts the value of the tile.
+// Need to also make menu to select custom letter, for blank tile occurances.
+
 class Board extends JFrame {
     /*
     *   Should make either a sidemenu, or selections from the player's hand, where, when selected, it highlights the border in yellow or something.
