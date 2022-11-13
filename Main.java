@@ -81,8 +81,8 @@ public class Main {
                 }
                 else if (e.getID() == b.DRAW_HAND) {
                     System.out.println("Hand Drawn.");
-                    b.setHand(basic.drawTiles());
-                    b.setHand(new char[] {'O', 'K', 'N', 'O', 'S', 'E', 'S'});
+                    //b.setHand(basic.drawTiles(b.getBlankAmount()));
+                    b.setHand(new char[] {'L', 'I', 'T', 'I', 'P', 'T', 'M'});
                 }
                 else if (e.getID() == b.SELECTED_HAND) {
                     System.out.println("Selected Tile.");
@@ -107,7 +107,11 @@ public class Main {
                 }
                 else if (e.getID() == b.FINALIZED_PLAY) {
                     System.out.println("Submitted Letters: "+real.getPlacedLetters()+".");
-                    System.out.println("Submitted Play Is Worth: "+real.submitWordPlacement());
+                    int score = real.submitWordPlacement();
+                    System.out.println("Submitted Play Is Worth: "+score);
+                    if (score > 0) {
+                        b.tilesWereSubmitted();
+                    }
                 }
                 else if (e.getID() == b.RECALLED_TILE) {
                     if (real.notYetPlaced(e.getRow(), e.getCol())) {

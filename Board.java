@@ -1,4 +1,5 @@
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.*;
@@ -134,12 +135,20 @@ class Board extends JFrame {
         return(player_count); // Returns the number of players
     }
 
+    public int getBlankAmount() {
+        return(getEmptyTiles().length);
+    }
+
     // Sets the letters on each tile within the players hand
     public void setHand(char[] list) {
-        for (int i=0; i<list.length; i++) {
-            getTile(i).setText(list[i]+"");
-            getTile(i).setOriginal(list[i]+"");
-            getTile(i).setValue(Scrabble.getLetterValue(list[i]));
+        Tile[] empty = getEmptyTiles(); // Gets the list of blank tiles to be drawn
+        if (empty.length < list.length) { // Checks there are enough tiles to hold the list
+            return; // Quits the function
+        }
+        for (int i=0; i<empty.length; i++) { // Loops through each blank tile
+            empty[i].setText(list[i]+""); // Sets the text to the drawn tile
+            empty[i].setOriginal(list[i]+""); // Sets the original text to its default
+            empty[i].setValue(Scrabble.getLetterValue(list[i])); // Sets the value of the tile
         }
     }
 
@@ -232,6 +241,10 @@ class Board extends JFrame {
         return(map); // Return the newly created HashMap
     }
 
+    public void tilesWereSubmitted() {
+        dispatchEvent(new CustomEvent(frame, DRAW_HAND));
+    }
+
     // Creates the JPanel that displays the current player and their score
     // Still under development
     private void createScoreboard() {
@@ -321,7 +334,7 @@ class Board extends JFrame {
         
         // Would add the Recall and Shuffle buttons up here, if adding directly to JPanel.
         for (int i=0; i<=HAND_LENGTH*2; i++) {
-            final Tile tile = new Tile("W", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, i/2); // Create the letter tile
+            final Tile tile = new Tile("", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, i/2); // Create the letter tile
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*1.5))); // Set the font of the tile
             tile.addActionListener(new ActionListener() {
                 @Override
@@ -474,6 +487,17 @@ class Board extends JFrame {
 
     private int calculateTile(int r, int c) {
         return(6 + (r + 1) * (c + 1) + (COLS - (c + 1)) * r);
+    }
+
+    private Tile[] getEmptyTiles() {
+        ArrayList<Tile> temp = new ArrayList<Tile>();
+        for (Component c : getHand().getTileComponents()) {
+            Tile t = (Tile) c;
+            if (t.findText().equals("")) {
+                temp.add(t);
+            }
+        }
+        return(temp.toArray(new Tile[0]));
     }
 
     // Returns the a tile from the players hand at the given index

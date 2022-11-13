@@ -44,10 +44,10 @@ public class Scrabble {
         numTiles = 100; // Set the default number of tiles
     }
 
-    public char[] drawTiles() {
+    public char[] drawTiles(int num) {
         Random rand = new Random();
-        char[] hand = new char[7];
-        if (numTiles > 7) { // Check to see if enough tiles left to draw
+        char[] hand = new char[num];
+        if (numTiles > num) { // Check to see if enough tiles left to draw
             for (int i=0; i<hand.length; i++) {
                 do { // Run the loop while the chosen character is empty
                     hand[i] = (char)(65+rand.nextInt(27)); // Choose a random character, from A-Z or SPACE
@@ -55,7 +55,7 @@ public class Scrabble {
                 } while (getLetterCount(hand[i]) == 0);
                 tiles[hand[i]-65 < 0 ? 26 : hand[i]-65] -= 1; // Decrements the count
             }
-            numTiles -= 7; // Remove 7 tiles from the count, since a hand is 7 large
+            numTiles -= num; // Remove 7 tiles from the count, since a hand is 7 large
             return(hand); // Return the chosen hand
         }
         else { // Throw Exception because extra tiles are unknown at the moment
@@ -102,35 +102,35 @@ public class Scrabble {
             int c = p.getCol(); // Store the current col, for easy acess
             if (placed.containsKey(new Point(r+1, c)) && !items.containsKey(new Point(r+1, c))) { // Check to see if the point below has been played
                 System.out.println("Added: ["+(r+1)+"]["+c+"] == DOWN");
-                check.put(p, DOWN); // Add the point to the 'check' map
+                check.put(new Point(r+1, c), DOWN); // Add the point to the 'check' map
             }
             if (placed.containsKey(new Point(r-1, c)) && !items.containsKey(new Point(r-1, c))) { // Check to see if the point above has been played
                 System.out.println("Added: ["+(r-1)+"]["+c+"] == UP");
-                check.put(p, UP); // Add the point to the 'check' map
+                check.put(new Point(r-1, c), UP); // Add the point to the 'check' map
             }
             if (placed.containsKey(new Point(r, c+1)) && !items.containsKey(new Point(r, c+1))) { // Check to see if the right point has been played
                 System.out.println("Added: ["+r+"]["+(c+1)+"] == RIGHT");
-                check.put(p, RIGHT); // Add the point to the 'check' map
+                check.put(new Point(r, c+1), RIGHT); // Add the point to the 'check' map
             }
             if (placed.containsKey(new Point(r, c-1)) && !items.containsKey(new Point(r, c-1))) { // Check to see if the left point has been played
                 System.out.println("Added: ["+r+"]["+(c-1)+"] == LEFT");
-                check.put(p, LEFT); // Add the point to the 'check' map
+                check.put(new Point(r, c-1), LEFT); // Add the point to the 'check' map
             }
         }
+        //items.putAll(placed);
         for (Point p : check.keySet()) { // Loops through each point to be checked
             int direct = check.get(p); // Stores the direction Point 'p' is heading, for simplicity
             int rowDiff = direct == DOWN || direct == UP ? (direct == UP ? -1 : 1) : 0; // Calculates whether the row moves up or down.
             int colDiff = direct == LEFT || direct == RIGHT ? (direct == LEFT ? -1 : 1) : 0; // Calculates whether the col moves left or right.
-            Point current = new Point(p.getRow() + rowDiff, p.getCol() + colDiff); // Create a new Point following the direction of the word at Point 'p'
-            System.out.println("Current is: ["+current.getRow()+"]["+current.getCol()+"]");
-            while (placed.containsKey(current)) { // Keep running as long as the word is there
+            Point current = p; // Create a new Point following the direction of the word at Point 'p'
+            System.out.println("Current is: ["+p.getRow()+"]["+p.getCol()+"]");
+            do { // Keep running as long as the word is there
                 items.put(current, placed.get(current)); // Add the current point to the list of newly placed tiles, to be calculated in the overall score
                 System.out.println("Added: ["+current.getRow()+"]["+current.getCol()+"] --> "+placed.get(current));
                 current = new Point(current.getRow() + rowDiff, current.getCol() + colDiff); // Recalculate the new point
-            }
+            } while (placed.containsKey(current));
         }
         if (validWordPlacement()) { // Check to see that all connecting words fit legally on the board
-            System.out.println(check.keySet());
             for (Point p : items.keySet()) { // Loop through each Point that was checked
                 placed.putIfAbsent(p, items.get(p)); // Add the point to the placed tiles, since the play is valid
             }
@@ -156,7 +156,15 @@ public class Scrabble {
 
     // Returns whether or not the tiles played form a valid word in proper formation
     public boolean validWordPlacement() {
-        return(areConnected(true) && calcRowOrCol(true) && calcRowOrCol(false)); // Check that the words formed by rows and columns are valid
+        boolean row = calcRowOrCol(true);
+        boolean col = calcRowOrCol(false);
+        boolean areConnected = areConnected(true);
+        for (char c : items.values()) {
+            System.out.print(c+", ");
+        }
+        System.out.println();
+        //System.out.println("Connected: "+areConnected+" Row: "+row+" Col: "+col);
+        return(areConnected && row && col); // Check that the words formed by rows and columns are valid
     }
 
     // Public method to allow for the client to recall tiles
