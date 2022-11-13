@@ -54,7 +54,6 @@ class Board extends JFrame {
     private int FRAME_HEIGHT = MIN_HEIGHT; // 528
     private int player_count = 2;
     private int selected_tile = -1;
-    private boolean GameStarted = false;
  
     // The Board() constructor runs its private methods to generate the panels that are contained in the application 
     Board() {
@@ -119,7 +118,6 @@ class Board extends JFrame {
         createHand(); // Recreate the gamePanel
         frame.add(gamePanel); // Add the game panel to display the Scrabble board
         frame.pack(); // Repaint the JFrame
-        GameStarted = true; // Set GameStarted status to true
         System.out.println("Game Started: "+player_count+" Players"); // Display the beginning of the game
         dispatchEvent(new CustomEvent(frame, DRAW_HAND));
     }
@@ -523,14 +521,6 @@ class Board extends JFrame {
         else {
             return((Tile)(getBoard().getComponent(i-7)));
         }
-    }
-
-    // Sets the Preferred, Minimum, and Maximum size of a JComponent
-    private void setDefaultSizes(Component comp, int width, int height) {
-        comp.setPreferredSize(new Dimension(width, height));
-        comp.setMaximumSize(new Dimension(width*2, height*2));
-        comp.setMinimumSize(new Dimension(width/2, height/2));
-        comp.setSize(new Dimension(width, height));
     }
 
     // Adding Listeners To JFrame: https://stackoverflow.com/questions/18165800/how-to-add-actionlistener-to-jframe-without-using-buttons-and-panels
