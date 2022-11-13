@@ -406,18 +406,19 @@ class Board extends JFrame {
     // Creates the JPanel that contains the components which make up the main menu
     // Need to redesign this at some point. PaddedPanel is just too non-redundant
     private void createMenu() {
-        mainPanel = new JPanel(new BorderLayout()); // Clears and sets the layout manager for the mainPanel
-        Menu screen = new Menu(MENU_WIDTH, MENU_HEIGHT, Menu.CENTER, Menu.Y_AXIS); // Generate the Main Menu
+        mainPanel = new JPanel(new GridBagLayout()); // Initializes the mainPanel
+        GridBagLayout l = (GridBagLayout) mainPanel.getLayout(); // Stores the GridBagLayout of the mainPanel
 
+        GridPanel menu = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.Y_AXIS); // Creates the Main Menu panel
+    
         startButton = new CurvedButton("Start", 15, Color.yellow, 100); // Creates a default start button
         startButton.setFont(new Font("Serif", Font.PLAIN, 75)); // Sets the font of the Start Button to size 75
-        startButton.setEnabled(true);
-        startButton.setSize(MENU_WIDTH, MENU_HEIGHT);
+        startButton.setSize(MENU_WIDTH/3, MENU_HEIGHT); // Sets the default size of the Start Button
 
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dispatchEvent(new CustomEvent(startButton, GAME_RUNNING));
+                dispatchEvent(new CustomEvent(startButton, GAME_RUNNING)); // Triggers an ActionEvent to signal the game was started
             }
         });
 
@@ -425,22 +426,31 @@ class Board extends JFrame {
         selector.setValue(2); // Sets the default player count to 2
         selector.setMajorTickSpacing(1); // Sets the tick spacing to each number
         selector.setPaintTicks(true); // Paints the ticks on the slider
-        selector.setSize(2*MENU_WIDTH/3, MENU_HEIGHT);
+        selector.setSize(MENU_WIDTH/3, MENU_HEIGHT); // Sets the default size of the Selector
 
-        PaddedPanel start = new PaddedPanel(startButton, MENU_WIDTH, FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.X_AXIS); // Creates a panel with padding on the left and right
-        PaddedPanel select = new PaddedPanel(selector, MENU_WIDTH/2, FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.X_AXIS); // Creates a panel with padding on the left and right
-
-        System.out.println("Start Padding: "+((double)(MENU_WIDTH) / FRAME_WIDTH));
-        System.out.println("Select Padding: "+(MENU_WIDTH / 2.0 / FRAME_WIDTH));
+        GridPanel start = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.X_AXIS); // Creates a GridPanel to hold the Start Button
+        start.add(makePadding(MENU_WIDTH/3, MENU_HEIGHT), 0, 0, 1, 1, GridBagConstraints.BOTH); // Adds Left Padding
+        start.add(startButton, 0, 1, 1, 1, GridBagConstraints.BOTH); // Adds the Start Button to the Start Panel
+        start.add(makePadding(MENU_WIDTH/3, MENU_HEIGHT), 0, 2, 1, 1, GridBagConstraints.BOTH); // Adds Right Padding
+        start.setSize(FRAME_WIDTH, MENU_HEIGHT); // Sets the default size of the Start Button
+        
+        GridPanel select = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.X_AXIS); // Creates a GridPanel to hold the Selector
+        select.add(makePadding(MENU_WIDTH/6, MENU_HEIGHT), 0, 0, 1, 1, GridBagConstraints.BOTH); // Adds Left Padding
+        select.add(selector, 0, 1, 1, 1, GridBagConstraints.BOTH); // Adds the Selector to the Selector Panel
+        select.add(makePadding(MENU_WIDTH/6, MENU_HEIGHT), 0, 2, 1, 1, GridBagConstraints.BOTH); // Adds Right Padding
+        select.setSize(FRAME_WIDTH, MENU_HEIGHT); // Sets the default size of the Selector
 
         final CurvedLabel counter = new CurvedLabel("Players:    2"); // Creates the Player Counter display
         counter.setFont(new Font("Serif", Font.PLAIN, 75)); // Sets the font of the Counter to size 75
+        counter.setSize(FRAME_WIDTH, MENU_HEIGHT); // Sets the default size of the Player Display
 
-        screen.add(counter); // Adds the counter to the Menu
-        screen.add(select); // Adds the Selector to the Menu
-        screen.add(start); // Adds the Start Button to the Menu
-
-        setDefaultSizes(screen, MENU_WIDTH*3 - MENU_WIDTH/2, MENU_HEIGHT*3); // Sets the default sizes of the Menu
+        menu.add(makePadding(FRAME_WIDTH, FRAME_HEIGHT/3 - MENU_HEIGHT), 0, 0, 1, 1, GridBagConstraints.BOTH); // Adds Top Padding
+        menu.add(counter, 1, 0, 1, 1, GridBagConstraints.BOTH); // Adds the Player Display to the Main Menu
+        menu.add(makePadding(FRAME_WIDTH, FRAME_HEIGHT/3 - MENU_HEIGHT), 2, 0, 1, 1, GridBagConstraints.BOTH); // Adds Middle Padding
+        menu.add(select, 3, 0, 1, 1, GridBagConstraints.BOTH); // Adds the Selector to the Main Menu
+        menu.add(makePadding(FRAME_WIDTH, FRAME_HEIGHT/3 - MENU_HEIGHT), 4, 0, 1, 1, GridBagConstraints.BOTH); // Adds Middle Padding
+        menu.add(start, 5, 0, 1, 1, GridBagConstraints.BOTH); // Adds the Start Button to the Main menu
+        menu.add(makePadding(FRAME_WIDTH, FRAME_HEIGHT/3 - MENU_HEIGHT), 6, 0, 1, 1, GridBagConstraints.BOTH); // Adds Bottom Padding
 
         selector.addChangeListener(new ChangeListener() {
             @Override
@@ -449,8 +459,9 @@ class Board extends JFrame {
                 counter.setText("Players:    "+player_count); // Adjust the counter to match the slider's value
             }
         });
-        screen.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT));
-        mainPanel.add(screen, BorderLayout.CENTER); // Create and add the Menu to the JPanel
+
+        l.setConstraints(menu, createConstraints(1, 1, 0, 0, 1, 1, GridBagConstraints.BOTH)); // Sets the constraints for the Main menu
+        mainPanel.add(menu); // Create and add the Menu to the JPanel
     }
 
     private GridBagConstraints createConstraints(double xLbs, double yLbs, int x, int y, int w, int h, int fill) {
