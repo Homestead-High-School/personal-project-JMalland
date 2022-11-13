@@ -125,12 +125,6 @@ class Board extends JFrame {
     }
 
     // Should be remade
-    // Returns whether or not the game has been started
-    public boolean gameStarted() {
-        return(GameStarted);
-    }
-
-    // Should be remade
     public int getPlayers() {
         return(player_count); // Returns the number of players
     }
