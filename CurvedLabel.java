@@ -20,7 +20,7 @@ public class CurvedLabel extends JLabel {
 
     public CurvedLabel(String s, int r, Color c) {
         text = s;
-        background = c;
+        color = c;
     }
 
     public static void setFrame(JFrame f) {
@@ -29,6 +29,11 @@ public class CurvedLabel extends JLabel {
 
     public void setColor(Color c) {
         color = c;
+        repaint();
+    }
+
+    public void setBackground(Color c) {
+        background = c;
         repaint();
     }
 

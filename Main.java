@@ -112,6 +112,9 @@ public class Main {
                     if (score > 0) {
                         b.tilesWereSubmitted();
                     }
+                    else {
+                        //b.createError("Invalid Word");
+                    }
                 }
                 else if (e.getID() == b.RECALLED_TILE) {
                     if (real.notYetPlaced(e.getRow(), e.getCol())) {

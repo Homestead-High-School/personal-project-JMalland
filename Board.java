@@ -457,6 +457,56 @@ class Board extends JFrame {
         mainPanel.add(menu); // Create and add the Menu to the JPanel
     }
 
+    public void createError(String error) {
+        final GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
+        GridPanel errorPanel = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.X_AXIS);
+        CurvedLabel text = new CurvedLabel(error, TILE_RADIUS, Color.red);
+        text.setFont(new Font("Serif", Font.ITALIC, (int)(FONT_SIZE*1.5)));
+        text.setSize((int)(FRAME_WIDTH - 3.5*TILE_SIZE), (int)(3.5*TILE_SIZE));
+        text.setBackground(Color.GRAY);
+        text.setOpaque(true);
+        errorPanel.add(makePadding((int)(3.5*TILE_SIZE), (int)(3.5*TILE_SIZE)), 0, 0, 1, 1, GridBagConstraints.BOTH);
+        errorPanel.add(text, 0, 1, 1, 1, GridBagConstraints.BOTH);
+        errorPanel.add(makePadding((int)(3.5*TILE_SIZE), (int)(3.5*TILE_SIZE)), 0, 2, 1, 1, GridBagConstraints.BOTH);
+        errorPanel.setPreferredSize(new Dimension(FRAME_WIDTH - (int)(3.5*TILE_SIZE), (int)(3.5*TILE_SIZE)));
+        l.setConstraints(errorPanel, createConstraints(1, 1, 0, 0, 1, 1, GridBagConstraints.BOTH));
+
+        final GridPanel tempBoard = (GridPanel) gamePanel.getComponent(1);
+        gamePanel.remove(1);
+        final JLayeredPane board = new JLayeredPane();
+        board.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
+        
+        board.add(tempBoard, new Integer(1), 0);
+        board.add(errorPanel, new Integer(0), 1);
+
+        l.setConstraints(board, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH));
+        gamePanel.add(board);
+
+        // How to use Java Swing Timer: https://stackoverflow.com/questions/28521173/how-to-use-swing-timer-actionlistener
+        final Timer real = new Timer(100, new ActionListener() { // Real timer executes every 100 Miliseconds
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.print(". ");
+            }
+        });
+        Timer original = new Timer(5000, new ActionListener() { // Original timer executes after 5 Seconds
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                real.stop(); // Stops the Real timer from running
+                System.out.println("Stopped.");
+                gamePanel.remove(board);
+                l.setConstraints(tempBoard, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH));
+                gamePanel.add(tempBoard);
+                frame.pack();
+            }
+        });
+        original.setRepeats(false); // Stops the Original timer from repeating
+        real.start(); // starts the Real timer
+        System.out.print("Running ");
+        original.start(); // Starts the Original timer
+        frame.pack();
+    }
+
     private GridBagConstraints createConstraints(double xLbs, double yLbs, int x, int y, int w, int h, int fill) {
         GridBagConstraints g = new GridBagConstraints();
         g.weightx = xLbs;
