@@ -134,10 +134,9 @@ class Board extends JFrame {
     // Sets the letters on each tile within the players hand
     public void setHand(char[] list) {
         for (int i=0; i<list.length; i++) {
-            Tile button = getTile(i);
-            button.setText(list[i]+"");
-            button.setOriginal(list[i]+"");
-            button.setValue(Scrabble.getLetterValue(list[i]));
+            getTile(i).setText(list[i]+"");
+            getTile(i).setOriginal(list[i]+"");
+            getTile(i).setValue(Scrabble.getLetterValue(list[i]));
         }
     }
 
