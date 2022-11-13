@@ -141,8 +141,6 @@ public class Scrabble {
 
     private boolean calcRowOrCol(final boolean rowOrCol) {
         // Eventually need to remove the " map.get(p) == ' ' " and implement a blank tile chooser.
-        // Sort rows & cols by both row and col index, to compare words in same column and row.
-        // https://stackoverflow.com/questions/2784514/sort-arraylist-of-custom-objects-by-property
         int score = 0;
         TreeMap<Point, Character> map = makeSortedMap(rowOrCol);
         HashMap<Point, Integer> letterMap = new HashMap<Point, Integer>();
@@ -198,7 +196,9 @@ public class Scrabble {
         return(score == 0); // Returns whether or not the final word is valid
     }
 
+    // Returns a TreeMap of sorted points, sorted based on column or row. Used to compare word placement
     private TreeMap<Point, Character> makeSortedMap(boolean rowOrCol) {
+        // https://stackoverflow.com/questions/2784514/sort-arraylist-of-custom-objects-by-property
         TreeMap<Point, Character> map = new TreeMap<Point, Character>(new Comparator<Point>() { // Sort By Columns
             @Override
             public int compare(Point a, Point b) {
