@@ -17,6 +17,8 @@ class Board extends JFrame {
     private final double widthMargin = 9.0/16.0; // 50% Width Ratio Acceptable Margin
     private final double heightMargin = 0.20; // 20% Height Ratio Acceptable Margin
     public final int SELECTED_HAND = ("HAND").hashCode();
+    public final int SELECTED_LETTER = ("SELECT").hashCode();
+    public final int PLACING_LETTER = ("PLACING").hashCode();
     public final int PLACED_LETTER = ("TILE").hashCode();
     public final int RECALLED_TILE = ("RECALL").hashCode();
     public final int RECALLED_ALL = ("ALL").hashCode();
@@ -192,13 +194,18 @@ class Board extends JFrame {
     // Recalls all tiles placed on the board, starting the play over
     public void recallTiles() {
         for (Tile p : placedTiles) { // Loop through each Tile placed on the board
-            recallTile(p); // Recall the current tile back to its originating position.
+            if (p.getPoint() != null) {
+                dispatchEvent(new CustomEvent(p, RECALLED_TILE, p.getPoint().r, p.getPoint().c)); // Trigger an ActionEvent to allow the client to determine whether or not the tile can be recalled
+            }
+            else {
+                //recallTile(p); // Recall the current tile back to its originating position.
+            }
         }
         placedTiles.clear(); // Wipe the set of all placed tiles, since they were recalled
     }
 
     // Recalls a tile back to its original position
-    private void recallTile(Tile p) {
+    public void recallTile(Tile p) {
         if (p == null) { // Checks if Tile 'p' is null
             return; // End the function if there's nothing to do
         }
@@ -206,9 +213,6 @@ class Board extends JFrame {
         p.setText(p.getOriginal()); // Swap the placed tile text with its original
         p.setPointingTo(null); // Set it so the placed tile no longer points to anything
         recallTile(pointingAt); // Recalls the tile Tile 'p' was pointing to
-        if (p.getPoint() != null) {
-            dispatchEvent(new CustomEvent(p, RECALLED_TILE, p.getPoint().r, p.getPoint().c)); // Trigger an ActionEvent to signal a Board Tile was recalled
-        }
     }
 
     public void shuffleTiles() {
@@ -285,10 +289,10 @@ class Board extends JFrame {
                 temp.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         if (selected_tile != -1 && calculateTile(temp.getPoint().r, temp.getPoint().c) != selected_tile) { // Checks if the selected tile is valid and is not the same tile
-                            placeTile(temp); // Places the selected tile onto the chosen one
+                            dispatchEvent(new CustomEvent(temp, PLACING_LETTER, temp.getPoint().r, temp.getPoint().c)); // Trigger an ActionEvent to allow the client to determine whether or not the tile can be placed
                         }
                         else if (temp.findText().length() == 1) { // Checks that the chosen tile holds a valid letter
-                            selectTile(temp); // Selects the chosen tile
+                            dispatchEvent(new CustomEvent(temp, SELECTED_LETTER, temp.getPoint().r, temp.getPoint().c)); // Trigger an ActionEvent to allow the client to determine whether or not the tile can be selected
                         }
                     }
                 });

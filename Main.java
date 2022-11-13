@@ -82,13 +82,23 @@ public class Main {
                 else if (e.getID() == b.DRAW_HAND) {
                     System.out.println("Hand Drawn.");
                     b.setHand(basic.drawTiles());
-                    //b.setHand(new char[] {'O', 'K', 'N', 'O', 'S', 'E', 'S'});
+                    b.setHand(new char[] {'O', 'K', 'N', 'O', 'S', 'E', 'S'});
                 }
                 else if (e.getID() == b.SELECTED_HAND) {
                     System.out.println("Selected Tile.");
                 }
                 else if (e.getID() == b.SHUFFLED_TILES) {
                     System.out.println("Shuffled Tiles.");
+                }
+                else if (e.getID() == b.PLACING_LETTER || e.getID() == b.SELECTED_LETTER) {
+                    if (real.notYetPlaced(e.getRow(), e.getCol())) {
+                        if (e.getID() == b.PLACING_LETTER) {
+                            b.placeTile((Tile) e.getSource());
+                        }
+                        else {
+                            b.selectTile((Tile) e.getSource());
+                        }
+                    }
                 }
                 else if (e.getID() == b.PLACED_LETTER) {
                     Tile t = (Tile) e.getSource();
@@ -97,13 +107,14 @@ public class Main {
                 }
                 else if (e.getID() == b.FINALIZED_PLAY) {
                     System.out.println("Submitted Letters: "+real.getPlacedLetters()+".");
-                    System.out.println("Submitted Play Is Valid: "+real.validWordPlacement()+".");
-                    System.out.println("Submitted Play Is Worth: "+real.calculatePlacementValue()+".");
-                    System.out.println("Submitted Play Connectedness: "+real.areConnected(true)+".");
+                    System.out.println("Submitted Play Is Worth: "+real.submitWordPlacement());
                 }
                 else if (e.getID() == b.RECALLED_TILE) {
-                    System.out.println("Recalled Placed Tile.");
-                    real.recallTile(e.getRow(), e.getCol());
+                    if (real.notYetPlaced(e.getRow(), e.getCol())) {
+                        System.out.println("Recalled Placed Tile.");
+                        b.recallTile((Tile) e.getSource());
+                        real.recallTile(e.getRow(), e.getCol());
+                    }
                 }
                 else if (e.getID() == b.RECALLED_ALL) {
                     System.out.println("Recalled All Tiles.");

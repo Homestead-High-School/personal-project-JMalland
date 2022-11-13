@@ -25,14 +25,20 @@ public class Scrabble {
         {0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0},
         {4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4}
     };
+    private final int DOWN = 1;
+    private final int UP = 2;
+    private final int LEFT = 3;
+    private final int RIGHT = 4;
     private TreeMap<Character, HashMap<String, String>> list;
     private char[][] map = new char[15][15];
+    private HashMap<Point, Character> placed;
     private HashMap<Point, Character> items;
     private HashMap<Point, Integer> counted;
     private int numTiles = 0;
 
     public Scrabble(TreeMap<Character, HashMap<String, String>> list) {
         this.list = list; // Map of possible words, sorted by first character, A-Z
+        placed = new HashMap<Point, Character>();
         items = new HashMap<Point, Character>(); // Map of coordinates, each pointing to a char
         counted = new HashMap<Point, Integer>();
         numTiles = 100; // Set the default number of tiles
@@ -84,41 +90,94 @@ public class Scrabble {
         return(s);
     }
 
-    public int calculatePlacementValue() {
-        calcRowOrCol(true); // Calculate the row values
-        calcRowOrCol(false); // Calculate the col values
-        int score = 0;
-        for (Point p : counted.keySet()) {
-            //System.out.print("["+p.getRow()+"]["+p.getCol()+"] --> "+counted.get(p)+"    ");
-            score += counted.get(p);
-        }
-        counted.clear();
-        //System.out.println();
-        return(score);
+    // Returns whether or not a tile has been placed at a set of coordinates
+    public boolean notYetPlaced(int r, int c) {
+        return(!placed.containsKey(new Point(r, c)));
     }
 
+    public int submitWordPlacement() {
+        HashMap<Point, Integer> check = new HashMap<Point, Integer>(); // HashMap to contain points that will be verified
+        for (Point p : items.keySet()) {
+            int r = p.getRow(); // Store the current row, for easy access
+            int c = p.getCol(); // Store the current col, for easy acess
+            if (placed.containsKey(new Point(r+1, c)) && !items.containsKey(new Point(r+1, c))) { // Check to see if the point below has been played
+                System.out.println("Added: ["+(r+1)+"]["+c+"] == DOWN");
+                check.put(p, DOWN); // Add the point to the 'check' map
+            }
+            if (placed.containsKey(new Point(r-1, c)) && !items.containsKey(new Point(r-1, c))) { // Check to see if the point above has been played
+                System.out.println("Added: ["+(r-1)+"]["+c+"] == UP");
+                check.put(p, UP); // Add the point to the 'check' map
+            }
+            if (placed.containsKey(new Point(r, c+1)) && !items.containsKey(new Point(r, c+1))) { // Check to see if the right point has been played
+                System.out.println("Added: ["+r+"]["+(c+1)+"] == RIGHT");
+                check.put(p, RIGHT); // Add the point to the 'check' map
+            }
+            if (placed.containsKey(new Point(r, c-1)) && !items.containsKey(new Point(r, c-1))) { // Check to see if the left point has been played
+                System.out.println("Added: ["+r+"]["+(c-1)+"] == LEFT");
+                check.put(p, LEFT); // Add the point to the 'check' map
+            }
+        }
+        for (Point p : check.keySet()) { // Loops through each point to be checked
+            int direct = check.get(p); // Stores the direction Point 'p' is heading, for simplicity
+            int rowDiff = direct == DOWN || direct == UP ? (direct == UP ? -1 : 1) : 0; // Calculates whether the row moves up or down.
+            int colDiff = direct == LEFT || direct == RIGHT ? (direct == LEFT ? -1 : 1) : 0; // Calculates whether the col moves left or right.
+            Point current = new Point(p.getRow() + rowDiff, p.getCol() + colDiff); // Create a new Point following the direction of the word at Point 'p'
+            System.out.println("Current is: ["+current.getRow()+"]["+current.getCol()+"]");
+            while (placed.containsKey(current)) { // Keep running as long as the word is there
+                items.put(current, placed.get(current)); // Add the current point to the list of newly placed tiles, to be calculated in the overall score
+                System.out.println("Added: ["+current.getRow()+"]["+current.getCol()+"] --> "+placed.get(current));
+                current = new Point(current.getRow() + rowDiff, current.getCol() + colDiff); // Recalculate the new point
+            }
+        }
+        if (validWordPlacement()) { // Check to see that all connecting words fit legally on the board
+            System.out.println(check.keySet());
+            for (Point p : items.keySet()) { // Loop through each Point that was checked
+                placed.putIfAbsent(p, items.get(p)); // Add the point to the placed tiles, since the play is valid
+            }
+            clearWordPlacement(); // Erase the map of placed items, because they've all been appended
+            return(calculatePlacementValue()); // Return the overall score of all connecting words
+        }
+        clearWordPlacement(); // Erase the map of placed items, because they've all been appended
+        return(0);
+    }
+
+    // Calculates the total sum of all placed tiles in a single play.
+    // Assumes all played tiles are in a valid formation.
+    public int calculatePlacementValue() {
+        int score = 0; // Integer to hold the current score
+        for (Point p : counted.keySet()) { // Loop through each Point that is being added
+            //System.out.print("["+p.getRow()+"]["+p.getCol()+"] --> "+counted.get(p)+"    ");
+            score += counted.get(p); // Add the value of the Point to the score
+        }
+        counted.clear(); // Erase the list of counted points so nothing gets repeated
+        //System.out.println();
+        return(score); // Return the score
+    }
+
+    // Returns whether or not the tiles played form a valid word in proper formation
     public boolean validWordPlacement() {
         return(areConnected(true) && calcRowOrCol(true) && calcRowOrCol(false)); // Check that the words formed by rows and columns are valid
     }
 
+    // Public method to allow for the client to recall tiles
     public void clearWordPlacement() {
-        counted.clear(); // Clear the map of scored tiles
         items.clear(); // Clear the map of placed tiles
     }
 
+    // Returns whether or not the played tiles are in-line with either the same row or column
     public boolean areConnected(boolean rowOrCol) {
         TreeMap<Point, Character> map = makeSortedMap(rowOrCol);
         boolean isConnected = true; // Stores the status of whether or not there's gaps between tiles in the row or column
         int altPosition = -1; // Stores the current tile position
-        int position = -1;
-        int length = 0;
+        int position = -1; // Stores the row or column the word is placed along
+        int length = 0; // Stores the length of the word to determine validity
         for (Point p : map.keySet()) { // Loops through each tile
-            int posUsed = rowOrCol ? p.getRow() : p.getCol();
-            int altPos = rowOrCol ? p.getCol() : p.getRow(); // Determines the current position
+            int posUsed = rowOrCol ? p.getRow() : p.getCol(); // Determines the current position
+            int altPos = rowOrCol ? p.getCol() : p.getRow(); // Determines the current alternate position
             if (altPosition == -1) { // Checks if the tile position is at its default
-                altPosition = altPos; // Update the position to match the current
-                position = posUsed;
-                length ++;
+                altPosition = altPos; // Update the alternate position to match the current
+                position = posUsed; // Update the position to match the current
+                length ++; // Increase the length to match the newly counted character
             }
             else if (posUsed != position) { // Check if the position is no longer current
                 if (length < 2) { // Check to see if the length is valid
@@ -135,27 +194,23 @@ public class Scrabble {
             }
             else {
                 altPosition = altPos; // Update the tile position to be current
-                length ++;
+                length ++; // Increase the length to match the newly counted character
             }
         }
         isConnected = !isConnected ? isConnected : length > 1;
-        if (rowOrCol) {
-            return(isConnected || areConnected(!rowOrCol)); // Return whether or not there are no gaps between tiles in either the row or col 
-        }
-        else {
-            return(isConnected); // Return whether or not there are no gaps between tiles
-        }
+        return(rowOrCol ? isConnected || areConnected(!rowOrCol) : isConnected); // Returns whether there are gaps between the placed tiles in either rows or columms
     }
 
     private boolean calcRowOrCol(final boolean rowOrCol) {
         // Eventually need to remove the " map.get(p) == ' ' " and implement a blank tile chooser.
+        // Eventually need to remove the x2 or x3 bonus tiles, after they've been calculated in the score.
         int score = 0;
         TreeMap<Point, Character> map = makeSortedMap(rowOrCol);
         HashMap<Point, Integer> letterMap = new HashMap<Point, Integer>();
         HashMap<Point, Integer> wordMap = new HashMap<Point, Integer>();
         String current = ""; // String to store the current word, formed by row or column
         int position = -1; // Stores the position of the current word to mark when the loop shifts rows or columns
-        int wordMultiplier = 1;
+        int wordMultiplier = 1; // Stores the value at which to multiply the word's score
         for (Point p : map.keySet()) { // Loop through each character, forming each possible word in the list
             int posUsed = rowOrCol ? p.getRow() : p.getCol(); // Use X if 'rowOrCol' is true, otherwise use Y
             int posVal = Scrabble.getVal(p.getRow(), p.getCol());
@@ -175,17 +230,13 @@ public class Scrabble {
             if (map.get(p) != ' ') {
                 current += map.get(p); // Only add the character if it isn't a space
             }
-            int letterMultiplier = 1;
-            if (posVal == 4 || posVal == 3) { // Checks if the tile is a word multiplier
-                wordMultiplier *= posVal - 1; // Adds the value to the total multiplier
-            }
-            else if (posVal == 2 || posVal == 1) { // Checks if the tile is a letter multiplier
-                letterMultiplier *= posVal + 1; // Adds the value to the letter multiplier
-            }
+            wordMultiplier *= (posVal == 4 || posVal == 3) ? posVal - 1 : 1; // Adds to the total multiplier, if needed
+            int letterMultiplier = (posVal == 2 || posVal == 1) ? posVal + 1 : 1; // Adds to the letter multiplier, if needed
             int charValue = Scrabble.getLetterValue(map.get(p)) * letterMultiplier; // Calculate the letter value
             letterMap.put(p, charValue); // Add the point to the letter map, per each word
         }
         
+        // This block right here could probably be turned into a method
         if (isLegalWord(current) && score >= 0 && current.length() > 1) { // Check to see if the word is valid
             for (Point x : letterMap.keySet()) { // Loop through each point in the letter map
                 wordMap.put(x, letterMap.get(x) * wordMultiplier); // Add the total point value to the word map
@@ -194,13 +245,12 @@ public class Scrabble {
         else if (current.length() > 1) {
             score = -1; // Sets the score to negative, if invalid
         }
-        System.out.println();
-        for (Point x : wordMap.keySet()) {
+
+        for (Point x : wordMap.keySet()) { // Loop through each Point within the wordMap to add the highest valued tiles to the calculations
             if (!counted.containsKey(x) || counted.get(x) < wordMap.get(x)) { // Check that the point hasn't been counted, or wasn't counted at the right value
                 counted.put(x, wordMap.get(x)); // Update the counted tiles map to hold the tiles of highest value
             }
         }
-
         return(score == 0); // Returns whether or not the final word is valid
     }
 
