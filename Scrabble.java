@@ -1,8 +1,9 @@
 import java.util.TreeMap;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Random;
 import java.util.Comparator;
+
+// Will eventually need to create a method to find all directly connected points to a valid placed word
 
 public class Scrabble {
     private static int[] tiles = new int[] {9, 2, 2, 2, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1, 2}; // List of tile amounts, each corresponding to a letter
@@ -72,7 +73,6 @@ public class Scrabble {
         if (r > map.length || c > map[0].length) { // Throw an exception if I'm stupid enough to make such a horrible mistake
             throw new IllegalArgumentException("Index Out Of Bounds For Map Placement");
         }
-        //System.out.println("Map Contains: "+items.containsKey(new Point(r, c)));
         items.put(new Point(r, c), l); // Append the coordinate, pointing to the character
     }
 
