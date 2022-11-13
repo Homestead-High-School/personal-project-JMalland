@@ -46,7 +46,7 @@ public class Tile extends CurvedButton {
         a.letterBonus = b.letterBonus;
         a.wordBonus = b.wordBonus;
         a.tileValue = b.tileValue;
-        a.setPoint(b.getPoint());
+        a.point = b.point;
         // Swaps all of Tile B's properties with A's original properties
         b.setText(aText);
         b.setOriginal(aOrigin);
@@ -54,7 +54,7 @@ public class Tile extends CurvedButton {
         b.letterBonus = aLBonus;
         b.wordBonus = aWBonus;
         b.tileValue = aTileVal;
-        b.setPoint(aPoint);
+        b.point = aPoint;
     }
     
     public void resetProperties(String s, int r, Color c, int o, int l, int w) {
@@ -70,10 +70,6 @@ public class Tile extends CurvedButton {
         tileValue = v;
     }
 
-    public void setPoint(Point p) {
-        point = p;
-    }
-
     public void setOriginal(String s) {
         originalText = s;
     }
@@ -84,14 +80,6 @@ public class Tile extends CurvedButton {
 
     public Point getPoint() {
         return(point);
-    }
-
-    public int getWordBonus() {
-        return(wordBonus);    
-    }
-
-    public int getLetterBonus() {
-        return(letterBonus);
     }
 
     // Sets the text of the Tile while saving the original text

@@ -1,6 +1,5 @@
 import java.util.*;
 import java.io.File;
-import java.awt.event.*;
 public class Main {
     public static void main(String[] args) {
         final TreeMap<Character, HashMap<String, String>> map = parseAndStore("Words.txt"); // Get the sorted TreeMap
@@ -83,26 +82,31 @@ public class Main {
                 else if (e.getID() == b.DRAW_HAND) {
                     System.out.println("Hand Drawn.");
                     b.setHand(basic.drawTiles());
-                    b.setHand(new char[] {'O', 'K', 'N', 'O', 'S', 'E', 'S'});
+                    //b.setHand(new char[] {'O', 'K', 'N', 'O', 'S', 'E', 'S'});
                 }
                 else if (e.getID() == b.SELECTED_HAND) {
                     System.out.println("Selected Tile.");
-                    //b.selectTile(e.getSource(), e.getIndex());
+                }
+                else if (e.getID() == b.SHUFFLED_TILES) {
+                    System.out.println("Shuffled Tiles.");
                 }
                 else if (e.getID() == b.PLACED_LETTER) {
                     Tile t = (Tile) e.getSource();
                     System.out.println("Placed Tile @ ["+t.getPoint().r+"]["+t.getPoint().c+"]. Contains Letter: "+t.findText()+".");
                     real.placeLetter(e.getChar(), e.getRow(), e.getCol());
-                    //b.placeTile(e.getSource(), e.getRow(), e.getCol());
                 }
                 else if (e.getID() == b.FINALIZED_PLAY) {
-                    System.out.println("Submitted Play Is Valid: "+real.validWordPlacement());
-                    System.out.println("Submitted Play Is Worth: "+real.calculatePlacementValue());
-                    System.out.println("Submitted Play Connectedness: "+real.areConnected(true));
+                    System.out.println("Submitted Letters: "+real.getPlacedLetters()+".");
+                    System.out.println("Submitted Play Is Valid: "+real.validWordPlacement()+".");
+                    System.out.println("Submitted Play Is Worth: "+real.calculatePlacementValue()+".");
+                    System.out.println("Submitted Play Connectedness: "+real.areConnected(true)+".");
                 }
                 else if (e.getID() == b.RECALLED_TILE) {
                     System.out.println("Recalled Placed Tile.");
                     real.recallTile(e.getRow(), e.getCol());
+                }
+                else if (e.getID() == b.RECALLED_ALL) {
+                    System.out.println("Recalled All Tiles.");
                     real.clearWordPlacement();
                 }
             }

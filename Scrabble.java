@@ -76,6 +76,14 @@ public class Scrabble {
         items.put(new Point(r, c), l); // Append the coordinate, pointing to the character
     }
 
+    public String getPlacedLetters() {
+        String s = "";
+        for (char c : items.values()) {
+            s += c;
+        }
+        return(s);
+    }
+
     public int calculatePlacementValue() {
         calcRowOrCol(true); // Calculate the row values
         calcRowOrCol(false); // Calculate the col values

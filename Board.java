@@ -19,6 +19,7 @@ class Board extends JFrame {
     public final int SELECTED_HAND = ("HAND").hashCode();
     public final int PLACED_LETTER = ("TILE").hashCode();
     public final int RECALLED_TILE = ("RECALL").hashCode();
+    public final int RECALLED_ALL = ("ALL").hashCode();
     public final int SHUFFLED_TILES = ("SHUFFLE").hashCode();
     public final int FINALIZED_PLAY = ("SUBMIT").hashCode();
     public final int DRAW_HAND = ("DRAW").hashCode();
@@ -81,28 +82,25 @@ class Board extends JFrame {
             public void componentResized(ComponentEvent componentEvent) { // Method to run every time window is resized
                 double width = frame.getWidth(); // Stores the width as a double for easy division
                 double height = frame.getHeight(); // Stores the height as a double for easy division
-                System.out.println("Window Resized: "+width+" x "+height);
                 double widthCheck = Math.abs(1-(width/height)/(widthRatio/heightRatio));
                 double heightCheck = Math.abs(1-(height/width)/(heightRatio/widthRatio));
-                System.out.println(widthCheck+" || "+heightCheck);
                 if (width/height != widthRatio/heightRatio && (widthCheck > widthMargin || heightCheck < heightMargin)) {
-                    if (Math.abs(FRAME_WIDTH - width) > Math.abs(FRAME_HEIGHT - height)) { // Checks to see if Width is increasing
-                        frame.setPreferredSize(new Dimension((int)(width), (int)(FRAME_HEIGHT * (width / FRAME_WIDTH)))); // Adjusts height to match
-                    }
-                    else if (Math.abs(FRAME_HEIGHT - height) > Math.abs(FRAME_WIDTH - width)) { // Checks to see if Height is increasing
-                        frame.setPreferredSize(new Dimension((int)(FRAME_WIDTH * (height / FRAME_HEIGHT)), (int)(height))); // Adjusts width to match
-                    }
-                    width = frame.getWidth(); // Updates the width variable
-                    height = frame.getHeight(); // Updates the height variable
                     if (width > MAX_WIDTH || height > MAX_HEIGHT) { // Checks to see if the new dimensions are within the maximum
                         frame.setPreferredSize(new Dimension(MAX_WIDTH, MAX_HEIGHT)); // Resets the frame to display at max size
                     }
                     else if (width < MIN_WIDTH || height < MIN_HEIGHT) { // Checks to see if the new dimensions are within the minimum
                         frame.setPreferredSize(new Dimension(MIN_WIDTH, MIN_HEIGHT)); // Resets the frame to display at min size
                     }
+                    else if (Math.abs(FRAME_WIDTH - width) > Math.abs(FRAME_HEIGHT - height)) { // Checks to see if Width is increasing
+                        frame.setPreferredSize(new Dimension((int)(width), (int)(FRAME_HEIGHT * (width / FRAME_WIDTH)))); // Adjusts height to match
+                    }
+                    else if (Math.abs(FRAME_HEIGHT - height) > Math.abs(FRAME_WIDTH - width)) { // Checks to see if Height is increasing
+                        frame.setPreferredSize(new Dimension((int)(FRAME_WIDTH * (height / FRAME_HEIGHT)), (int)(height))); // Adjusts width to match
+                    }
                 }
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
+                System.out.println("Window Resized: "+FRAME_WIDTH+" x "+FRAME_HEIGHT);
                 frame.pack(); // Pack once more, in case the Hand was adjusted
             }
         });
@@ -170,7 +168,6 @@ class Board extends JFrame {
     }
 
     // Places the letter from the selected tile within the players hand
-    // May want to dispatch a CustomEvent containing the coords/letter placed to Main.java
     public void placeTile(Tile c) {
         if (selected_tile < 0 || !(c instanceof Tile) || c == getTile(selected_tile)) { // Check to see if the tile can be placed
             return; // Return, if no tile is selected
@@ -178,7 +175,7 @@ class Board extends JFrame {
 
         Tile select = getTile(selected_tile); // Store the selected tile
         Tile old = c.getPointingTo(); // Store the previously placed tile, if there is one
-        boolean isBoardTile = selected_tile > 7; // Check if the selected tile is a Board tile
+        boolean isBoardTile = selected_tile >= 7; // Check if the selected tile is a Board tile
 
         recallTile(isBoardTile ? null : old); // Reset the previously placed tile to its default, if the selected tile isn't a Board tile
         c.swapText(select.findText()); // Swap the text from the selected tile to the placed tile
@@ -189,6 +186,9 @@ class Board extends JFrame {
         if (isBoardTile && old == null) { // Checks if there's no previous tile, and the selected tile is a Board tile
             placedTiles.remove(select); // Removes the selected tile from the list of placed tiles
             recallTile(select); // Resets the selected tile to it's default content
+        }
+        else if (isBoardTile) { // Checks that the selected tile is a Board tile
+            dispatchEvent(new CustomEvent(select, PLACED_LETTER, select.findText().charAt(0), select.getPoint().r, select.getPoint().c)); // Triggers an ActionEvent because the tile was replaced, once more.
         }
 
         placedTiles.add(c); // Add the placed tile to the list of tiles
@@ -235,6 +235,8 @@ class Board extends JFrame {
         return(map); // Return the newly created HashMap
     }
 
+    // Creates the JPanel that displays the current player and their score
+    // Still under development
     private void createScoreboard() {
         gamePanel = new JPanel(new GridBagLayout()); // Clears the gamePanel
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
@@ -287,7 +289,6 @@ class Board extends JFrame {
                     temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(0xD7381C), tile%2 == 1 ? 25 : 100, 1, tile);
                 }
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
-                temp.setPoint(new Point(r, c)); // Sets the [row][col] Point the tile is placed at
                 temp.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         if (selected_tile != -1 && calculateTile(temp.getPoint().r, temp.getPoint().c) != selected_tile) { // Checks if the selected tile is valid and is not the same tile
@@ -303,8 +304,7 @@ class Board extends JFrame {
             }
         }
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
-        GridBagConstraints g = createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH);
-        l.setConstraints(board, g); // Set the constraints on the board
+        l.setConstraints(board, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the board
         board.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
         gamePanel.add(board); // Create and add the board to the application frame
     }
@@ -342,8 +342,7 @@ class Board extends JFrame {
                 hand.add(temp, 0, i+2, 1, 2, GridBagConstraints.BOTH);
             }
         }
-        GridBagConstraints g = createConstraints(1, (H_TILE_SIZE + 2*H_X_OFF)/1.0/MAX_WIDTH, 0, 2, 1, 0, GridBagConstraints.BOTH); // 0.147727 or 0.116666 seem to be the right ratios
-        l.setConstraints(hand, g); // Set the constraints on the hand
+        l.setConstraints(hand, createConstraints(1, (H_TILE_SIZE + 2*H_X_OFF)/1.0/MAX_WIDTH, 0, 2, 1, 0, GridBagConstraints.BOTH)); // Set the constraints on the hand
         createHandOptions(hand); // Create the action buttons, located on the Player's Hand
         hand.setPreferredSize(new Dimension(FRAME_WIDTH, H_TILE_SIZE));
         gamePanel.add(hand); // Create and add the hand to the application frame;
@@ -364,7 +363,14 @@ class Board extends JFrame {
 
         recall.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                recallTiles(); // Recalls all placed tiles
+                if (selected_tile >= 7) { // Checks if the selected tile is a Board tile
+                    recallTile(getTile(selected_tile)); // Recalls the selected tile
+                    selectTile(getTile(selected_tile)); // Clear the selection
+                }
+                else { // If there is no selected tile, or it isn't a Board tile
+                    recallTiles(); // Recalls all placed tiles
+                    dispatchEvent(new CustomEvent(frame, RECALLED_ALL)); // Trigger ActionEvent to signal all the tiles were recalled
+                }
             }
         });
         shuffle.addActionListener(new ActionListener() {
@@ -387,6 +393,7 @@ class Board extends JFrame {
     }
 
     // Creates the JPanel that contains the components which make up the main menu
+    // Need to redesign this at some point. PaddedPanel is just too non-redundant
     private void createMenu() {
         mainPanel = new JPanel(new BorderLayout()); // Clears and sets the layout manager for the mainPanel
         Menu screen = new Menu(MENU_WIDTH, MENU_HEIGHT, Menu.CENTER, Menu.Y_AXIS); // Generate the Main Menu
