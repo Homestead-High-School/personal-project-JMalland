@@ -18,7 +18,7 @@ class Board extends JFrame {
     private final double heightMargin = 0.20; // 20% Height Ratio Acceptable Margin
     public final int SELECTED_HAND = ("HAND").hashCode();
     public final int PLACED_LETTER = ("TILE").hashCode();
-    public final int RECALLED_TILES = ("RECALL").hashCode();
+    public final int RECALLED_TILE = ("RECALL").hashCode();
     public final int SHUFFLED_TILES = ("SHUFFLE").hashCode();
     public final int FINALIZED_PLAY = ("SUBMIT").hashCode();
     public final int DRAW_HAND = ("DRAW").hashCode();
@@ -202,7 +202,6 @@ class Board extends JFrame {
             recallTile(p); // Recall the current tile back to its originating position.
         }
         placedTiles.clear(); // Wipe the set of all placed tiles, since they were recalled
-        dispatchEvent(new CustomEvent(frame, RECALLED_TILES)); // Throw an event signalling the tiles have been recalled.
     }
 
     // Recalls a tile back to its original position
@@ -214,6 +213,9 @@ class Board extends JFrame {
         p.setText(p.getOriginal()); // Swap the placed tile text with its original
         p.setPointingTo(null); // Set it so the placed tile no longer points to anything
         recallTile(pointingAt); // Recalls the tile Tile 'p' was pointing to
+        if (p.getPoint() != null) {
+            dispatchEvent(new CustomEvent(p, RECALLED_TILE, p.getPoint().r, p.getPoint().c));
+        }
     }
 
     public void shuffleTiles() {
@@ -362,7 +364,6 @@ class Board extends JFrame {
 
         recall.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                dispatchEvent(new CustomEvent(recall, RECALLED_TILES)); // Dispatch Recall
                 recallTiles(); // Recalls all placed tiles
             }
         });

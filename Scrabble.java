@@ -1,5 +1,6 @@
 import java.util.TreeMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Comparator;
 
@@ -26,11 +27,13 @@ public class Scrabble {
     private TreeMap<Character, HashMap<String, String>> list;
     private char[][] map = new char[15][15];
     private HashMap<Point, Character> items;
+    private HashMap<Point, Integer> counted;
     private int numTiles = 0;
 
     public Scrabble(TreeMap<Character, HashMap<String, String>> list) {
         this.list = list; // Map of possible words, sorted by first character, A-Z
         items = new HashMap<Point, Character>(); // Map of coordinates, each pointing to a char
+        counted = new HashMap<Point, Integer>();
         numTiles = 100; // Set the default number of tiles
     }
 
@@ -42,8 +45,6 @@ public class Scrabble {
                 do { // Run the loop while the chosen character is empty
                     hand[i] = (char)(65+rand.nextInt(27)); // Choose a random character, from A-Z or SPACE
                     hand[i] = (hand[i]-65 == 26) ? 32 : hand[i]; // If the character was SPACE, fix the value
-                    // NEED TO DECREMENT THE OVERALL TILE COUNT
-                    // ENDS UP WITH TOO MANY INCORRECT LETTER AMOUNTS IN THE DEFAULT HANDS
                 } while (getLetterCount(hand[i]) == 0);
                 tiles[hand[i]-65 < 0 ? 26 : hand[i]-65] -= 1; // Decrements the count
             }
@@ -63,54 +64,154 @@ public class Scrabble {
         return(c == 32 ? Scrabble.tiles[26] : Scrabble.tiles[c-65]);
     }
 
-    public void recallTiles() {
-        items.clear();
+    public void recallTile(int row, int col) {
+        items.remove(new Point(row, col));
     }
 
     public void placeLetter(char l, int r, int c) {
         if (r > map.length || c > map[0].length) { // Throw an exception if I'm stupid enough to make such a horrible mistake
             throw new IllegalArgumentException("Index Out Of Bounds For Map Placement");
         }
-        items.put(new Point(c, r), l); // Append the coordinate, pointing to the character
+        //System.out.println("Map Contains: "+items.containsKey(new Point(r, c)));
+        items.put(new Point(r, c), l); // Append the coordinate, pointing to the character
+    }
+
+    public int calculatePlacementValue() {
+        calcRowOrCol(true); // Calculate the row values
+        calcRowOrCol(false); // Calculate the col values
+        int score = 0;
+        for (Point p : counted.keySet()) {
+            //System.out.print("["+p.getRow()+"]["+p.getCol()+"] --> "+counted.get(p)+"    ");
+            score += counted.get(p);
+        }
+        counted.clear();
+        //System.out.println();
+        return(score);
     }
 
     public boolean validWordPlacement() {
-        return(calcRowOrCol(true) && calcRowOrCol(false)); // Check that the words formed by rows and columns are valid
+        return(areConnected(true) && calcRowOrCol(true) && calcRowOrCol(false)); // Check that the words formed by rows and columns are valid
+    }
+
+    public void clearWordPlacement() {
+        counted.clear(); // Clear the map of scored tiles
+        items.clear(); // Clear the map of placed tiles
+    }
+
+    public boolean areConnected(boolean rowOrCol) {
+        TreeMap<Point, Character> map = makeSortedMap(rowOrCol);
+        boolean isConnected = true; // Stores the status of whether or not there's gaps between tiles in the row or column
+        int altPosition = -1; // Stores the current tile position
+        int position = -1;
+        int length = 0;
+        for (Point p : map.keySet()) { // Loops through each tile
+            int posUsed = rowOrCol ? p.getRow() : p.getCol();
+            int altPos = rowOrCol ? p.getCol() : p.getRow(); // Determines the current position
+            if (altPosition == -1) { // Checks if the tile position is at its default
+                altPosition = altPos; // Update the position to match the current
+                position = posUsed;
+                length ++;
+            }
+            else if (posUsed != position) { // Check if the position is no longer current
+                if (length < 2) { // Check to see if the length is valid
+                    isConnected = false; // Set the connectedness to false, since the length was invalid
+                    break; // Quit the loop
+                }
+                position = posUsed; // Reset the position, since on a new row/col
+                altPosition = altPos; // Reset the alternate position, since on a new row/col
+                length = 0; // Reset the length, since on a new row/col
+            }
+            else if (altPos - altPosition > 1) { // Check if there's a gap greater than one between the tiles
+                isConnected = false; // Set the connectedness to false
+                break; // Quit the loop
+            }
+            else {
+                altPosition = altPos; // Update the tile position to be current
+                length ++;
+            }
+        }
+        isConnected = !isConnected ? isConnected : length > 1;
+        if (rowOrCol) {
+            return(isConnected || areConnected(!rowOrCol)); // Return whether or not there are no gaps between tiles in either the row or col 
+        }
+        else {
+            return(isConnected); // Return whether or not there are no gaps between tiles
+        }
     }
 
     private boolean calcRowOrCol(final boolean rowOrCol) {
+        // Eventually need to remove the " map.get(p) == ' ' " and implement a blank tile chooser.
         // Sort rows & cols by both row and col index, to compare words in same column and row.
         // https://stackoverflow.com/questions/2784514/sort-arraylist-of-custom-objects-by-property
+        int score = 0;
+        TreeMap<Point, Character> map = makeSortedMap(rowOrCol);
+        HashMap<Point, Integer> letterMap = new HashMap<Point, Integer>();
+        HashMap<Point, Integer> wordMap = new HashMap<Point, Integer>();
+        String current = ""; // String to store the current word, formed by row or column
+        int position = -1; // Stores the position of the current word to mark when the loop shifts rows or columns
+        int wordMultiplier = 1;
+        for (Point p : map.keySet()) { // Loop through each character, forming each possible word in the list
+            int posUsed = rowOrCol ? p.getRow() : p.getCol(); // Use X if 'rowOrCol' is true, otherwise use Y
+            int posVal = Scrabble.getVal(p.getRow(), p.getCol());
+            if (position == -1 || posUsed != position || map.get(p) == ' ') { // The point doesn't follow the previous one
+                if (isLegalWord(current) && score >= 0 && current.length() > 1) { // Check to see if the word is valid
+                    for (Point x : letterMap.keySet()) { // Loop through each point in the letter map
+                        wordMap.put(x, letterMap.get(x) * wordMultiplier); // Add the total point value to the word map
+                    }
+                }
+                else if (current.length() > 1 && map.get(p) != ' ') {
+                    score = -1; // Sets the score to negative because its invalid
+                }
+                wordMultiplier = 1; // Resets the word multiplier
+                position = posUsed; // Set the current position
+                current = ""; // Reset the string to start the word over again
+            }
+            if (map.get(p) != ' ') {
+                current += map.get(p); // Only add the character if it isn't a space
+            }
+            int letterMultiplier = 1;
+            if (posVal == 4 || posVal == 3) { // Checks if the tile is a word multiplier
+                wordMultiplier *= posVal - 1; // Adds the value to the total multiplier
+            }
+            else if (posVal == 2 || posVal == 1) { // Checks if the tile is a letter multiplier
+                letterMultiplier *= posVal + 1; // Adds the value to the letter multiplier
+            }
+            int charValue = Scrabble.getLetterValue(map.get(p)) * letterMultiplier; // Calculate the letter value
+            letterMap.put(p, charValue); // Add the point to the letter map, per each word
+        }
+        
+        if (isLegalWord(current) && score >= 0 && current.length() > 1) { // Check to see if the word is valid
+            for (Point x : letterMap.keySet()) { // Loop through each point in the letter map
+                wordMap.put(x, letterMap.get(x) * wordMultiplier); // Add the total point value to the word map
+            }
+        }
+        else if (current.length() > 1) {
+            score = -1; // Sets the score to negative, if invalid
+        }
+        System.out.println();
+        for (Point x : wordMap.keySet()) {
+            if (!counted.containsKey(x) || counted.get(x) < wordMap.get(x)) { // Check that the point hasn't been counted, or wasn't counted at the right value
+                counted.put(x, wordMap.get(x)); // Update the counted tiles map to hold the tiles of highest value
+            }
+        }
+
+        return(score == 0); // Returns whether or not the final word is valid
+    }
+
+    private TreeMap<Point, Character> makeSortedMap(boolean rowOrCol) {
         TreeMap<Point, Character> map = new TreeMap<Point, Character>(new Comparator<Point>() { // Sort By Columns
             @Override
             public int compare(Point a, Point b) {
-                if ((rowOrCol && a.getRow() != b.getRow()) || (!rowOrCol && a.getCol() != b.getCol())) { // Each x value is the column of the point
-                    return(rowOrCol ? a.getRow() - b.getRow() : a.getCol() - b.getCol()); // Sort by column/row placement first
+                if (rowOrCol ? a.getRow() != b.getRow() : a.getCol() != b.getCol()) {
+                    return(rowOrCol ? a.getRow() - b.getRow() : a.getCol() - b.getCol());
                 }
-                else { // Each y value is the row of the point
-                    return(rowOrCol ? a.getCol() - b.getCol() : a.getRow() - b.getRow()); // Sort by row/column placement second
+                else {
+                    return(rowOrCol ? a.getCol() - b.getCol() : a.getRow() - b.getRow());
                 }
             }
         });
         map.putAll(items); // Add all placed characters to the map to be sorted
-        String current = ""; // String to store the current word, formed by row or column
-        int position = -1; // Stores the position of the current word to mark when the loop shifts rows or columns
-        for (Point p : map.keySet()) { // Loop through each character, forming each possible word in the list
-            int posUsed = rowOrCol ? p.getRow() : p.getCol(); // Use X if 'rowOrCol' is true, otherwise use Y
-            if (position == -1 || posUsed != position || map.get(p) == ' ') { // The point doesn't follow the previous one
-                if (isLegalWord(current)) { // Check to see if the word is valid
-                    position = posUsed; // Set the current position
-                    current = ""; // Reset the string to start the word over again
-                }
-                else {
-                    return(false); // Return false if invalid
-                }
-            }
-            if (map.get(p) != ' ') { 
-                current += map.get(p); // Only add the character if it isn't a space
-            }
-        }
-        return(isLegalWord(current)); // Returns whether or not the final word is valid
+        return(map);
     }
     
     private boolean isLegalWord(String word) {

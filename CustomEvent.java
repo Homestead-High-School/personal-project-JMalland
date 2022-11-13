@@ -16,6 +16,11 @@ public class CustomEvent extends ActionEvent {
         this.index = index;
     }
 
+    public CustomEvent(Component c, int id, int row, int col) {
+        super(c, id, "");
+        this.r = row;
+        this.c = col;
+    }
     public CustomEvent(Component c, int id, char t, int row, int col) {
         super(c, id, "");
         this.r = row;

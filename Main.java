@@ -63,6 +63,7 @@ public class Main {
         System.out.println("Words Contained: ");
         boolean temp = basic.validWordPlacement();
         System.out.println("Words Are Valid: "+temp);
+        System.out.println("Words Are Connected: "+basic.areConnected(true));
         
         System.out.println("A: "+Scrabble.getLetterValue('A')+" "+basic.getLetterCount('A'));
         System.out.println("B: "+Scrabble.getLetterValue('B')+" "+basic.getLetterCount('B'));
@@ -82,7 +83,7 @@ public class Main {
                 else if (e.getID() == b.DRAW_HAND) {
                     System.out.println("Hand Drawn.");
                     b.setHand(basic.drawTiles());
-                    //b.setHand(new char[] {'P', 'I', 'N', 'I', 'N', 'G', 'S'});
+                    b.setHand(new char[] {'O', 'K', 'N', 'O', 'S', 'E', 'S'});
                 }
                 else if (e.getID() == b.SELECTED_HAND) {
                     System.out.println("Selected Tile.");
@@ -96,11 +97,13 @@ public class Main {
                 }
                 else if (e.getID() == b.FINALIZED_PLAY) {
                     System.out.println("Submitted Play Is Valid: "+real.validWordPlacement());
-                    b.getTilesPlaced();
+                    System.out.println("Submitted Play Is Worth: "+real.calculatePlacementValue());
+                    System.out.println("Submitted Play Connectedness: "+real.areConnected(true));
                 }
-                else if (e.getID() == b.RECALLED_TILES) {
-                    System.out.println("Recalled Placed Tiles.");
-                    real.recallTiles();
+                else if (e.getID() == b.RECALLED_TILE) {
+                    System.out.println("Recalled Placed Tile.");
+                    real.recallTile(e.getRow(), e.getCol());
+                    real.clearWordPlacement();
                 }
             }
         });
