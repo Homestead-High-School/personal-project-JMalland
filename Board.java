@@ -107,6 +107,7 @@ class Board extends JFrame {
                 layer.setBounds(0, 0, (int)(layer.getWidth() * frame.getWidth() / 1.0 / FRAME_WIDTH), (int)(layer.getHeight() * frame.getHeight() / 1.0 / FRAME_HEIGHT));
                 board.setBounds(0, 0, (int)(board.getWidth() * frame.getWidth() / 1.0 / FRAME_WIDTH), (int)(board.getHeight() * frame.getHeight() / 1.0 / FRAME_HEIGHT));
                 hand.setBounds(0, 0, (int)(hand.getWidth() * frame.getWidth() / 1.0 / FRAME_WIDTH), (int)(hand.getHeight() * frame.getHeight() / 1.0 / FRAME_HEIGHT));
+                System.out.println("Board Width: "+board.getWidth()+" Frame Width: "+frame.getWidth());
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
                 System.out.println("Window Resized: "+FRAME_WIDTH+" x "+FRAME_HEIGHT);
@@ -260,13 +261,13 @@ class Board extends JFrame {
 
         CurvedButton left = new CurvedButton("<", (int)(TILE_RADIUS*1.5), new Color(0x000000), 100);
         left.setSize(TILE_SIZE, SB_HEIGHT);
-        left.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
+        left.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
         left.setYOffset(1.0/4.0);
         scoreboard.add(left, 0, 0, 1, 3, GridBagConstraints.BOTH);
 
         CurvedButton right = new CurvedButton(">", (int)(TILE_RADIUS*1.5), new Color(0x000000), 100);
         right.setSize(TILE_SIZE, SB_HEIGHT);
-        right.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
+        right.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
         right.setYOffset(1.0/4.0);
         scoreboard.add(right, 0, 3, 1, 3, GridBagConstraints.BOTH);
 
