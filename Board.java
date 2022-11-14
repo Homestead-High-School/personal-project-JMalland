@@ -76,7 +76,7 @@ class Board extends JFrame {
         createMenu(); // Generate the Main Menu and add to mainPanel
         createScoreboard(); // Generate the Scoreboard displayed in-game
         createBoard(); // Create the Scrabble Board
-        createError();
+        //createError();
         createHand(); // Create the Player's Hand
 
         mainPanel.setVisible(true); // Set the main menu visible, if not
@@ -84,7 +84,7 @@ class Board extends JFrame {
         frame.add(mainPanel);//mainPanel); // Add the main menu to the JFrame
 
         Toolkit.getDefaultToolkit().setDynamicLayout(false); // Ensures window resize keeps the right ratio: https://stackoverflow.com/questions/20925193/using-componentadapter-to-determine-when-frame-resize-is-finished 
-        
+        frame.setSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Sets the default dimensions
         frame.addComponentListener(new ComponentAdapter() {
             // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-eventff
             public void componentResized(ComponentEvent componentEvent) { // Method to run every time window is resized
@@ -101,10 +101,10 @@ class Board extends JFrame {
                     }
                 }
                 // Automatically Resizing Layered Panes/Components: https://community.oracle.com/tech/developers/discussion/1351513/automatically-fitting-the-size-of-jlayeredpane-inside-a-jframe
-                JLayeredPane layer = (JLayeredPane) gamePanel.getComponent(1);
-                GridPanel board = getBoard();
-                layer.setBounds(0, 0, (int)(layer.getWidth() * frame.getWidth() / 1.0 / FRAME_WIDTH), (int)(layer.getHeight() * frame.getHeight() / 1.0 / FRAME_HEIGHT));
-                board.setBounds(0, 0, (int)(board.getWidth() * frame.getWidth() / 1.0 / FRAME_WIDTH), (int)(board.getHeight() * frame.getHeight() / 1.0 / FRAME_HEIGHT));
+                //JLayeredPane layer = (JLayeredPane) gamePanel.getComponent(1);
+                //GridPanel board = getBoard();
+                //layer.setBounds(0, 0, (int)(layer.getWidth() * frame.getWidth() / 1.0 / FRAME_WIDTH), (int)(layer.getHeight() * frame.getHeight() / 1.0 / FRAME_HEIGHT));
+                //board.setBounds(0, 0, (int)(board.getWidth() * frame.getWidth() / 1.0 / FRAME_WIDTH), (int)(board.getHeight() * frame.getHeight() / 1.0 / FRAME_HEIGHT));
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
                 System.out.println("Window Resized: "+FRAME_WIDTH+" x "+FRAME_HEIGHT);
@@ -113,7 +113,6 @@ class Board extends JFrame {
         });
 
         frame.setVisible(true); // Set the application frame visible
-        frame.setPreferredSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Sets the default dimensions
     }
     
     // Starts the game, and switches from mainPanel to gamePanel
@@ -255,35 +254,35 @@ class Board extends JFrame {
         GridPanel scoreboard = new GridPanel(FRAME_WIDTH, SB_HEIGHT, BoxLayout.X_AXIS); // 50 * 2.5 = 125
 
         CurvedLabel player = new CurvedLabel("Player:    1"); // Might have usernames, doesn't matter rn
-        player.setSize((FRAME_WIDTH - SB_HEIGHT/3)/2, SB_HEIGHT/6);
+        player.setSize((FRAME_WIDTH - 2*SB_HEIGHT/3)/2, SB_HEIGHT/6);
         player.setFont(new Font("Serif", Font.BOLD, (int)(FONT_SIZE*2)));
         scoreboard.add(player, 1, 1, 1, 1, GridBagConstraints.BOTH);
 
         CurvedLabel score = new CurvedLabel("Score:    0");
-        score.setSize((FRAME_WIDTH - SB_HEIGHT/3)/2, SB_HEIGHT/6);
+        score.setSize((FRAME_WIDTH - 2*SB_HEIGHT/3)/2, SB_HEIGHT/6);
         score.setFont(new Font("Serif", Font.BOLD, (int)(FONT_SIZE*2)));
         scoreboard.add(score, 1, 2, 1, 1, GridBagConstraints.BOTH);
-            
+
         CurvedButton left = new CurvedButton("<", (int)(TILE_RADIUS*1.5), new Color(0x000000), 100);
-        left.setSize(SB_HEIGHT/6, SB_HEIGHT/6);
+        left.setSize(SB_HEIGHT/3, SB_HEIGHT/3);
         left.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
         left.setYOffset(1.0/4.0);
         scoreboard.add(left, 1, 0, 1, 1, GridBagConstraints.BOTH);
 
-        scoreboard.add(makePadding(SB_HEIGHT/6, (int)(2.5*SB_HEIGHT/6)), 0, 3, 1, 1, GridBagConstraints.BOTH);
-        scoreboard.add(makePadding(SB_HEIGHT/6, (int)(2.5*SB_HEIGHT/6)), 2, 3, 1, 1, GridBagConstraints.BOTH);
+        scoreboard.add(makePadding(SB_HEIGHT/3, (int)(2.5*SB_HEIGHT/3)), 0, 3, 1, 1, GridBagConstraints.BOTH);
+        scoreboard.add(makePadding(SB_HEIGHT/3, (int)(2.5*SB_HEIGHT/3)), 2, 3, 1, 1, GridBagConstraints.BOTH);
 
         CurvedButton right = new CurvedButton(">", (int)(TILE_RADIUS*1.5), new Color(0x000000), 100);
-        right.setSize(SB_HEIGHT/6, SB_HEIGHT/6);
+        right.setSize(SB_HEIGHT/3, SB_HEIGHT/3);
         right.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
         right.setYOffset(1.0/4.0);
         scoreboard.add(right, 1, 3, 1, 1, GridBagConstraints.BOTH);
 
-        scoreboard.add(makePadding(SB_HEIGHT/6, (int)(2.5*SB_HEIGHT/6)), 0, 0, 1, 1, GridBagConstraints.BOTH);
-        scoreboard.add(makePadding(SB_HEIGHT/6, (int)(2.5*SB_HEIGHT/6)), 2, 0, 1, 1, GridBagConstraints.BOTH);
+        scoreboard.add(makePadding(SB_HEIGHT/3, (int)(2.5*SB_HEIGHT/3)), 0, 0, 1, 1, GridBagConstraints.BOTH);
+        scoreboard.add(makePadding(SB_HEIGHT/3, (int)(2.5*SB_HEIGHT/3)), 2, 0, 1, 1, GridBagConstraints.BOTH);
 
         l.setConstraints(scoreboard, createConstraints(1, SB_HEIGHT/1.0/FRAME_HEIGHT, 0, 0, 1, 1, GridBagConstraints.BOTH));
-        scoreboard.setPreferredSize(new Dimension(FRAME_WIDTH, SB_HEIGHT));
+        scoreboard.setPreferredSize(new Dimension(MIN_WIDTH, (int)(SB_HEIGHT * FRAME_HEIGHT / 1.0 / MAX_HEIGHT)));
         //layer.add(scoreboard, JLayeredPane.DEFAULT_LAYER);
         gamePanel.add(scoreboard);
     }
@@ -316,9 +315,10 @@ class Board extends JFrame {
                 board.add(temp, r, c, 1, 1, GridBagConstraints.BOTH); // Adds the tile to the Board
             }
         }
-        //GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
-        //l.setConstraints(board, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the board
+        GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
         board.setSize(new Dimension((COLS*TILE_SIZE), (ROWS*TILE_SIZE)));
+        board.setPreferredSize(board.getSize());
+        l.setConstraints(board, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the board
         gamePanel.add(board); // Create and add the board to the application frame
     }
 
@@ -467,7 +467,7 @@ class Board extends JFrame {
     }
 
     // An attempt at layering panels
-    public void createError() {
+    /*public void createError() {
         JLayeredPane layer = new JLayeredPane();
         layer.setLayout(null);
 
@@ -505,7 +505,7 @@ class Board extends JFrame {
 
        //a.setBounds(100, 100, a.getWidth(), a.getHeight());
        // b.setBounds(200, 200, b.getWidth(), b.getHeight());
-    }
+    }*/
 
     private GridBagConstraints createConstraints(double xLbs, double yLbs, int x, int y, int w, int h, int fill) {
         GridBagConstraints g = new GridBagConstraints();
@@ -537,8 +537,8 @@ class Board extends JFrame {
     }
 
     private GridPanel getBoard() {
-        JLayeredPane temp = (JLayeredPane) gamePanel.getComponent(1);
-        return((GridPanel)(temp.getComponentsInLayer(JLayeredPane.DEFAULT_LAYER)[0]));
+        //JLayeredPane temp = (JLayeredPane) gamePanel.getComponent(1);
+        return((GridPanel)(gamePanel.getComponent(1)));//temp.getComponentsInLayer(JLayeredPane.DEFAULT_LAYER)[0]));
     }
 
     private int calculateTile(int r, int c) {

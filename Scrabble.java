@@ -132,7 +132,7 @@ public class Scrabble {
         }
         if (validWordPlacement()) { // Check to see that all connecting words fit legally on the board
             for (Point p : items.keySet()) { // Loop through each Point that was checked
-                placed.putIfAbsent(p, items.get(p)); // Add the point to the placed tiles, since the play is valid
+                placed.put(p, items.get(p)); // Add the point to the placed tiles, since the play is valid
             }
             clearWordPlacement(); // Erase the map of placed items, because they've all been appended
             return(calculatePlacementValue()); // Return the overall score of all connecting words
@@ -259,7 +259,7 @@ public class Scrabble {
     }
 
     // Returns a TreeMap of sorted points, sorted based on column or row. Used to compare word placement
-    private TreeMap<Point, Character> makeSortedMap(boolean rowOrCol) {
+    private TreeMap<Point, Character> makeSortedMap(final boolean rowOrCol) {
         // https://stackoverflow.com/questions/2784514/sort-arraylist-of-custom-objects-by-property
         TreeMap<Point, Character> map = new TreeMap<Point, Character>(new Comparator<Point>() { // Sort By Columns
             @Override
