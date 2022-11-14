@@ -262,23 +262,23 @@ class Board extends JFrame {
         left.setSize(TILE_SIZE, SB_HEIGHT);
         left.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
         left.setYOffset(1.0/4.0);
-        //scoreboard.add(left, 0, 0, 1, 3, GridBagConstraints.BOTH);
+        scoreboard.add(left, 0, 0, 1, 3, GridBagConstraints.BOTH);
 
         CurvedButton right = new CurvedButton(">", (int)(TILE_RADIUS*1.5), new Color(0x000000), 100);
         right.setSize(TILE_SIZE, SB_HEIGHT);
         right.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
         right.setYOffset(1.0/4.0);
-        //scoreboard.add(right, 0, 3, 1, 3, GridBagConstraints.BOTH);
+        scoreboard.add(right, 0, 3, 1, 3, GridBagConstraints.BOTH);
 
         CurvedLabel player = new CurvedLabel("Player:    1"); // Might have usernames, doesn't matter rn
-        player.setSize(FRAME_WIDTH, SB_HEIGHT);
-        player.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
-        scoreboard.add(player, 0, 0, 1, 1, GridBagConstraints.BOTH);
+        player.setSize(FRAME_WIDTH, SB_HEIGHT/3);
+        player.setFont(new Font("Serif", Font.BOLD, (int)(FONT_SIZE*1.5)));
+        scoreboard.add(player, 1, 1, 1, 1, GridBagConstraints.BOTH);
 
         CurvedLabel score = new CurvedLabel("Score:    0");
-        score.setSize(FRAME_WIDTH, SB_HEIGHT);
-        score.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
-        scoreboard.add(score, 0, 1, 1, 1, GridBagConstraints.BOTH);
+        score.setSize(FRAME_WIDTH, SB_HEIGHT/3);
+        score.setFont(new Font("Serif", Font.BOLD, (int)(FONT_SIZE*1.5)));
+        scoreboard.add(score, 1, 2, 1, 1, GridBagConstraints.BOTH);
 
         l.setConstraints(scoreboard, createConstraints(1, SB_HEIGHT/1.0/FRAME_HEIGHT, 0, 0, 1, 1, GridBagConstraints.BOTH));
         scoreboard.setSize(new Dimension(FRAME_WIDTH, SB_HEIGHT));
