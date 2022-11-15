@@ -104,6 +104,13 @@ public class CurvedButton extends JButton {
     public String findText() {
         return(text);
     }
+
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        paintComponent(g);
+        paintBorder(g);
+    }
     
     @Override
     public void paintComponent(Graphics g) {
