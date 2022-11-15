@@ -8,24 +8,7 @@ public class LayerPanel extends JPanel {
     HashMap<Integer, HashSet<Component>> map = new HashMap<Integer, HashSet<Component>>();
     
     public LayerPanel() {
-        setLayout(new GridBagLayout());
-        //CurvedButton a = new CurvedButton("A", 25, Color.RED, 100);
-        //CurvedButton b = new CurvedButton("B", 25, Color.GREEN, 100);
-        JButton a = new JButton("TEXT A");
-        JButton b = new JButton("TEXT B");
-        a.setBounds(0, 0, 100, 100);
-        b.setBounds(100 + 15, 0, 100, 100);
-        a.setEnabled(true);
-        b.setEnabled(true);
-        add(a);
-        add(b);
-
-        a.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("A Clicked!");
-            }
-        });
+        setLayout(null);
     }
 
     private GridBagConstraints createConstraints(double xLbs, double yLbs, int x, int y, int w, int h, int fill) {
@@ -40,42 +23,33 @@ public class LayerPanel extends JPanel {
         return(g);
     }
 
-    @Override
-    public Component[] getComponents() {
-        HashSet<Component> max = new HashSet<Component>();
-        for (HashSet<Component> c : map.values()) {
-            max.addAll(c);
-        }
-        return(max.toArray(new Component[0]));
+    public Component[] getComponentsInLayer(int i) {
+        return(map.get(i).toArray(new Component[0]));
     }
 
+    @Override
+    public Component add(Component c, int zIndex) {
+        super.add(c);
+        if (!map.containsKey(zIndex)) {
+            map.put(zIndex, new HashSet<Component>());
+        }
+        map.get(zIndex).add(c);
+        return(c);
+    }
+    
     @Override
     public Component add(Component c) {
-        if (!map.containsKey(0)) {
-            map.put(0, new HashSet<Component>());
-        }
-        map.get(0).add(c);
-        return(c);
+        return(add(c, 0));
     }
 
     @Override
-    public Component add(Component c, int i) {
-        if (!map.containsKey(i)) {
-            map.put(i, new HashSet<Component>());
-        }
-        map.get(i).add(c);
-        return(c);
-    }
-
-    @Override
+    // Showing on hover/interaction: https://stackoverflow.com/questions/7629473/component-layering-java-swing-layers-showing-on-hover
     public void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        for (HashSet<Component> s : map.values()) {
-            for (Component c : s) {
-                JButton t = (JButton) c;
-                t.paint(g.create(c.getX(), c.getY(), c.getWidth(), c.getHeight()));
-                //t.paintBorder(g.create(c.getX(), c.getY(), c.getWidth(), c.getHeight()));
-                //c.paint(g.create(c.getX(), c.getY(), c.getWidth(), c.getHeight()));
+        super.paintComponent(g); // Always call. ALWAYS!
+        for (int i : map.keySet()) {
+            for (Component c : map.get(i)) {
+                // I imagine I'm calling the wrong potential paint method, so sometimes things get painted, but not for my custom classes.
+                c.paint(g.create(c.getX(), c.getY(), c.getWidth(), c.getHeight()));
             }
         }
     }
