@@ -469,21 +469,23 @@ class Board extends JFrame {
 
     // An attempt at layering panels
     public void createError() {
-        errorPanel = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.X_AXIS);
-        CurvedLabel text = new CurvedLabel("", TILE_RADIUS, Color.RED);
-        errorPanel.add(text, 0, 0, 1, 1, GridBagConstraints.BOTH);
-
-        errorPanel.setSize((FRAME_WIDTH - (int)(3.5 * TILE_SIZE))/2, (int)(3.5 * TILE_SIZE));
-
+        CurvedLabel text = new CurvedLabel("Test Phrase", TILE_RADIUS, Color.RED);
+        
+        text.setFont(new Font("Serif", Font.BOLD, 37));
+        text.setBounds((FRAME_WIDTH - (int)(3.5*TILE_SIZE))/2, 2*TILE_SIZE, (int)(3.5*TILE_SIZE), 2*TILE_SIZE);
+        text.setBackground(Color.GRAY);
+        
         CurvedButton a = new CurvedButton("A", TILE_RADIUS, Color.RED, 100);
-        //CurvedButton b = new CurvedButton("B", TILE_RADIUS, Color.GREEN, 100);
+        CurvedButton b = new CurvedButton("B", TILE_RADIUS, Color.GREEN, 100);
         
         a.setSize(new Dimension(500, 500));
-        //b.setSize(new Dimension(250, 250));
+        b.setSize(new Dimension(250, 250));
 
-        JLayeredPane layer = new JLayeredPane();
+        a.setBounds(50, 0, 100, 100);
+        b.setBounds(100, 0, 100, 100);
+        
+        LayerPanel layer = new LayerPanel();
         // Could use GridBagLayout to set the specific Row/Col of origin, but extend the width & height to be larger?
-        layer.setLayout(new GridBagLayout());
 
         GridPanel board = (GridPanel) gamePanel.getComponent(1);
         gamePanel.remove(1);
@@ -491,24 +493,21 @@ class Board extends JFrame {
         // Making LayeredPane With Layout: https://stackoverflow.com/questions/11528677/newbie-jlayeredpane-issue
         // https://stackoverflow.com/questions/48712815/resize-a-jlayeredpane-based-on-users-input
 
-        layer.add(board, createConstraints(1, 1, 0, 0, 10, 10, GridBagConstraints.BOTH));
-        layer.setLayer(board, new Integer(0));
-
-        a.setPreferredSize(new Dimension(250, 250));
-
-        layer.add(a, createConstraints(0.1, 0.1, 1, 1, 3, 1, GridBagConstraints.BOTH));
-        layer.setLayer(a, new Integer(1));
-        a.setBounds((FRAME_WIDTH - a.getSize().width)/2, a.getSize().height, a.getSize().width, a.getSize().height);
+        board.setBounds(50, 0, board.getSize().width, board.getSize().height);
+        
+        layer.add(a, 0);
+        layer.add(text, 2);
+        layer.add(b, 1);
+        layer.add(board, 0);
+        
         
         //layer.add(errorPanel, new Integer(2), 1);
 
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
 
-        LayerPanel temp = new LayerPanel();
-
-        l.setConstraints(temp, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH));
-        temp.setPreferredSize(new Dimension(board.getSize().width*2, board.getSize().height*2));
-        gamePanel.add(temp);
+        l.setConstraints(layer, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH));
+        layer.setPreferredSize(new Dimension(board.getSize().width*2, board.getSize().height*2));
+        gamePanel.add(layer);
 
        //a.setBounds(100, 100, a.getWidth(), a.getHeight());
        // b.setBounds(200, 200, b.getWidth(), b.getHeight());
@@ -544,9 +543,8 @@ class Board extends JFrame {
     }
 
     private GridPanel getBoard() {
-        return(new GridPanel(1, 1, BoxLayout.X_AXIS));
-        //JLayeredPane temp = (JLayeredPane) gamePanel.getComponent(1);
-        //return((GridPanel)(/*gamePanel.getComponent(1)));*/temp.getComponentsInLayer(new Integer(0))[0]));
+        LayerPanel temp = (LayerPanel) gamePanel.getComponent(1);
+        return((GridPanel)(/*gamePanel.getComponent(1)));*/temp.getComponent(3)));
     }
 
     private int calculateTile(int r, int c) {
