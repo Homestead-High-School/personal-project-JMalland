@@ -579,4 +579,4 @@ class Board extends JFrame {
     public void addCustomListener(CustomListener c) {
         listeners.add(c);
     }
-}
+} 
