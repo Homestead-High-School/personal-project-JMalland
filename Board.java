@@ -13,10 +13,8 @@ class Board extends JFrame {
     *   Should make either a sidemenu, or selections from the player's hand, where, when selected, it highlights the border in yellow or something.
     */
     // Actual ratios are more towards 19/15;
-    private final double widthRatio = 13.0;//1.0; // Width has a ratio of 3
-    private final double heightRatio = 17.0;// 2.0; // Height has a ratio of 4
-    private final double widthMargin = 13.0/17.0;//0.8; // 50% Width Ratio Acceptable Margin
-    private final double heightMargin = 0.2;//0.2; // 20% Height Ratio Acceptable Margin
+    private final double widthRatio = 15.0; // Width has a ratio of 3
+    private final double heightRatio = 20.0; // Height has a ratio of 4
     public final int SELECTED_HAND = ("HAND").hashCode();
     public final int SELECTED_LETTER = ("SELECT").hashCode();
     public final int PLACING_LETTER = ("PLACING").hashCode();
@@ -33,27 +31,29 @@ class Board extends JFrame {
     private CurvedButton startButton = new CurvedButton();
     private HashSet<CustomListener> listeners = new HashSet<CustomListener>();
     private HashSet<Tile> placedTiles = new HashSet<Tile>();
-    private final double MULT = 0.5;
+    private final double MULT = 0.8; // At Mult of 0.8, Aspect Ratio appears odd at <= 630 X 840
     private final int ROWS = Scrabble.getBoard().length;
     private final int COLS = Scrabble.getBoard()[0].length;
     private final int FONT_SIZE = (int)(26*MULT); // 26 Is actually double. Window starts out at half size
     private final int TILE_SIZE = (int)(50*MULT); // 50
     private final int TILE_RADIUS = (int)(18*MULT); // 26 - Is actually double. Window starts out at half size
-    private final int SB_HEIGHT = (int)(TILE_SIZE*2);
+    private final int SB_HEIGHT = (int)(TILE_SIZE*2.5);
     private final int HAND_LENGTH = 7;
-    private final int H_TILE_SIZE = (int)(TILE_SIZE*1.5);
+    private final int H_TILE_SIZE = (int)(TILE_SIZE*1.3); // 675 - (8*65 + 8*(65/8) + 50)) --> 20px padding
     private final int H_Y_OFF = 3;
     private final int H_X_OFF = H_TILE_SIZE/8;
     private final int MENU_WIDTH = (int)(300*MULT); // 300
     private final int MENU_HEIGHT = (int)(75*MULT); // 75
-    private final int MIN_WIDTH = (int)(MULT*540); // (75*8 + 50) = 650
-    private final int MIN_HEIGHT = (int)(MULT*666); // (750 + 75 | 125) = 825 ~ 950
-    private final int MAX_WIDTH = (int)(840*MULT); // If exceeds 843, duplicate tiles appear on bottom row
-    private final int MAX_HEIGHT = (int)(MULT*1036); // If exceeds 1012, duplicate tiles appear on bottom row
+    private final int MIN_WIDTH = (int)(MULT*675); // (75*8 + 50) = 650
+    private final int MIN_HEIGHT = (int)(MULT*900); // (750 + 75 | 125) = 825 ~ 950
+    private final int MAX_WIDTH = (int)(900*MULT); // If exceeds 843, duplicate tiles appear on bottom row
+    private final int MAX_HEIGHT = (int)(MULT*1179); // If exceeds 1012, duplicate tiles appear on bottom row
     private int FRAME_WIDTH = MIN_WIDTH; // 528
     private int FRAME_HEIGHT = MIN_HEIGHT; // 528
     private int player_count = 2;
     private int selected_tile = -1;
+    private ArrayList<Integer> widths = new ArrayList<Integer>();
+    private ArrayList<Integer> heights = new ArrayList<Integer>();
  
     // The Board() constructor runs its private methods to generate the panels that are contained in the application 
     Board() {
@@ -78,32 +78,66 @@ class Board extends JFrame {
     
         frame.add(mainPanel);//mainPanel); // Add the main menu to the JFrame
         
+        for (int i=MIN_WIDTH; i<=MAX_WIDTH; i+=(int) widthRatio) {
+            widths.add(i);
+        }
+
+        for (int i=MIN_HEIGHT; i<=MAX_HEIGHT; i+=(int) heightRatio) {
+            heights.add(i);
+        }
+
         Toolkit.getDefaultToolkit().setDynamicLayout(false); // Ensures window resize keeps the right ratio: https://stackoverflow.com/questions/20925193/using-componentadapter-to-determine-when-frame-resize-is-finished 
         
         frame.addComponentListener(new ComponentAdapter() {
             // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-eventff
             public void componentResized(ComponentEvent componentEvent) { // Method to run every time window is resized
-                double width = frame.getWidth(); // Stores the width as a double for easy division
-                double height = frame.getHeight(); // Stores the height as a double for easy division
-                double widthCheck = Math.abs(1-(width/height)/(widthRatio/heightRatio));
-                double heightCheck = Math.abs(1-(height/width)/(heightRatio/widthRatio));
-                if (width/height != widthRatio/heightRatio && (widthCheck > widthMargin || heightCheck < heightMargin)) {
-                    if (Math.abs(FRAME_WIDTH - width) > Math.abs(FRAME_HEIGHT - height)) { // Checks to see if Width is increasing
-                        frame.setPreferredSize(new Dimension(Math.min(MAX_WIDTH, Math.max((int)(width), MIN_WIDTH)), Math.min(MAX_HEIGHT, Math.max((int)(FRAME_HEIGHT * (width / FRAME_WIDTH)), MIN_HEIGHT)))); // Adjusts height to match
+                int width = frame.getWidth();
+                int height = frame.getHeight();
+                if ((int) (width%widthRatio) == 0 && (int) (height%heightRatio) == 0) {
+                    
+                }
+                else if (Math.abs(FRAME_WIDTH - width) > Math.abs(FRAME_HEIGHT - height)) {
+                    int w = getClosestIndex(width, widths);
+                    int h = getClosestIndex((int) (FRAME_HEIGHT * (width / 1.0 / FRAME_WIDTH)), heights);
+                    if (width < MIN_WIDTH || width > MAX_WIDTH) {
+                        w = width > MAX_WIDTH ? widths.size()-1 : 0;
+                        h = width > MAX_WIDTH ? heights.size()-1 : 0;
                     }
-                    else if (Math.abs(FRAME_HEIGHT - height) > Math.abs(FRAME_WIDTH - width)) { // Checks to see if Height is increasing
-                        frame.setPreferredSize(new Dimension(Math.min(MAX_WIDTH, Math.max((int)(FRAME_WIDTH * (height / FRAME_HEIGHT)), MIN_WIDTH)), Math.min(MAX_HEIGHT, Math.max((int)(height), MIN_HEIGHT)))); // Adjusts width to match
+                    frame.setPreferredSize(new Dimension(widths.get(w), heights.get(h)));
+                }
+                else if (Math.abs(FRAME_WIDTH - width) < Math.abs(FRAME_HEIGHT - height)) {
+                    int h = getClosestIndex(height, heights);
+                    int w = getClosestIndex((int) (FRAME_WIDTH * (height / 1.0 / FRAME_HEIGHT)), widths);
+                    if (height < MIN_HEIGHT || height > MAX_HEIGHT) {
+                        h = width > MAX_HEIGHT ? heights.size()-1 : 0;
+                        w = height > MAX_HEIGHT ? widths.size()-1 : 0;
                     }
+                    frame.setPreferredSize(new Dimension(widths.get(w), heights.get(h)));
                 }
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
-                System.out.println("Window Resized: "+FRAME_WIDTH+" x "+FRAME_HEIGHT);
                 frame.pack(); // Pack once more, in case the Hand was adjusted
+                System.out.println("Window Resized: "+frame.getWidth()+" x "+frame.getHeight());
             }
         });
 
         frame.setVisible(true); // Set the application frame visible
         frame.setPreferredSize(new Dimension(MIN_WIDTH, MIN_HEIGHT)); // Sets the default dimensions
+    }
+
+    private int getClosestIndex(int n, ArrayList<Integer> list) {
+        int diff = Math.abs(list.get(0) - n);
+        int index = 0;
+        for (int i=0; i<list.size(); i++) {
+            if (Math.abs(list.get(i) - n) < diff) {
+                diff = Math.abs(list.get(i) - n);
+                index = i;
+            }
+            else if (Math.abs(list.get(i) - n) > diff) {
+                return(index);
+            }
+        }
+        return(index);
     }
     
     // Starts the game, and switches from mainPanel to gamePanel
@@ -267,16 +301,16 @@ class Board extends JFrame {
         CurvedLabel player = new CurvedLabel("Player:    1"); // Might have usernames, doesn't matter rn
         player.setSize(MIN_WIDTH, SB_HEIGHT);
         player.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
-        scoreboard.add(player, 0, 1, 1, 4, GridBagConstraints.BOTH);
+        scoreboard.add(player, 0, 1, 1, 3, GridBagConstraints.BOTH);
 
         CurvedLabel score = new CurvedLabel("Score:    0");
         score.setSize(MIN_WIDTH, SB_HEIGHT);
         score.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
-        scoreboard.add(score, 0, 2, 1, 4, GridBagConstraints.BOTH);
+        scoreboard.add(score, 0, 2, 1, 3, GridBagConstraints.BOTH);
 
-        l.setConstraints(scoreboard, createConstraints(1, SB_HEIGHT/1.0/MIN_HEIGHT, 0, 0, 1, 1, GridBagConstraints.BOTH));
+        l.setConstraints(scoreboard, createConstraints(1, 2*SB_HEIGHT/1.0/MIN_HEIGHT, 0, 0, 1, 1, GridBagConstraints.BOTH));
         scoreboard.setPreferredSize(new Dimension(MIN_WIDTH, SB_HEIGHT));
-        gamePanel.add(new JPanel());
+        gamePanel.add(scoreboard);
     }
 
     // Creates the JPanel which holds each JButton that makes up the Scrabble board 
@@ -324,8 +358,13 @@ class Board extends JFrame {
         right.setSize(left.getSize()); // Set the size of the right padding
 
         //hand.add(left, 0, 0, 1, 2, GridBagConstraints.BOTH); // Add Left Padding at [0][0]
-        //hand.add(right, 0, (HAND_LENGTH+1)*2 + 4, 1, 2, GridBagConstraints.BOTH); // Add Right Padding at [0][-1]
+        //hand.add(right, 0, (HAND_LENGTH)*2 + 4, 1, 2, GridBagConstraints.BOTH); // Add Right Padding at [0][-1]
         
+        hand.add(makePadding(4*(MIN_WIDTH - (8*(H_TILE_SIZE + H_X_OFF) + TILE_SIZE))/2 + 4, H_TILE_SIZE), 0, 0, 1, 2, GridBagConstraints.BOTH);
+        hand.add(makePadding(4*(MIN_WIDTH - (8*(H_TILE_SIZE + H_X_OFF) + TILE_SIZE))/2 + 4, H_TILE_SIZE), 0, (HAND_LENGTH * 2) + 4, 1, 2, GridBagConstraints.BOTH);
+
+        System.out.println("Padding: "+(MIN_WIDTH - (8*(H_TILE_SIZE + H_X_OFF) + TILE_SIZE)));
+
         // Would add the Recall and Shuffle buttons up here, if adding directly to JPanel.
         for (int i=0; i<=HAND_LENGTH*2; i++) {
             final Tile tile = new Tile("", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, i/2); // Create the letter tile
@@ -470,8 +509,10 @@ class Board extends JFrame {
     }
 
     private Component makePadding(int width, int height) {
-        JLabel padding = new JLabel();
+        JPanel padding = new JPanel();
         padding.setSize(width, height);
+        padding.setMinimumSize(new Dimension(width, height/2));
+        padding.setMaximumSize(new Dimension((int) (width/1.0/MIN_WIDTH) * MAX_WIDTH, (int) (height/2.0/MIN_HEIGHT) * MAX_HEIGHT));
         return(padding);
     }
 
