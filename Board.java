@@ -8,25 +8,15 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.util.Random;
 
-// Will need to recolor placed tiles, as well as implement a number at bottom L/R corner that depicts the value of the tile.
-// Need to also make menu to select custom letter, for blank tile occurances.
-
 class Board extends JFrame {
     /*
     *   Should make either a sidemenu, or selections from the player's hand, where, when selected, it highlights the border in yellow or something.
     */
     // Actual ratios are more towards 19/15;
-    private final double widthRatio = 9.0; // Width has a ratio of 3
-    private final double heightRatio = 16.0; // Height has a ratio of 4
-    private final double widthMargin = 0.45; // 50% Width Ratio Acceptable Margin
-    private final double heightMargin = 0.25; // 20% Height Ratio Acceptable Margin
-    private final double MULT = 1;
-    private final int MIN_WIDTH = (int)(MULT*390);
-    private final int MIN_HEIGHT = (int)(MULT*481);
-    private final int MAX_WIDTH = (int)(840*MULT); // If exceeds 843, duplicate tiles appear on bottom row
-    private final int MAX_HEIGHT = (int)(MULT*1036); // If exceeds 1012, duplicate tiles appear on bottom row
-    private int FRAME_WIDTH = MIN_WIDTH; // 528
-    private int FRAME_HEIGHT = MIN_HEIGHT; // 528
+    private final double widthRatio = 13.0;//1.0; // Width has a ratio of 3
+    private final double heightRatio = 17.0;// 2.0; // Height has a ratio of 4
+    private final double widthMargin = 13.0/17.0;//0.8; // 50% Width Ratio Acceptable Margin
+    private final double heightMargin = 0.2;//0.2; // 20% Height Ratio Acceptable Margin
     public final int SELECTED_HAND = ("HAND").hashCode();
     public final int SELECTED_LETTER = ("SELECT").hashCode();
     public final int PLACING_LETTER = ("PLACING").hashCode();
@@ -40,10 +30,10 @@ class Board extends JFrame {
     private final JFrame frame;
     private JPanel gamePanel = new JPanel();
     private JPanel mainPanel = new JPanel();
-    private GridPanel errorPanel = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.X_AXIS);
     private CurvedButton startButton = new CurvedButton();
     private HashSet<CustomListener> listeners = new HashSet<CustomListener>();
     private HashSet<Tile> placedTiles = new HashSet<Tile>();
+    private final double MULT = 0.5;
     private final int ROWS = Scrabble.getBoard().length;
     private final int COLS = Scrabble.getBoard()[0].length;
     private final int FONT_SIZE = (int)(26*MULT); // 26 Is actually double. Window starts out at half size
@@ -56,6 +46,12 @@ class Board extends JFrame {
     private final int H_X_OFF = H_TILE_SIZE/8;
     private final int MENU_WIDTH = (int)(300*MULT); // 300
     private final int MENU_HEIGHT = (int)(75*MULT); // 75
+    private final int MIN_WIDTH = (int)(MULT*540); // (75*8 + 50) = 650
+    private final int MIN_HEIGHT = (int)(MULT*666); // (750 + 75 | 125) = 825 ~ 950
+    private final int MAX_WIDTH = (int)(840*MULT); // If exceeds 843, duplicate tiles appear on bottom row
+    private final int MAX_HEIGHT = (int)(MULT*1036); // If exceeds 1012, duplicate tiles appear on bottom row
+    private int FRAME_WIDTH = MIN_WIDTH; // 528
+    private int FRAME_HEIGHT = MIN_HEIGHT; // 528
     private int player_count = 2;
     private int selected_tile = -1;
  
@@ -76,15 +72,14 @@ class Board extends JFrame {
         createMenu(); // Generate the Main Menu and add to mainPanel
         createScoreboard(); // Generate the Scoreboard displayed in-game
         createBoard(); // Create the Scrabble Board
-        createError();
         createHand(); // Create the Player's Hand
 
         mainPanel.setVisible(true); // Set the main menu visible, if not
     
         frame.add(mainPanel);//mainPanel); // Add the main menu to the JFrame
-
+        
         Toolkit.getDefaultToolkit().setDynamicLayout(false); // Ensures window resize keeps the right ratio: https://stackoverflow.com/questions/20925193/using-componentadapter-to-determine-when-frame-resize-is-finished 
-        frame.setSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT)); // Sets the default dimensions
+        
         frame.addComponentListener(new ComponentAdapter() {
             // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-eventff
             public void componentResized(ComponentEvent componentEvent) { // Method to run every time window is resized
@@ -96,16 +91,10 @@ class Board extends JFrame {
                     if (Math.abs(FRAME_WIDTH - width) > Math.abs(FRAME_HEIGHT - height)) { // Checks to see if Width is increasing
                         frame.setPreferredSize(new Dimension(Math.min(MAX_WIDTH, Math.max((int)(width), MIN_WIDTH)), Math.min(MAX_HEIGHT, Math.max((int)(FRAME_HEIGHT * (width / FRAME_WIDTH)), MIN_HEIGHT)))); // Adjusts height to match
                     }
-                    
                     else if (Math.abs(FRAME_HEIGHT - height) > Math.abs(FRAME_WIDTH - width)) { // Checks to see if Height is increasing
                         frame.setPreferredSize(new Dimension(Math.min(MAX_WIDTH, Math.max((int)(FRAME_WIDTH * (height / FRAME_HEIGHT)), MIN_WIDTH)), Math.min(MAX_HEIGHT, Math.max((int)(height), MIN_HEIGHT)))); // Adjusts width to match
                     }
                 }
-                // Automatically Resizing Layered Panes/Components: https://community.oracle.com/tech/developers/discussion/1351513/automatically-fitting-the-size-of-jlayeredpane-inside-a-jframe
-                //JLayeredPane layer = (JLayeredPane) gamePanel.getComponent(1);
-                GridPanel board = getBoard();
-                //layer.setBounds(0, 0, (int)(layer.getWidth() * frame.getWidth() / 1.0 / FRAME_WIDTH), (int)(layer.getHeight() * frame.getHeight() / 1.0 / FRAME_HEIGHT));
-                board.setBounds(0, 0, (int)(board.getWidth() * frame.getWidth() / 1.0 / FRAME_WIDTH), (int)(board.getHeight() * frame.getHeight() / 1.0 / FRAME_HEIGHT));
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
                 System.out.println("Window Resized: "+FRAME_WIDTH+" x "+FRAME_HEIGHT);
@@ -114,11 +103,14 @@ class Board extends JFrame {
         });
 
         frame.setVisible(true); // Set the application frame visible
+        frame.setPreferredSize(new Dimension(MIN_WIDTH, MIN_HEIGHT)); // Sets the default dimensions
     }
     
     // Starts the game, and switches from mainPanel to gamePanel
     public void startGame() {
         frame.remove(mainPanel); // Remove all current panels to begin the gameplay
+        createBoard(); // Recreate the gamePanel
+        createHand(); // Recreate the gamePanel
         frame.add(gamePanel); // Add the game panel to display the Scrabble board
         frame.pack(); // Repaint the JFrame
         System.out.println("Game Started: "+player_count+" Players"); // Display the beginning of the game
@@ -252,45 +244,44 @@ class Board extends JFrame {
     private void createScoreboard() {
         gamePanel = new JPanel(new GridBagLayout()); // Clears the gamePanel
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
-        GridPanel scoreboard = new GridPanel(FRAME_WIDTH, SB_HEIGHT, BoxLayout.X_AXIS); // 50 * 2.5 = 125
-
-        CurvedLabel player = new CurvedLabel("Player:    1"); // Might have usernames, doesn't matter rn
-        player.setSize((FRAME_WIDTH - 2*SB_HEIGHT/3)/2, SB_HEIGHT/6);
-        player.setFont(new Font("Serif", Font.BOLD, (int)(FONT_SIZE*2)));
-        scoreboard.add(player, 1, 1, 1, 1, GridBagConstraints.BOTH);
-
-        CurvedLabel score = new CurvedLabel("Score:    0");
-        score.setSize((FRAME_WIDTH - 2*SB_HEIGHT/3)/2, SB_HEIGHT/6);
-        score.setFont(new Font("Serif", Font.BOLD, (int)(FONT_SIZE*2)));
-        scoreboard.add(score, 1, 2, 1, 1, GridBagConstraints.BOTH);
+        GridPanel scoreboard = new GridPanel(MIN_WIDTH, SB_HEIGHT, BoxLayout.X_AXIS); // 50 * 2.5 = 125
 
         CurvedButton left = new CurvedButton("<", (int)(TILE_RADIUS*1.5), new Color(0x000000), 100);
-        left.setSize(SB_HEIGHT/3, SB_HEIGHT/3);
+        left.setSize(TILE_SIZE, TILE_SIZE);
         left.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
         left.setYOffset(1.0/4.0);
         scoreboard.add(left, 1, 0, 1, 1, GridBagConstraints.BOTH);
 
-        scoreboard.add(makePadding(SB_HEIGHT/3, (int)(2.5*SB_HEIGHT/3)), 0, 3, 1, 1, GridBagConstraints.BOTH);
-        scoreboard.add(makePadding(SB_HEIGHT/3, (int)(2.5*SB_HEIGHT/3)), 2, 3, 1, 1, GridBagConstraints.BOTH);
+        scoreboard.add(makePadding((SB_HEIGHT-TILE_SIZE)/2, (SB_HEIGHT-TILE_SIZE)/2), 0, 0, 1, 1, GridBagConstraints.BOTH);
+        scoreboard.add(makePadding((SB_HEIGHT-TILE_SIZE)/2, (SB_HEIGHT-TILE_SIZE)/2), 2, 0, 1, 1, GridBagConstraints.BOTH);
 
         CurvedButton right = new CurvedButton(">", (int)(TILE_RADIUS*1.5), new Color(0x000000), 100);
-        right.setSize(SB_HEIGHT/3, SB_HEIGHT/3);
+        right.setSize(TILE_SIZE, TILE_SIZE);
         right.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
         right.setYOffset(1.0/4.0);
         scoreboard.add(right, 1, 3, 1, 1, GridBagConstraints.BOTH);
 
-        scoreboard.add(makePadding(SB_HEIGHT/3, (int)(2.5*SB_HEIGHT/3)), 0, 0, 1, 1, GridBagConstraints.BOTH);
-        scoreboard.add(makePadding(SB_HEIGHT/3, (int)(2.5*SB_HEIGHT/3)), 2, 0, 1, 1, GridBagConstraints.BOTH);
+        scoreboard.add(makePadding((SB_HEIGHT-TILE_SIZE)/2, (SB_HEIGHT-TILE_SIZE)/2), 0, 3, 1, 1, GridBagConstraints.BOTH);
+        scoreboard.add(makePadding((SB_HEIGHT-TILE_SIZE)/2, (SB_HEIGHT-TILE_SIZE)/2), 2, 3, 1, 1, GridBagConstraints.BOTH);
 
-        l.setConstraints(scoreboard, createConstraints(1, SB_HEIGHT/1.0/FRAME_HEIGHT, 0, 0, 1, 1, GridBagConstraints.BOTH));
-        scoreboard.setPreferredSize(new Dimension(MIN_WIDTH, (int)(SB_HEIGHT * FRAME_HEIGHT / 1.0 / MAX_HEIGHT)));
-        //layer.add(scoreboard, new Integer(0));
-        gamePanel.add(scoreboard);
+        CurvedLabel player = new CurvedLabel("Player:    1"); // Might have usernames, doesn't matter rn
+        player.setSize(MIN_WIDTH, SB_HEIGHT);
+        player.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
+        scoreboard.add(player, 0, 1, 1, 4, GridBagConstraints.BOTH);
+
+        CurvedLabel score = new CurvedLabel("Score:    0");
+        score.setSize(MIN_WIDTH, SB_HEIGHT);
+        score.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
+        scoreboard.add(score, 0, 2, 1, 4, GridBagConstraints.BOTH);
+
+        l.setConstraints(scoreboard, createConstraints(1, SB_HEIGHT/1.0/MIN_HEIGHT, 0, 0, 1, 1, GridBagConstraints.BOTH));
+        scoreboard.setPreferredSize(new Dimension(MIN_WIDTH, SB_HEIGHT));
+        gamePanel.add(new JPanel());
     }
 
     // Creates the JPanel which holds each JButton that makes up the Scrabble board 
     private void createBoard() {
-        GridPanel board = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.Y_AXIS); // Creates the main Board panel
+        GridPanel board = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.Y_AXIS); // Creates the main Board panel
         for (int r=0; r<ROWS; r++) { // Loops through each row on the board
             for (int c=0; c<COLS; c++) { // Loops through each col on the board
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
@@ -316,25 +307,24 @@ class Board extends JFrame {
                 board.add(temp, r, c, 1, 1, GridBagConstraints.BOTH); // Adds the tile to the Board
             }
         }
-        //GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
-        board.setSize(new Dimension((COLS*TILE_SIZE)/2, (ROWS*TILE_SIZE)/2));
-        //board.setPreferredSize(board.getSize());
-        //l.setConstraints(board, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the board
+        GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
+        l.setConstraints(board, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the board
+        board.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
         gamePanel.add(board); // Create and add the board to the application frame
     }
 
     // Creates the JPanel that features each player's hand of tiles
     private void createHand() {
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
-        GridPanel hand = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.X_AXIS);
+        GridPanel hand = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.X_AXIS);
     
         JPanel left = new JPanel(); // Left padding
         left.setSize((MAX_WIDTH - (7*(H_TILE_SIZE + H_X_OFF) + H_TILE_SIZE/2))/2, H_TILE_SIZE); // Set the size of the left padding
         JPanel right = new JPanel(); // Right padding
         right.setSize(left.getSize()); // Set the size of the right padding
 
-        hand.add(left, 0, 0, 1, 2, GridBagConstraints.BOTH); // Add Left Padding at [0][0]
-        hand.add(right, 0, (HAND_LENGTH+1)*2 + 2, 1, 2, GridBagConstraints.BOTH); // Add Right Padding at [0][-1]
+        //hand.add(left, 0, 0, 1, 2, GridBagConstraints.BOTH); // Add Left Padding at [0][0]
+        //hand.add(right, 0, (HAND_LENGTH+1)*2 + 4, 1, 2, GridBagConstraints.BOTH); // Add Right Padding at [0][-1]
         
         // Would add the Recall and Shuffle buttons up here, if adding directly to JPanel.
         for (int i=0; i<=HAND_LENGTH*2; i++) {
@@ -356,9 +346,9 @@ class Board extends JFrame {
                 hand.add(temp, 0, i+2, 1, 2, GridBagConstraints.BOTH);
             }
         }
-        l.setConstraints(hand, createConstraints(1, ((H_TILE_SIZE + 2*H_X_OFF)/1.0/MAX_WIDTH), 0, 2, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the hand
+        l.setConstraints(hand, createConstraints(1, (H_TILE_SIZE)/1.0/MAX_WIDTH, 0, 2, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the hand
         createHandOptions(hand); // Create the action buttons, located on the Player's Hand
-        hand.setPreferredSize(new Dimension(FRAME_WIDTH, H_TILE_SIZE));
+        hand.setPreferredSize(new Dimension(MIN_WIDTH, H_TILE_SIZE));
         gamePanel.add(hand); // Create and add the hand to the application frame;
     }
 
@@ -403,7 +393,7 @@ class Board extends JFrame {
         
         hand.add(recall, 0, 1, 1, 1, GridBagConstraints.BOTH); // Add Recall Button at [0][1]
         hand.add(shuffle, 1, 1, 1, 1, GridBagConstraints.BOTH); // Add Shuffle Button at [1][1]
-        hand.add(submit, 0, (HAND_LENGTH+1)*2 + 1, 1, 2, GridBagConstraints.BOTH); // Add Submit Button at [0][-2];
+        hand.add(submit, 0, (HAND_LENGTH)*2 + 3, 1, 2, GridBagConstraints.BOTH); // Add Submit Button at [0][-2];
     }
 
     // Creates the JPanel that contains the components which make up the main menu
@@ -412,7 +402,7 @@ class Board extends JFrame {
         mainPanel = new JPanel(new GridBagLayout()); // Initializes the mainPanel
         GridBagLayout l = (GridBagLayout) mainPanel.getLayout(); // Stores the GridBagLayout of the mainPanel
 
-        GridPanel menu = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.Y_AXIS); // Creates the Main Menu panel
+        GridPanel menu = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.Y_AXIS); // Creates the Main Menu panel
     
         startButton = new CurvedButton("Start", 15, Color.yellow, 100); // Creates a default start button
         startButton.setFont(new Font("Serif", Font.PLAIN, 75)); // Sets the font of the Start Button to size 75
@@ -431,29 +421,29 @@ class Board extends JFrame {
         selector.setPaintTicks(true); // Paints the ticks on the slider
         selector.setSize(MENU_WIDTH/3, MENU_HEIGHT); // Sets the default size of the Selector
 
-        GridPanel start = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.X_AXIS); // Creates a GridPanel to hold the Start Button
+        GridPanel start = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.X_AXIS); // Creates a GridPanel to hold the Start Button
         start.add(makePadding(MENU_WIDTH/3, MENU_HEIGHT), 0, 0, 1, 1, GridBagConstraints.BOTH); // Adds Left Padding
         start.add(startButton, 0, 1, 1, 1, GridBagConstraints.BOTH); // Adds the Start Button to the Start Panel
         start.add(makePadding(MENU_WIDTH/3, MENU_HEIGHT), 0, 2, 1, 1, GridBagConstraints.BOTH); // Adds Right Padding
-        start.setSize(FRAME_WIDTH, MENU_HEIGHT); // Sets the default size of the Start Button
+        start.setSize(MIN_WIDTH, MENU_HEIGHT); // Sets the default size of the Start Button
         
-        GridPanel select = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.X_AXIS); // Creates a GridPanel to hold the Selector
+        GridPanel select = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.X_AXIS); // Creates a GridPanel to hold the Selector
         select.add(makePadding(MENU_WIDTH/6, MENU_HEIGHT), 0, 0, 1, 1, GridBagConstraints.BOTH); // Adds Left Padding
         select.add(selector, 0, 1, 1, 1, GridBagConstraints.BOTH); // Adds the Selector to the Selector Panel
         select.add(makePadding(MENU_WIDTH/6, MENU_HEIGHT), 0, 2, 1, 1, GridBagConstraints.BOTH); // Adds Right Padding
-        select.setSize(FRAME_WIDTH, MENU_HEIGHT); // Sets the default size of the Selector
+        select.setSize(MIN_WIDTH, MENU_HEIGHT); // Sets the default size of the Selector
 
         final CurvedLabel counter = new CurvedLabel("Players:    2"); // Creates the Player Counter display
         counter.setFont(new Font("Serif", Font.PLAIN, 75)); // Sets the font of the Counter to size 75
-        counter.setSize(FRAME_WIDTH, MENU_HEIGHT); // Sets the default size of the Player Display
+        counter.setSize(MIN_WIDTH, MENU_HEIGHT); // Sets the default size of the Player Display
 
-        menu.add(makePadding(FRAME_WIDTH, FRAME_HEIGHT/3 - MENU_HEIGHT), 0, 0, 1, 1, GridBagConstraints.BOTH); // Adds Top Padding
+        menu.add(makePadding(MIN_WIDTH, MIN_HEIGHT/3 - MENU_HEIGHT), 0, 0, 1, 1, GridBagConstraints.BOTH); // Adds Top Padding
         menu.add(counter, 1, 0, 1, 1, GridBagConstraints.BOTH); // Adds the Player Display to the Main Menu
-        menu.add(makePadding(FRAME_WIDTH, FRAME_HEIGHT/3 - MENU_HEIGHT), 2, 0, 1, 1, GridBagConstraints.BOTH); // Adds Middle Padding
+        menu.add(makePadding(MIN_WIDTH, MIN_HEIGHT/3 - MENU_HEIGHT), 2, 0, 1, 1, GridBagConstraints.BOTH); // Adds Middle Padding
         menu.add(select, 3, 0, 1, 1, GridBagConstraints.BOTH); // Adds the Selector to the Main Menu
-        menu.add(makePadding(FRAME_WIDTH, FRAME_HEIGHT/3 - MENU_HEIGHT), 4, 0, 1, 1, GridBagConstraints.BOTH); // Adds Middle Padding
+        menu.add(makePadding(MIN_WIDTH, MIN_HEIGHT/3 - MENU_HEIGHT), 4, 0, 1, 1, GridBagConstraints.BOTH); // Adds Middle Padding
         menu.add(start, 5, 0, 1, 1, GridBagConstraints.BOTH); // Adds the Start Button to the Main menu
-        menu.add(makePadding(FRAME_WIDTH, FRAME_HEIGHT/3 - MENU_HEIGHT), 6, 0, 1, 1, GridBagConstraints.BOTH); // Adds Bottom Padding
+        menu.add(makePadding(MIN_WIDTH, MIN_HEIGHT/3 - MENU_HEIGHT), 6, 0, 1, 1, GridBagConstraints.BOTH); // Adds Bottom Padding
 
         selector.addChangeListener(new ChangeListener() {
             @Override
@@ -465,52 +455,6 @@ class Board extends JFrame {
 
         l.setConstraints(menu, createConstraints(1, 1, 0, 0, 1, 1, GridBagConstraints.BOTH)); // Sets the constraints for the Main menu
         mainPanel.add(menu); // Create and add the Menu to the JPanel
-    }
-
-    // An attempt at layering panels
-    public void createError() {
-        CurvedLabel text = new CurvedLabel("Test Phrase", TILE_RADIUS, Color.RED);
-        
-        text.setFont(new Font("Serif", Font.BOLD, 37));
-        text.setBounds((FRAME_WIDTH - (int)(3.5*TILE_SIZE))/2, 2*TILE_SIZE, (int)(3.5*TILE_SIZE), 2*TILE_SIZE);
-        text.setBackground(Color.GRAY);
-        
-        CurvedButton a = new CurvedButton("A", TILE_RADIUS, Color.RED, 100);
-        CurvedButton b = new CurvedButton("B", TILE_RADIUS, Color.GREEN, 100);
-        
-        a.setSize(new Dimension(500, 500));
-        b.setSize(new Dimension(250, 250));
-
-        a.setBounds(50, 0, 100, 100);
-        b.setBounds(100, 0, 100, 100);
-        
-        LayerPanel layer = new LayerPanel();
-        // Could use GridBagLayout to set the specific Row/Col of origin, but extend the width & height to be larger?
-
-        GridPanel board = (GridPanel) gamePanel.getComponent(1);
-        gamePanel.remove(1);
-
-        // Making LayeredPane With Layout: https://stackoverflow.com/questions/11528677/newbie-jlayeredpane-issue
-        // https://stackoverflow.com/questions/48712815/resize-a-jlayeredpane-based-on-users-input
-
-        board.setBounds(50, 0, board.getSize().width, board.getSize().height);
-        
-        layer.add(a, 0);
-        layer.add(text, 2);
-        layer.add(b, 1);
-        layer.add(board, 0);
-        
-        
-        //layer.add(errorPanel, new Integer(2), 1);
-
-        GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
-
-        l.setConstraints(layer, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH));
-        layer.setPreferredSize(new Dimension(board.getSize().width*2, board.getSize().height*2));
-        gamePanel.add(layer);
-
-       //a.setBounds(100, 100, a.getWidth(), a.getHeight());
-       // b.setBounds(200, 200, b.getWidth(), b.getHeight());
     }
 
     private GridBagConstraints createConstraints(double xLbs, double yLbs, int x, int y, int w, int h, int fill) {
@@ -526,7 +470,7 @@ class Board extends JFrame {
     }
 
     private Component makePadding(int width, int height) {
-        JPanel padding = new JPanel();
+        JLabel padding = new JLabel();
         padding.setSize(width, height);
         return(padding);
     }
@@ -543,8 +487,7 @@ class Board extends JFrame {
     }
 
     private GridPanel getBoard() {
-        LayerPanel temp = (LayerPanel) gamePanel.getComponent(1);
-        return((GridPanel)(/*gamePanel.getComponent(1)));*/temp.getComponent(3)));
+        return((GridPanel)(gamePanel.getComponent(1)));
     }
 
     private int calculateTile(int r, int c) {
@@ -579,4 +522,4 @@ class Board extends JFrame {
     public void addCustomListener(CustomListener c) {
         listeners.add(c);
     }
-} 
+}
