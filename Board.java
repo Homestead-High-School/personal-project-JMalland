@@ -231,11 +231,12 @@ class Board extends JFrame {
             selectTile(select);
             if (old == null) {
                 placedTiles.remove(select);
-                recallTile(select);
+                dispatchEvent(new CustomEvent(select, RECALLED_TILE, select.getPoint().r, select.getPoint().c));
             }
             else {
                 dispatchEvent(new CustomEvent(select, PLACED_LETTER, select.findText().charAt(0), select.getPoint().r, select.getPoint().c));
             }
+            placedTiles.add(c);
             dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c));
         }/*boolean isBoardTile = selected_tile >= 7; // Check if the selected tile is a Board tile
         recallTile(isBoardTile ? null : old); // Reset the previously placed tile to its default, if the selected tile isn't a Board tile
@@ -260,9 +261,6 @@ class Board extends JFrame {
         for (Tile p : placedTiles) { // Loop through each Tile placed on the board
             if (p.getPoint() != null) {
                 dispatchEvent(new CustomEvent(p, RECALLED_TILE, p.getPoint().r, p.getPoint().c)); // Trigger an ActionEvent to allow the client to determine whether or not the tile can be recalled
-            }
-            else {
-                //recallTile(p); // Recall the current tile back to its originating position.
             }
         }
         placedTiles.clear(); // Wipe the set of all placed tiles, since they were recalled
@@ -538,6 +536,7 @@ class Board extends JFrame {
         error.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
         error.setOpaque(false);
         error.setVisible(false); // Start with the error screen invisible.
+        text.setVisible(false);
 
         JLayeredPane t = new JLayeredPane();
         

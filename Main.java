@@ -120,7 +120,7 @@ public class Main {
                 }
                 else if (e.getID() == b.RECALLED_TILE) {
                     if (real.notYetPlaced(e.getRow(), e.getCol())) {
-                        System.out.println("Recalled Placed Tile.");
+                        System.out.println("Recalled Placed Tile: "+e.getRow()+" "+e.getCol());
                         b.recallTile((Tile) e.getSource());
                         real.recallTile(e.getRow(), e.getCol());
                     }
