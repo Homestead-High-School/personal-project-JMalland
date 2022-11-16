@@ -13,15 +13,8 @@ class Board extends JFrame {
     *   Should make either a sidemenu, or selections from the player's hand, where, when selected, it highlights the border in yellow or something.
     */
     // Actual ratios are more towards 19/15;
-<<<<<<< HEAD
-    private final double widthRatio = 11.0;//1.0; // Width has a ratio of 3
-    private final double heightRatio = 17.0;// 2.0; // Height has a ratio of 4
-    private final double widthMargin = 11.0/17.0;//0.8; // 50% Width Ratio Acceptable Margin
-    private final double heightMargin = 0.2;//0.2; // 20% Height Ratio Acceptable Margin
-=======
     private final double widthRatio = 15.0; // Width has a ratio of 3
     private final double heightRatio = 20.0; // Height has a ratio of 4
->>>>>>> 5df427293be0536c3ae3fcfdf653ff21efb41671
     public final int SELECTED_HAND = ("HAND").hashCode();
     public final int SELECTED_LETTER = ("SELECT").hashCode();
     public final int PLACING_LETTER = ("PLACING").hashCode();
@@ -536,7 +529,7 @@ class Board extends JFrame {
     }
 
  public void displayError(String error) {
-        CurvedButton text = (CurvedButton) getError().getComponent(0);
+        final CurvedButton text = (CurvedButton) getError().getComponent(0);
         text.setText(error);
         text.setOpacity(0);
         // How to use Java Swing Timer: https://stackoverflow.com/questions/28521173/how-to-use-swing-timer-actionlistener
