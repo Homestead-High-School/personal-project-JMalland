@@ -552,7 +552,7 @@ class Board extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if (inc.isRunning()) {
                     inc.stop(); // Stops the Real timer from running
-                    original.start();
+                    //original.start();
                     System.out.println("Stopped.\nDecreasing ");
                 }
                 else {
