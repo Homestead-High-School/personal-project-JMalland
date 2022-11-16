@@ -71,6 +71,7 @@ class Board extends JFrame {
         createMenu(); // Generate the Main Menu and add to mainPanel
         createScoreboard(); // Generate the Scoreboard displayed in-game
         createBoard(); // Create the Scrabble Board
+        createError();
         createHand(); // Create the Player's Hand
 
         mainPanel.setVisible(true); // Set the main menu visible, if not
@@ -113,6 +114,8 @@ class Board extends JFrame {
                     }
                     frame.setPreferredSize(new Dimension(widths.get(w), heights.get(h)));
                 }
+                CurvedButton error = getError();
+                error.setBounds(error.getX(), error.getY(), (int)(error.getSize().width * (frame.getWidth() / 1.0 / FRAME_WIDTH)), (int)(error.getSize().height * (frame.getHeight() / 1.0 / FRAME_HEIGHT)));
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
                 frame.pack(); // Pack once more, in case the Hand was adjusted
@@ -497,41 +500,27 @@ class Board extends JFrame {
 
     // An attempt at layering panels
     public void createError() {
-        CurvedLabel text = new CurvedLabel("Test Phrase", TILE_RADIUS, Color.RED);
-        
+        // PaintComponent problems: https://stackoverflow.com/questions/20833913/flickering-when-updating-overlapping-jpanels-inside-a-jlayeredpane-using-timeste
+        CurvedButton text = new CurvedButton("Invalid Word", TILE_RADIUS, Color.GRAY, 50);
+        text.setEnabled(false);
         text.setFont(new Font("Serif", Font.BOLD, 37));
-        text.setBounds((FRAME_WIDTH - (int)(3.5*TILE_SIZE))/2, 2*TILE_SIZE, (int)(3.5*TILE_SIZE), 2*TILE_SIZE);
-        text.setBackground(Color.GRAY);
+        text.setTextColor(Color.RED);
+        text.setBorder(new Color(0, 0, 0, 0), 0);
+        text.setBounds(0, 0, COLS*TILE_SIZE, ROWS*TILE_SIZE);
+
+        JLayeredPane t = new JLayeredPane();
         
-        CurvedButton a = new CurvedButton("A", TILE_RADIUS, Color.RED, 100);
-        CurvedButton b = new CurvedButton("B", TILE_RADIUS, Color.GREEN, 100);
-        
-        a.setSize(new Dimension(500, 500));
-        b.setSize(new Dimension(250, 250));
-        a.setBounds(50, 0, 100, 100);
-        b.setBounds(100, 0, 100, 100);
-        
-        LayerPanel layer = new LayerPanel();
-        // Could use GridBagLayout to set the specific Row/Col of origin, but extend the width & height to be larger?
         GridPanel board = (GridPanel) gamePanel.getComponent(1);
         gamePanel.remove(1);
-        // Making LayeredPane With Layout: https://stackoverflow.com/questions/11528677/newbie-jlayeredpane-issue
-        // https://stackoverflow.com/questions/48712815/resize-a-jlayeredpane-based-on-users-input
-        board.setBounds(50, 0, board.getSize().width, board.getSize().height);
+        board.setBounds(0, 0, board.getSize().width, board.getSize().height);
         
-        layer.add(a, 0);
-        layer.add(text, 2);
-        layer.add(b, 1);
-        layer.add(board, 0);
+        t.add(text, JLayeredPane.POPUP_LAYER);
+        t.add(board, JLayeredPane.DEFAULT_LAYER);
         
-        
-        //layer.add(errorPanel, new Integer(2), 1);
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
-        l.setConstraints(layer, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH));
-        layer.setPreferredSize(new Dimension(board.getSize().width*2, board.getSize().height*2));
-        gamePanel.add(layer);
-       //a.setBounds(100, 100, a.getWidth(), a.getHeight());
-       // b.setBounds(200, 200, b.getWidth(), b.getHeight());
+        l.setConstraints(t, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH));
+        //t.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
+        gamePanel.add(t);
     }
 
     private GridBagConstraints createConstraints(double xLbs, double yLbs, int x, int y, int w, int h, int fill) {
@@ -566,7 +555,13 @@ class Board extends JFrame {
     }
 
     private GridPanel getBoard() {
-        return((GridPanel)(gamePanel.getComponent(1)));
+        JLayeredPane temp = (JLayeredPane) gamePanel.getComponent(1);
+        return((GridPanel) temp.getComponent(1));//new GridPanel(1, 1, BoxLayout.X_AXIS));//return((GridPanel)(gamePanel.getComponent(1)));
+    }
+
+    private CurvedButton getError() {
+        JLayeredPane temp = (JLayeredPane) gamePanel.getComponent(1);
+        return((CurvedButton) temp.getComponent(0));
     }
 
     private int calculateTile(int r, int c) {
