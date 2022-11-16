@@ -13,9 +13,9 @@ class Board extends JFrame {
     *   Should make either a sidemenu, or selections from the player's hand, where, when selected, it highlights the border in yellow or something.
     */
     // Actual ratios are more towards 19/15;
-    private final double widthRatio = 13.0;//1.0; // Width has a ratio of 3
+    private final double widthRatio = 11.0;//1.0; // Width has a ratio of 3
     private final double heightRatio = 17.0;// 2.0; // Height has a ratio of 4
-    private final double widthMargin = 13.0/17.0;//0.8; // 50% Width Ratio Acceptable Margin
+    private final double widthMargin = 11.0/17.0;//0.8; // 50% Width Ratio Acceptable Margin
     private final double heightMargin = 0.2;//0.2; // 20% Height Ratio Acceptable Margin
     public final int SELECTED_HAND = ("HAND").hashCode();
     public final int SELECTED_LETTER = ("SELECT").hashCode();
