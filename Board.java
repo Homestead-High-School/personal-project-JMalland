@@ -441,7 +441,7 @@ class Board extends JFrame {
 
         GridPanel menu = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.Y_AXIS); // Creates the Main Menu panel
     
-        CurvedButton startButton = new CurvedButton("Start", 15, Color.yellow, 100); // Creates a default start button
+        final CurvedButton startButton = new CurvedButton("Start", 15, Color.yellow, 100); // Creates a default start button
         startButton.setFont(new Font("Serif", Font.PLAIN, 75)); // Sets the font of the Start Button to size 75
         startButton.setSize(MENU_WIDTH/3, MENU_HEIGHT); // Sets the default size of the Start Button
 
