@@ -546,13 +546,13 @@ class Board extends JFrame {
                 System.out.print(". ");
                 text.setOpacity(text.getOpacity()-1);
             }
-        })
+        });
         final Timer original = new Timer(5000, new ActionListener() { // Original timer executes after 5 Seconds
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (inc.isRunning()) {
                     inc.stop(); // Stops the Real timer from running
-                    original.start()
+                    original.start();
                     System.out.println("Stopped.\nDecreasing ");
                 }
                 else {
