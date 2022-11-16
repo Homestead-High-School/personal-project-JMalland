@@ -28,6 +28,7 @@ class Board extends JFrame {
     private final JFrame frame;
     private JPanel gamePanel = new JPanel();
     private JPanel mainPanel = new JPanel();
+    private GridPanel board = new GridPanel(1, 1, BoxLayout.X_AXIS);
     private HashSet<CustomListener> listeners = new HashSet<CustomListener>();
     private HashSet<Tile> placedTiles = new HashSet<Tile>();
     private final double MULT = 0.8; // At Mult of 0.8, Aspect Ratio appears odd at <= 630 X 840
@@ -46,7 +47,7 @@ class Board extends JFrame {
     private final int MIN_WIDTH = (int)(MULT*675); // (75*8 + 50) = 650
     private final int MIN_HEIGHT = (int)(MULT*900); // (750 + 75 | 125) = 825 ~ 950
     private final int MAX_WIDTH = (int)(900*MULT); // If exceeds 843, duplicate tiles appear on bottom row
-    private final int MAX_HEIGHT = (int)(MULT*1179); // If exceeds 1012, duplicate tiles appear on bottom row
+    private final int MAX_HEIGHT = (int)(MULT*1200); // If exceeds 1012, duplicate tiles appear on bottom row
     private int FRAME_WIDTH = MIN_WIDTH; // 528
     private int FRAME_HEIGHT = MIN_HEIGHT; // 528
     private int player_count = 2;
@@ -77,17 +78,18 @@ class Board extends JFrame {
         mainPanel.setVisible(true); // Set the main menu visible, if not
     
         frame.add(mainPanel);//mainPanel); // Add the main menu to the JFrame
-        
+
         for (int i=MIN_WIDTH; i<=MAX_WIDTH; i+=(int) widthRatio) {
             widths.add(i);
+            heights.add((int)(i * (heightRatio/widthRatio)));
         }
 
-        for (int i=MIN_HEIGHT; i<=MAX_HEIGHT; i+=(int) heightRatio) {
+        /*for (int i=MIN_HEIGHT; i<=MAX_HEIGHT; i+=(int) heightRatio) {
             heights.add(i);
-        }
+        }*/
 
         Toolkit.getDefaultToolkit().setDynamicLayout(false); // Ensures window resize keeps the right ratio: https://stackoverflow.com/questions/20925193/using-componentadapter-to-determine-when-frame-resize-is-finished 
-        
+        frame.setSize(new Dimension(MIN_WIDTH, MIN_HEIGHT)); // Sets the default dimensions
         frame.addComponentListener(new ComponentAdapter() {
             // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-eventff
             public void componentResized(ComponentEvent componentEvent) { // Method to run every time window is resized
@@ -132,7 +134,6 @@ class Board extends JFrame {
         });
 
         frame.setVisible(true); // Set the application frame visible
-        frame.setPreferredSize(new Dimension(MIN_WIDTH, MIN_HEIGHT)); // Sets the default dimensions
     }
 
     private int getClosestIndex(int n, ArrayList<Integer> list) {
@@ -197,12 +198,12 @@ class Board extends JFrame {
 
         if (previous_tile == selected_tile) { // Checks if the selected tile was previously selected
             selected_tile = -1; // Deselects the selected tile if it was previously selected
+            c.setBorder(Color.black, 2);
         }
         else if (c.findText().equals("")) { // Checks if the selected tile is empty
             c.setBorder(Color.black, 2); // Set the current tile back to its default
             selected_tile = previous_tile; // Reselects the previous tile
         }
-        System.out.println(selected_tile+" "+previous_tile);
     }
     // Places the letter from the selected tile within the players hand
     public void placeTile(Tile c) {
@@ -211,7 +212,32 @@ class Board extends JFrame {
         }
         Tile select = getTile(selected_tile); // Store the selected tile
         Tile old = c.getPointingTo(); // Store the previously placed tile, if there is one
-        boolean isBoardTile = selected_tile >= 7; // Check if the selected tile is a Board tile
+        boolean isBoardTile = selected_tile >= 7;
+        if (!isBoardTile) {
+            c.swapText(select.findText());
+            select.swapText("");
+            c.setPointingTo(select);
+            select.setPointingTo(c);
+            placedTiles.add(c);
+            selectTile(select);
+            recallTile(old);
+            dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c));
+        }
+        else{
+            c.swapText(select.findText());
+            select.swapText(c.getPrev());
+            c.setPointingTo(select.getPointingTo());
+            select.setPointingTo(old);
+            selectTile(select);
+            if (old == null) {
+                placedTiles.remove(select);
+                recallTile(select);
+            }
+            else {
+                dispatchEvent(new CustomEvent(select, PLACED_LETTER, select.findText().charAt(0), select.getPoint().r, select.getPoint().c));
+            }
+            dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c));
+        }/*boolean isBoardTile = selected_tile >= 7; // Check if the selected tile is a Board tile
         recallTile(isBoardTile ? null : old); // Reset the previously placed tile to its default, if the selected tile isn't a Board tile
         c.swapText(select.findText()); // Swap the text from the selected tile to the placed tile
         select.swapText(isBoardTile ? c.getPrev() : ""); // Clear the text, or set it to default if the selected tile is a Board tile
@@ -226,7 +252,7 @@ class Board extends JFrame {
         }
         placedTiles.add(c); // Add the placed tile to the list of tiles
         selectTile(select); // Clear the tile selection
-        dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c)); // Trigger the ActionEvent
+        dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c)); // Trigger the ActionEvent*/
     }
 
     // Recalls all tiles placed on the board, starting the play over
@@ -313,7 +339,7 @@ class Board extends JFrame {
     // Creates the JPanel which holds each JButton that makes up the Scrabble board 
     // Creates the JPanel which holds each JButton that makes up the Scrabble board 
     private void createBoard() {
-        GridPanel board = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.Y_AXIS); // Creates the main Board panel
+        board = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.Y_AXIS); // Creates the main Board panel
         for (int r=0; r<ROWS; r++) { // Loops through each row on the board
             for (int c=0; c<COLS; c++) { // Loops through each col on the board
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
@@ -515,8 +541,7 @@ class Board extends JFrame {
 
         JLayeredPane t = new JLayeredPane();
         
-        GridPanel board = (GridPanel) gamePanel.getComponent(1);
-        gamePanel.remove(1);
+        gamePanel.remove(board);
         board.setBounds(0, 0, board.getSize().width, board.getSize().height);
         
         t.add(error, JLayeredPane.POPUP_LAYER);
@@ -600,8 +625,7 @@ class Board extends JFrame {
     }
 
     private GridPanel getBoard() {
-        JLayeredPane temp = (JLayeredPane) gamePanel.getComponent(1);
-        return((GridPanel) temp.getComponent(1));//new GridPanel(1, 1, BoxLayout.X_AXIS));//return((GridPanel)(gamePanel.getComponent(1)));
+        return(board);//new GridPanel(1, 1, BoxLayout.X_AXIS));//return((GridPanel)(gamePanel.getComponent(1)));
     }
 
     private GridPanel getError() {

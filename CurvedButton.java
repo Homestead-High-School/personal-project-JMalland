@@ -110,13 +110,6 @@ public class CurvedButton extends JButton {
     public String findText() {
         return(text);
     }
-
-    @Override
-    public void paint(Graphics g) {
-        super.paint(g);
-        paintComponent(g);
-        paintBorder(g);
-    }
     
     @Override
     public void paintComponent(Graphics g) {
@@ -147,7 +140,7 @@ public class CurvedButton extends JButton {
 
     @Override
     public void paintBorder(Graphics g) {
-        super.paintBorder(g); // Prevents duplicates: https://stackoverflow.com/questions/13773315/java-paintcomponent-paints-a-copy-of-the-top-gui-panel-for-no-apparent-reason
+        //super.paintBorder(g); // Prevents duplicates: https://stackoverflow.com/questions/13773315/java-paintcomponent-paints-a-copy-of-the-top-gui-panel-for-no-apparent-reason
         Graphics2D g2d = (Graphics2D)(g);
         g2d.setColor(borderColor);
         // Setting Stroke Thickness: https://stackoverflow.com/questions/4219511/draw-rectangle-border-thickness

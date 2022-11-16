@@ -93,9 +93,11 @@ public class Main {
                 else if (e.getID() == b.PLACING_LETTER || e.getID() == b.SELECTED_LETTER) {
                     if (real.notYetPlaced(e.getRow(), e.getCol())) {
                         if (e.getID() == b.PLACING_LETTER) {
+                            System.out.println("Placing To: "+((Tile)(e.getSource())).findText());
                             b.placeTile((Tile) e.getSource());
                         }
                         else {
+                            System.out.println("Selecting: "+((Tile)(e.getSource())).findText());
                             b.selectTile((Tile) e.getSource());
                         }
                     }
