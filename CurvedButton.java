@@ -14,6 +14,7 @@ public class CurvedButton extends JButton {
     private double yOffset = 1.0/3.0;
     private Color color = Color.white;
     private Color borderColor = Color.black;
+    private Color tColor = Color.black;
     private Font font = new Font("Arial", Font.PLAIN, 14);
 
     public CurvedButton() {
@@ -54,6 +55,11 @@ public class CurvedButton extends JButton {
     public void setBorder(Color c, int s) {
         borderColor = c;
         borderSize = s;
+        repaint();
+    }
+
+    public void setTextColor(Color c) {
+        tColor = c;
         repaint();
     }
 
@@ -125,7 +131,7 @@ public class CurvedButton extends JButton {
             g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 2*opacity/3));
         }
 
-        g.fillRoundRect(0, 0, getSize().width, getSize().height, (int)(radius * frame.getWidth()/840.0), (int)(radius * frame.getHeight()/1036.0));
+        g.fillRoundRect(0, 0, getSize().width, getSize().height, (int)(radius * frame.getWidth()/900.0), (int)(radius * frame.getHeight()/1179.0));
 
         // End the method if text doesn't need to be painted
         if (text.trim().equals("")) {
@@ -133,23 +139,23 @@ public class CurvedButton extends JButton {
         }
 
         // Draw Button Text: https://stackoverflow.com/questions/5378052/positioning-string-in-graphic-java
-        g.setFont(new Font(font.getName(), font.getStyle(), (int)(font.getSize()*frame.getWidth()/840.0)));
-        g.setColor(Color.black);
+        g.setFont(new Font(font.getName(), font.getStyle(), (int)(font.getSize()*frame.getWidth()/900.0)));
+        g.setColor(tColor);
         Rectangle2D rect = g.getFontMetrics().getStringBounds(text, g);
         g.drawString(text, (int)(getSize().width/2 - rect.getWidth()*xOffset), (int)(getSize().height/2 + rect.getHeight()*yOffset));
     }
 
     @Override
     public void paintBorder(Graphics g) {
-        //super.paintBorder(g); // Prevents duplicates: https://stackoverflow.com/questions/13773315/java-paintcomponent-paints-a-copy-of-the-top-gui-panel-for-no-apparent-reason
+        super.paintBorder(g); // Prevents duplicates: https://stackoverflow.com/questions/13773315/java-paintcomponent-paints-a-copy-of-the-top-gui-panel-for-no-apparent-reason
         Graphics2D g2d = (Graphics2D)(g);
         g2d.setColor(borderColor);
         // Setting Stroke Thickness: https://stackoverflow.com/questions/4219511/draw-rectangle-border-thickness
-        g2d.setStroke(new BasicStroke((int)(borderSize * (frame.getWidth()/840.0))));
-        if ((int)(borderSize * (frame.getWidth()/840.0)) < 2) {
+        g2d.setStroke(new BasicStroke((int)(borderSize * (frame.getWidth()/900.0))));
+        if ((int)(borderSize * (frame.getWidth()/900.0)) < 2) {
             g2d.setStroke(new BasicStroke(2));
         }
         // Draw Button Border: https://stackoverflow.com/questions/13866252/button-with-round-edges
-        g2d.drawRoundRect(0, 0, getSize().width-1, getSize().height-1, (int)(radius * frame.getWidth()/840.0), (int)(radius * frame.getHeight()/1036.0));
+        g2d.drawRoundRect(0, 0, getSize().width-1, getSize().height-1, (int)(radius * frame.getWidth()/900.0), (int)(radius * frame.getHeight()/1179.0));
     }
 }

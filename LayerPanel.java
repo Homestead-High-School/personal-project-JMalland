@@ -34,6 +34,10 @@ public class LayerPanel extends JPanel {
             map.put(zIndex, new HashSet<Component>());
         }
         map.get(zIndex).add(c);
+        super.revalidate();
+        super.repaint();
+        revalidate();
+        repaint();
         return(c);
     }
     

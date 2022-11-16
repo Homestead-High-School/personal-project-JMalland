@@ -8,6 +8,9 @@ public class CurvedLabel extends JLabel {
     private Color color = Color.black;
     private Color background = null;
     private int radius = 1;
+    private int opacity = 100;
+    private double xOffset = 1.0/2.0;
+    private double yOffset = 1.0/4.0;
     private Font font = new Font("Arial", Font.PLAIN, 14);
 
     public CurvedLabel() {
@@ -31,6 +34,11 @@ public class CurvedLabel extends JLabel {
         color = c;
         repaint();
     }
+    
+    public void setOpacity(int o) {
+        opacity = o;
+        repaint();
+    }
 
     public void setBackground(Color c) {
         background = c;
@@ -47,20 +55,28 @@ public class CurvedLabel extends JLabel {
         repaint();
     }
 
+    public void setYOffset(double y) {
+        yOffset = y;
+    }
+
+    public void setXOffset(double x) {
+        xOffset = x;
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g); // Prevents duplicates: https://stackoverflow.com/questions/13773315/java-paintcomponent-paints-a-copy-of-the-top-gui-panel-for-no-apparent-reason
 
         // Draw the background, if necessary
         if (background != null) { // If background isn't null
-            g.setColor(background); // Set the color to the background color
-            g.fillRoundRect(0, 0, getSize().width, getSize().height, (int)(radius * frame.getWidth()/840.0), (int)(radius * frame.getHeight()/1036.0)); // Draw the background
+            g.setColor(new Color(background.getRed(), background.getBlue(), background.getGreen(), opacity)); // Set the color to the background color
+            g.fillRoundRect(0, 0, getSize().width, getSize().height, (int)(radius * frame.getWidth()/900.0), (int)(radius * frame.getHeight()/1179.0)); // Draw the background
         }
 
         // Draw Label Text: https://stackoverflow.com/questions/5378052/positioning-string-in-graphic-java
-        g.setFont(new Font(font.getName(), font.getStyle(), (int)(font.getSize()*frame.getWidth()/1036.0)));
+        g.setFont(new Font(font.getName(), font.getStyle(), (int)(font.getSize()*frame.getWidth()/900.0)));
         g.setColor(color);
         Rectangle2D rect = g.getFontMetrics().getStringBounds(text, g);
-        g.drawString(text, (int)(getSize().width/2 - rect.getWidth()/2), (int)(getSize().height/2 + rect.getHeight()/2 - rect.getHeight()/4));
+        g.drawString(text, (int)(getSize().width/2 - rect.getWidth()*xOffset), (int)(getSize().height/2 + rect.getHeight()/2 - rect.getHeight()*yOffset));
     }
 }
