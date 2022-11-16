@@ -28,7 +28,6 @@ class Board extends JFrame {
     private final JFrame frame;
     private JPanel gamePanel = new JPanel();
     private JPanel mainPanel = new JPanel();
-    private CurvedButton startButton = new CurvedButton();
     private HashSet<CustomListener> listeners = new HashSet<CustomListener>();
     private HashSet<Tile> placedTiles = new HashSet<Tile>();
     private final double MULT = 0.8; // At Mult of 0.8, Aspect Ratio appears odd at <= 630 X 840
@@ -443,7 +442,7 @@ class Board extends JFrame {
 
         GridPanel menu = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.Y_AXIS); // Creates the Main Menu panel
     
-        startButton = new CurvedButton("Start", 15, Color.yellow, 100); // Creates a default start button
+        CurvedButton startButton = new CurvedButton("Start", 15, Color.yellow, 100); // Creates a default start button
         startButton.setFont(new Font("Serif", Font.PLAIN, 75)); // Sets the font of the Start Button to size 75
         startButton.setSize(MENU_WIDTH/3, MENU_HEIGHT); // Sets the default size of the Start Button
 
@@ -494,6 +493,45 @@ class Board extends JFrame {
 
         l.setConstraints(menu, createConstraints(1, 1, 0, 0, 1, 1, GridBagConstraints.BOTH)); // Sets the constraints for the Main menu
         mainPanel.add(menu); // Create and add the Menu to the JPanel
+    }
+
+    // An attempt at layering panels
+    public void createError() {
+        CurvedLabel text = new CurvedLabel("Test Phrase", TILE_RADIUS, Color.RED);
+        
+        text.setFont(new Font("Serif", Font.BOLD, 37));
+        text.setBounds((FRAME_WIDTH - (int)(3.5*TILE_SIZE))/2, 2*TILE_SIZE, (int)(3.5*TILE_SIZE), 2*TILE_SIZE);
+        text.setBackground(Color.GRAY);
+        
+        CurvedButton a = new CurvedButton("A", TILE_RADIUS, Color.RED, 100);
+        CurvedButton b = new CurvedButton("B", TILE_RADIUS, Color.GREEN, 100);
+        
+        a.setSize(new Dimension(500, 500));
+        b.setSize(new Dimension(250, 250));
+        a.setBounds(50, 0, 100, 100);
+        b.setBounds(100, 0, 100, 100);
+        
+        LayerPanel layer = new LayerPanel();
+        // Could use GridBagLayout to set the specific Row/Col of origin, but extend the width & height to be larger?
+        GridPanel board = (GridPanel) gamePanel.getComponent(1);
+        gamePanel.remove(1);
+        // Making LayeredPane With Layout: https://stackoverflow.com/questions/11528677/newbie-jlayeredpane-issue
+        // https://stackoverflow.com/questions/48712815/resize-a-jlayeredpane-based-on-users-input
+        board.setBounds(50, 0, board.getSize().width, board.getSize().height);
+        
+        layer.add(a, 0);
+        layer.add(text, 2);
+        layer.add(b, 1);
+        layer.add(board, 0);
+        
+        
+        //layer.add(errorPanel, new Integer(2), 1);
+        GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
+        l.setConstraints(layer, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH));
+        layer.setPreferredSize(new Dimension(board.getSize().width*2, board.getSize().height*2));
+        gamePanel.add(layer);
+       //a.setBounds(100, 100, a.getWidth(), a.getHeight());
+       // b.setBounds(200, 200, b.getWidth(), b.getHeight());
     }
 
     private GridBagConstraints createConstraints(double xLbs, double yLbs, int x, int y, int w, int h, int fill) {
