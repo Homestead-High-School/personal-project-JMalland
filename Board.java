@@ -213,47 +213,28 @@ class Board extends JFrame {
         Tile select = getTile(selected_tile); // Store the selected tile
         Tile old = c.getPointingTo(); // Store the previously placed tile, if there is one
         boolean isBoardTile = selected_tile >= 7;
+        c.swapText(select.findText()); // Swaps the text from the selected tile to the one it was placed on
         if (!isBoardTile) {
-            c.swapText(select.findText());
-            select.swapText("");
-            c.setPointingTo(select);
-            select.setPointingTo(c);
-            placedTiles.add(c);
-            selectTile(select);
-            recallTile(old);
-            dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c));
+            select.swapText(""); // Sets the text of the selected tile to be blank
+            c.setPointingTo(select); // Sets the placed tile corresponding to the selected tile
+            select.setPointingTo(c); // Sets the selected tile corresponding to the placed tile
+            recallTile(old); // Recalls the tile that was placed previous to the current one
         }
         else{
-            c.swapText(select.findText());
-            select.swapText(c.getPrev());
-            c.setPointingTo(select.getPointingTo());
-            select.setPointingTo(old);
-            selectTile(select);
-            if (old == null) {
-                placedTiles.remove(select);
-                dispatchEvent(new CustomEvent(select, RECALLED_TILE, select.getPoint().r, select.getPoint().c));
+            select.swapText(c.getPrev()); // Swaps the text of the selected tile with that of the previous text from the placed tile
+            c.setPointingTo(select.getPointingTo()); // Sets the placed tile corresponding to the tile the selected one points to
+            select.setPointingTo(old); // Sets the selected tile corresponding to the tile the placed one pointed to, previously.
+            if (old == null) { // Checks that there was no previous tile at the location of the placed tile
+                placedTiles.remove(select); // Removes the selected tile from the list of placed tiles
+                dispatchEvent(new CustomEvent(select, RECALLED_TILE, select.getPoint().r, select.getPoint().c)); // Announce the recall of the selected tile
             }
             else {
-                dispatchEvent(new CustomEvent(select, PLACED_LETTER, select.findText().charAt(0), select.getPoint().r, select.getPoint().c));
+                dispatchEvent(new CustomEvent(select, PLACED_LETTER, select.findText().charAt(0), select.getPoint().r, select.getPoint().c)); // Announce the re-placement of the selected tile
             }
-            placedTiles.add(c);
-            dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c));
-        }/*boolean isBoardTile = selected_tile >= 7; // Check if the selected tile is a Board tile
-        recallTile(isBoardTile ? null : old); // Reset the previously placed tile to its default, if the selected tile isn't a Board tile
-        c.swapText(select.findText()); // Swap the text from the selected tile to the placed tile
-        select.swapText(isBoardTile ? c.getPrev() : ""); // Clear the text, or set it to default if the selected tile is a Board tile
-        c.setPointingTo(isBoardTile ? select.getPointingTo() : select); // Set the placed tile pointing to the Hand tile of origin
-        select.setPointingTo(isBoardTile ? old : c); // Set the selected tile pointing to the placed tile, or the previous tile, if it's a Board tile
-        if (isBoardTile && old == null) { // Checks if there's no previous tile, and the selected tile is a Board tile
-            placedTiles.remove(select); // Removes the selected tile from the list of placed tiles
-            recallTile(select); // Resets the selected tile to it's default content
         }
-        else if (isBoardTile) { // Checks that the selected tile is a Board tile
-            dispatchEvent(new CustomEvent(select, PLACED_LETTER, select.findText().charAt(0), select.getPoint().r, select.getPoint().c)); // Triggers an ActionEvent because the tile was replaced, once more.
-        }
-        placedTiles.add(c); // Add the placed tile to the list of tiles
-        selectTile(select); // Clear the tile selection
-        dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c)); // Trigger the ActionEvent*/
+        selectTile(select); // Deselects the selected tile
+        placedTiles.add(c); // Adds the placed tile to the list of placed tiles
+        dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c)); // Announce the placement of the placed tile
     }
 
     // Recalls all tiles placed on the board, starting the play over
