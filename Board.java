@@ -13,6 +13,11 @@ class Board extends JFrame {
     *   Should make either a sidemenu, or selections from the player's hand, where, when selected, it highlights the border in yellow or something.
     */
     // Actual ratios are more towards 19/15;
+    private static final double MULT = 0.8; // At Mult of 0.8, Aspect Ratio appears odd at <= 630 X 840
+    public static final int MIN_WIDTH = (int)(MULT*675); // (75*8 + 50) = 650
+    public static final int MIN_HEIGHT = (int)(MULT*900); // (750 + 75 | 125) = 825 ~ 950
+    public static final int MAX_WIDTH = (int)(900*MULT); // If exceeds 843, duplicate tiles appear on bottom row
+    public static final int MAX_HEIGHT = (int)(MULT*1200); // If exceeds 1012, duplicate tiles appear on bottom row
     private final double widthRatio = 15.0; // Width has a ratio of 3
     private final double heightRatio = 20.0; // Height has a ratio of 4
     public final int SELECTED_HAND = ("HAND").hashCode();
@@ -31,7 +36,6 @@ class Board extends JFrame {
     private GridPanel board = new GridPanel(1, 1, BoxLayout.X_AXIS);
     private HashSet<CustomListener> listeners = new HashSet<CustomListener>();
     private HashSet<Tile> placedTiles = new HashSet<Tile>();
-    private final double MULT = 0.8; // At Mult of 0.8, Aspect Ratio appears odd at <= 630 X 840
     private final int ROWS = Scrabble.getBoard().length;
     private final int COLS = Scrabble.getBoard()[0].length;
     private final int FONT_SIZE = (int)(26*MULT); // 26 Is actually double. Window starts out at half size
@@ -44,10 +48,9 @@ class Board extends JFrame {
     private final int H_X_OFF = H_TILE_SIZE/8;
     private final int MENU_WIDTH = (int)(300*MULT); // 300
     private final int MENU_HEIGHT = (int)(75*MULT); // 75
-    private final int MIN_WIDTH = (int)(MULT*675); // (75*8 + 50) = 650
-    private final int MIN_HEIGHT = (int)(MULT*900); // (750 + 75 | 125) = 825 ~ 950
-    private final int MAX_WIDTH = (int)(900*MULT); // If exceeds 843, duplicate tiles appear on bottom row
-    private final int MAX_HEIGHT = (int)(MULT*1200); // If exceeds 1012, duplicate tiles appear on bottom row
+    private final int ERROR_LENGTH = 2000; // Sets the length of time that errors are displayed
+    private final int ERROR_OPACITY = 75; // Sets the opacity the error starts at
+    private final int ERROR_INTERVAL = ERROR_LENGTH/ERROR_OPACITY; // Determines the interval at which the error disappears
     private int FRAME_WIDTH = MIN_WIDTH; // 528
     private int FRAME_HEIGHT = MIN_HEIGHT; // 528
     private int player_count = 2;
@@ -388,7 +391,7 @@ class Board extends JFrame {
                 hand.add(temp, 0, i+2, 1, 2, GridBagConstraints.BOTH);
             }
         }
-        l.setConstraints(hand, createConstraints(1, (H_TILE_SIZE)/1.0/MAX_WIDTH, 0, 2, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the hand
+        l.setConstraints(hand, createConstraints(1, (H_TILE_SIZE + 2*H_X_OFF)/1.0/MAX_WIDTH, 0, 2, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the hand
         createHandOptions(hand); // Create the action buttons, located on the Player's Hand
         hand.setPreferredSize(new Dimension(MIN_WIDTH, H_TILE_SIZE));
         gamePanel.add(hand); // Create and add the hand to the application frame;
@@ -502,7 +505,7 @@ class Board extends JFrame {
     // An attempt at layering panels
     public void createError() {
         // PaintComponent problems: https://stackoverflow.com/questions/20833913/flickering-when-updating-overlapping-jpanels-inside-a-jlayeredpane-using-timeste
-        CurvedButton text = new CurvedButton("Invalid Word", TILE_RADIUS, Color.GRAY, 0);
+        CurvedButton text = new CurvedButton("Invalid Word", TILE_RADIUS, Color.DARK_GRAY, 0);
         text.setEnabled(false);
         text.setXOffset(0.55);
         text.setYOffset(0.375);
@@ -535,42 +538,35 @@ class Board extends JFrame {
 
  public void displayError(String error) {
         final CurvedButton text = (CurvedButton) getError().getComponent(0);
+        if (text.isVisible()) {
+            return;
+        }
         text.setText(error);
         text.setOpacity(0);
         // How to use Java Swing Timer: https://stackoverflow.com/questions/28521173/how-to-use-swing-timer-actionlistener
-        final Timer inc = new Timer(100, new ActionListener() { // Real timer executes every 100 Miliseconds
+        final Timer dec = new Timer(ERROR_INTERVAL, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.print(". ");
-                text.setOpacity(text.getOpacity()+1);
+                text.setOpacity(text.getOpacity()-1); // Decreases the opacity of the error
+                getError().repaint(); // Repaints the error panel
             }
         });
-        final Timer dec = new Timer(100, new ActionListener() {
+        final Timer a = new Timer(ERROR_LENGTH, new ActionListener() { // Original timer executes after 5 Seconds
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.print(". ");
-                text.setOpacity(text.getOpacity()-1);
+                dec.stop(); // Starts the Decreasing timer
+                System.out.println("Stopped.");
+                getError().setVisible(false); // Sets the error panel invisible
+                text.setVisible(false); // Sets the error invisible
             }
         });
-        final Timer original = new Timer(5000, new ActionListener() { // Original timer executes after 5 Seconds
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (inc.isRunning()) {
-                    inc.stop(); // Stops the Real timer from running
-                    //original.start();
-                    System.out.println("Stopped.\nDecreasing ");
-                }
-                else {
-                    dec.stop();
-                    System.out.println("Stopped.");
-                }
-            }
-        });
-        getError().setVisible(true);
-        original.setRepeats(false); // Stops the Original timer from repeating
-        inc.start(); // starts the Real timer
-        System.out.print("Increasing ");
-        original.start(); // Starts the Original timer
+        getError().setVisible(true); // Sets the error visible
+        text.setVisible(true); // Sets the error visible
+        text.setOpacity(ERROR_OPACITY); // Sets the opacity the error starts at
+        a.setRepeats(false); // Stops the Original timer from repeating
+        System.out.print("Decreasing ");
+        a.start(); // Starts the Original timer
+        dec.start(); // Starts the Decreasing timer
     }
 
     private GridBagConstraints createConstraints(double xLbs, double yLbs, int x, int y, int w, int h, int fill) {

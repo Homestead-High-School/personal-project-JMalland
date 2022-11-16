@@ -115,7 +115,7 @@ public class Main {
                         b.tilesWereSubmitted();
                     }
                     else {
-                        //b.displayError("Invalid Word");
+                        b.displayError("Invalid Word");
                     }
                 }
                 else if (e.getID() == b.RECALLED_TILE) {

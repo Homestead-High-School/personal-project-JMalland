@@ -110,6 +110,13 @@ public class CurvedButton extends JButton {
     public String findText() {
         return(text);
     }
+
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        paintComponent(g);
+        paintBorder(g);
+    }
     
     @Override
     public void paintComponent(Graphics g) {
@@ -124,7 +131,7 @@ public class CurvedButton extends JButton {
             g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 2*opacity/3));
         }
 
-        g.fillRoundRect(0, 0, getSize().width, getSize().height, (int)(radius * frame.getWidth()/900.0), (int)(radius * frame.getHeight()/1179.0));
+        g.fillRoundRect(0, 0, getSize().width, getSize().height, (int)(radius * frame.getWidth()/Board.MAX_WIDTH), (int)(radius * frame.getHeight()/Board.MAX_HEIGHT));
 
         // End the method if text doesn't need to be painted
         if (text.trim().equals("")) {
@@ -132,7 +139,7 @@ public class CurvedButton extends JButton {
         }
 
         // Draw Button Text: https://stackoverflow.com/questions/5378052/positioning-string-in-graphic-java
-        g.setFont(new Font(font.getName(), font.getStyle(), (int)(font.getSize()*frame.getWidth()/900.0)));
+        g.setFont(new Font(font.getName(), font.getStyle(), (int)(font.getSize()*frame.getWidth()/Board.MAX_WIDTH)));
         g.setColor(tColor);
         Rectangle2D rect = g.getFontMetrics().getStringBounds(text, g);
         g.drawString(text, (int)(getSize().width/2 - rect.getWidth()*xOffset), (int)(getSize().height/2 + rect.getHeight()*yOffset));
@@ -144,11 +151,11 @@ public class CurvedButton extends JButton {
         Graphics2D g2d = (Graphics2D)(g);
         g2d.setColor(borderColor);
         // Setting Stroke Thickness: https://stackoverflow.com/questions/4219511/draw-rectangle-border-thickness
-        g2d.setStroke(new BasicStroke((int)(borderSize * (frame.getWidth()/900.0))));
-        if ((int)(borderSize * (frame.getWidth()/900.0)) < 2) {
+        g2d.setStroke(new BasicStroke((int)(borderSize * (frame.getWidth()/Board.MAX_WIDTH))));
+        if ((int)(borderSize * (frame.getWidth()/Board.MAX_WIDTH)) < 2) {
             g2d.setStroke(new BasicStroke(2));
         }
         // Draw Button Border: https://stackoverflow.com/questions/13866252/button-with-round-edges
-        g2d.drawRoundRect(0, 0, getSize().width-1, getSize().height-1, (int)(radius * frame.getWidth()/900.0), (int)(radius * frame.getHeight()/1179.0));
+        g2d.drawRoundRect(0, 0, getSize().width-1, getSize().height-1, (int)(radius * frame.getWidth()/Board.MAX_WIDTH), (int)(radius * frame.getHeight()/Board.MAX_HEIGHT));
     }
 }
