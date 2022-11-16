@@ -34,11 +34,11 @@ class Board extends JFrame {
     private final int ROWS = Scrabble.getBoard().length;
     private final int COLS = Scrabble.getBoard()[0].length;
     private final int FONT_SIZE = (int)(26*MULT); // 26 Is actually double. Window starts out at half size
-    private final int TILE_SIZE = (int)(50*MULT); // 50
+    private final int TILE_SIZE = (int)(45*MULT); // 50
     private final int TILE_RADIUS = (int)(18*MULT); // 26 - Is actually double. Window starts out at half size
     private final int SB_HEIGHT = (int)(TILE_SIZE*2.5);
     private final int HAND_LENGTH = 7;
-    private final int H_TILE_SIZE = (int)(TILE_SIZE*1.3); // 675 - (8*65 + 8*(65/8) + 50)) --> 20px padding
+    private final int H_TILE_SIZE = (int)(65 * MULT); // 675 - (8*65 + 8*(65/8) + 50)) --> 20px padding
     private final int H_Y_OFF = 3;
     private final int H_X_OFF = H_TILE_SIZE/8;
     private final int MENU_WIDTH = (int)(300*MULT); // 300
@@ -114,8 +114,16 @@ class Board extends JFrame {
                     }
                     frame.setPreferredSize(new Dimension(widths.get(w), heights.get(h)));
                 }
-                CurvedButton error = getError();
+                GridPanel error = getError();
                 error.setBounds(error.getX(), error.getY(), (int)(error.getSize().width * (frame.getWidth() / 1.0 / FRAME_WIDTH)), (int)(error.getSize().height * (frame.getHeight() / 1.0 / FRAME_HEIGHT)));
+                CurvedButton text = (CurvedButton) error.getComponent(0);
+                if (frame.getWidth() < 570) {
+                    text.setYOffset(-0.375);
+                }
+                else {
+                    text.setYOffset(0.375);
+                }
+                
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
                 frame.pack(); // Pack once more, in case the Hand was adjusted
@@ -174,24 +182,19 @@ class Board extends JFrame {
             empty[i].setValue(Scrabble.getLetterValue(list[i])); // Sets the value of the tile
         }
     }
-
     // Highlights the selected tile within the players hand
     public void selectTile(Tile c) {
         if (!(c instanceof Tile)) { // Checks to see if the tile is a valid selection
             return; // Return, if tile is not valid
         }
-
         int previous_tile = selected_tile; // Stores the index of the previously selected tile
         c.setBorder(Color.orange, 6); // Sets the chosen tile's border to orange
-
         Point point = c.getPoint(); // Stores the location of the chosen tile, if it's a Board tile
         int index = c.getIndex(); // Stores the index of the chosen tile, if it's a Hand tile
         int calculated_tile = point == null ? -1 : calculateTile(point.getRow(), point.getCol()); // Calculates the index of the chosen tile, if it's a Board tile
-
         selected_tile = index >= 0 ? index : calculated_tile; // Stores the index of the selected tile, relative to whether or not it is a Board or Hand tile
-
         getTile(previous_tile).setBorder(Color.black, 2); // Sets the border of the previously selected tile to default
-        
+
         if (previous_tile == selected_tile) { // Checks if the selected tile was previously selected
             selected_tile = -1; // Deselects the selected tile if it was previously selected
         }
@@ -199,24 +202,21 @@ class Board extends JFrame {
             c.setBorder(Color.black, 2); // Set the current tile back to its default
             selected_tile = previous_tile; // Reselects the previous tile
         }
+        System.out.println(selected_tile+" "+previous_tile);
     }
-
     // Places the letter from the selected tile within the players hand
     public void placeTile(Tile c) {
         if (selected_tile < 0 || !(c instanceof Tile) || c == getTile(selected_tile)) { // Check to see if the tile can be placed
             return; // Return, if no tile is selected
         }
-
         Tile select = getTile(selected_tile); // Store the selected tile
         Tile old = c.getPointingTo(); // Store the previously placed tile, if there is one
         boolean isBoardTile = selected_tile >= 7; // Check if the selected tile is a Board tile
-
         recallTile(isBoardTile ? null : old); // Reset the previously placed tile to its default, if the selected tile isn't a Board tile
         c.swapText(select.findText()); // Swap the text from the selected tile to the placed tile
         select.swapText(isBoardTile ? c.getPrev() : ""); // Clear the text, or set it to default if the selected tile is a Board tile
         c.setPointingTo(isBoardTile ? select.getPointingTo() : select); // Set the placed tile pointing to the Hand tile of origin
         select.setPointingTo(isBoardTile ? old : c); // Set the selected tile pointing to the placed tile, or the previous tile, if it's a Board tile
-
         if (isBoardTile && old == null) { // Checks if there's no previous tile, and the selected tile is a Board tile
             placedTiles.remove(select); // Removes the selected tile from the list of placed tiles
             recallTile(select); // Resets the selected tile to it's default content
@@ -224,7 +224,6 @@ class Board extends JFrame {
         else if (isBoardTile) { // Checks that the selected tile is a Board tile
             dispatchEvent(new CustomEvent(select, PLACED_LETTER, select.findText().charAt(0), select.getPoint().r, select.getPoint().c)); // Triggers an ActionEvent because the tile was replaced, once more.
         }
-
         placedTiles.add(c); // Add the placed tile to the list of tiles
         selectTile(select); // Clear the tile selection
         dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c)); // Trigger the ActionEvent
@@ -242,7 +241,6 @@ class Board extends JFrame {
         }
         placedTiles.clear(); // Wipe the set of all placed tiles, since they were recalled
     }
-
     // Recalls a tile back to its original position
     public void recallTile(Tile p) {
         if (p == null) { // Checks if Tile 'p' is null
@@ -253,7 +251,6 @@ class Board extends JFrame {
         p.setPointingTo(null); // Set it so the placed tile no longer points to anything
         recallTile(pointingAt); // Recalls the tile Tile 'p' was pointing to
     }
-
     public void shuffleTiles() {
         // Shuffling: https://stackoverflow.com/questions/1519736/random-shuffling-of-an-array
         Random rand = new Random(); // Creates a random object for shuffling
@@ -261,7 +258,6 @@ class Board extends JFrame {
             Tile.swapTiles(getTile(i), getTile(rand.nextInt(HAND_LENGTH-i) + i)); // Uses the Tile class to swap the properties of the current tile with that of a random tile, past the current one
         }
     }
-
     // Creates a HashMap of the Point/Character locations of placed tiles on the board
     public HashMap<Point, Character> getTilesPlaced() {
         HashMap<Point, Character> map = new HashMap<Point, Character>(); // Creates empty HashMap to store Point/Character placements
@@ -270,7 +266,6 @@ class Board extends JFrame {
         }
         return(map); // Return the newly created HashMap
     }
-
     public void tilesWereSubmitted() {
         dispatchEvent(new CustomEvent(frame, DRAW_HAND));
     }
@@ -316,8 +311,9 @@ class Board extends JFrame {
     }
 
     // Creates the JPanel which holds each JButton that makes up the Scrabble board 
+    // Creates the JPanel which holds each JButton that makes up the Scrabble board 
     private void createBoard() {
-        GridPanel board = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.Y_AXIS); // Creates the main Board panel
+        GridPanel board = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.Y_AXIS); // Creates the main Board panel
         for (int r=0; r<ROWS; r++) { // Loops through each row on the board
             for (int c=0; c<COLS; c++) { // Loops through each col on the board
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
@@ -501,12 +497,21 @@ class Board extends JFrame {
     // An attempt at layering panels
     public void createError() {
         // PaintComponent problems: https://stackoverflow.com/questions/20833913/flickering-when-updating-overlapping-jpanels-inside-a-jlayeredpane-using-timeste
-        CurvedButton text = new CurvedButton("Invalid Word", TILE_RADIUS, Color.GRAY, 50);
+        CurvedButton text = new CurvedButton("Invalid Word", TILE_RADIUS, Color.GRAY, 0);
         text.setEnabled(false);
+        text.setXOffset(0.55);
+        text.setYOffset(0.375);
         text.setFont(new Font("Serif", Font.BOLD, 37));
         text.setTextColor(Color.RED);
         text.setBorder(new Color(0, 0, 0, 0), 0);
-        text.setBounds(0, 0, COLS*TILE_SIZE, ROWS*TILE_SIZE);
+        text.setSize(10, 10);
+
+        GridPanel error = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.X_AXIS);
+        error.add(text, 0, 0, 1, 1, GridBagConstraints.BOTH);
+        error.setBounds(0, 0, COLS*TILE_SIZE, ROWS*TILE_SIZE);
+        error.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
+        error.setOpaque(false);
+        error.setVisible(false); // Start with the error screen invisible.
 
         JLayeredPane t = new JLayeredPane();
         
@@ -514,13 +519,53 @@ class Board extends JFrame {
         gamePanel.remove(1);
         board.setBounds(0, 0, board.getSize().width, board.getSize().height);
         
-        t.add(text, JLayeredPane.POPUP_LAYER);
+        t.add(error, JLayeredPane.POPUP_LAYER);
         t.add(board, JLayeredPane.DEFAULT_LAYER);
         
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
         l.setConstraints(t, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH));
         //t.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
         gamePanel.add(t);
+    }
+
+ public void displayError(String error) {
+        CurvedButton text = (CurvedButton) getError().getComponent(0);
+        text.setText(error);
+        text.setOpacity(0);
+        // How to use Java Swing Timer: https://stackoverflow.com/questions/28521173/how-to-use-swing-timer-actionlistener
+        final Timer inc = new Timer(100, new ActionListener() { // Real timer executes every 100 Miliseconds
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.print(". ");
+                text.setOpacity(text.getOpacity()+1);
+            }
+        });
+        final Timer dec = new Timer(100, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.print(". ");
+                text.setOpacity(text.getOpacity()-1);
+            }
+        })
+        final Timer original = new Timer(5000, new ActionListener() { // Original timer executes after 5 Seconds
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (inc.isRunning()) {
+                    inc.stop(); // Stops the Real timer from running
+                    original.start()
+                    System.out.println("Stopped.\nDecreasing ");
+                }
+                else {
+                    dec.stop();
+                    System.out.println("Stopped.");
+                }
+            }
+        });
+        getError().setVisible(true);
+        original.setRepeats(false); // Stops the Original timer from repeating
+        inc.start(); // starts the Real timer
+        System.out.print("Increasing ");
+        original.start(); // Starts the Original timer
     }
 
     private GridBagConstraints createConstraints(double xLbs, double yLbs, int x, int y, int w, int h, int fill) {
@@ -559,9 +604,9 @@ class Board extends JFrame {
         return((GridPanel) temp.getComponent(1));//new GridPanel(1, 1, BoxLayout.X_AXIS));//return((GridPanel)(gamePanel.getComponent(1)));
     }
 
-    private CurvedButton getError() {
+    private GridPanel getError() {
         JLayeredPane temp = (JLayeredPane) gamePanel.getComponent(1);
-        return((CurvedButton) temp.getComponent(0));
+        return((GridPanel) temp.getComponent(0));
     }
 
     private int calculateTile(int r, int c) {
