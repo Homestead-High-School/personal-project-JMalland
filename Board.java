@@ -24,6 +24,7 @@ class Board extends JFrame {
     public static final int MAX_HEIGHT = (int)(MULT*1200); // If exceeds 1012, duplicate tiles appear on bottom row
     private final double widthRatio = 3.0; // Width has a ratio of 3
     private final double heightRatio = 4.0; // Height has a ratio of 4
+    public final int CREATE_PLAYER = ("PLAYER").hashCode();
     public final int SELECTED_HAND = ("HAND").hashCode();
     public final int SELECTED_LETTER = ("SELECT").hashCode();
     public final int PLACING_LETTER = ("PLACING").hashCode();
@@ -58,9 +59,11 @@ class Board extends JFrame {
     private int FRAME_WIDTH = MIN_WIDTH; // 528
     private int FRAME_HEIGHT = MIN_HEIGHT; // 528
     private int player_count = 2;
+    private int current_player = -1;
     private int selected_tile = -1;
     private ArrayList<Integer> widths = new ArrayList<Integer>();
     private ArrayList<Integer> heights = new ArrayList<Integer>();
+    private Player[] players = null;
  
     // The Board() constructor runs its private methods to generate the panels that are contained in the application 
     Board() {
@@ -149,13 +152,14 @@ class Board extends JFrame {
     
     // Starts the game, and switches from mainPanel to gamePanel
     public void startGame() {
+        createPlayers(); // Start the process of player creation.
         frame.remove(mainPanel); // Remove all current panels to begin the gameplay
         createBoard(); // Recreate the gamePanel
         createHand(); // Recreate the gamePanel
         frame.add(gamePanel); // Add the game panel to display the Scrabble board
         frame.pack(); // Repaint the JFrame
         System.out.println("Game Started: "+player_count+" Players"); // Display the beginning of the game
-        dispatchEvent(new CustomEvent(frame, DRAW_HAND));
+        tilesWereSubmitted();
     }
 
     // Should be remade
@@ -167,16 +171,26 @@ class Board extends JFrame {
         return(getEmptyTiles().length);
     }
 
+    public void createPlayer(char[] hand, int i) {
+        if (i >= player_count) { // Throw an exception if I'm stupid enough to hit it
+            throw new IllegalArgumentException("Index Out Of Bounds For Player Creation");
+        }
+        players[i] = new Player(hand);
+    }
+
+    public void updateScore(int points) {
+        players[current_player].addToScore(points);
+        getScoreDisplay().setText("Score:    "+players[current_player].getScore());
+    }
+
     // Sets the letters on each tile within the players hand
-    public void setHand(char[] list) {
+    public void setHand(char[] list, int player) {
         Tile[] empty = getEmptyTiles(); // Gets the list of blank tiles to be drawn
         if (empty.length < list.length) { // Checks there are enough tiles to hold the list
             return; // Quits the function
         }
         for (int i=0; i<empty.length; i++) { // Loops through each blank tile
-            empty[i].setText(list[i]+""); // Sets the text to the drawn tile
-            empty[i].setOriginal(list[i]+""); // Sets the original text to its default
-            empty[i].setValue(Scrabble.getLetterValue(list[i])); // Sets the value of the tile
+            players[player].setTile(getTileIndex(empty[i]), list[i]);
         }
     }
     
@@ -229,12 +243,14 @@ class Board extends JFrame {
             }
             else {
                 dispatchEvent(new CustomEvent(select, PLACED_LETTER, select.findText().charAt(0), select.getPoint().r, select.getPoint().c)); // Announce the re-placement of the selected tile
-                select.setOpacity(200);
+                select.setOpacity(200); // Sets the tile to display as clear as possible
+                select.setTextOpacity(200); // Sets the tile to display text much clearer
             }
         }
         selectTile(select); // Deselects the selected tile
         placedTiles.add(c); // Adds the placed tile to the list of placed tiles
-        c.setOpacity(200);
+        c.setOpacity(200); // Sets the tile to display as clear as possible
+        c.setTextOpacity(200); // Sets the tile to display text much clearer
         dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c)); // Announce the placement of the placed tile
     }
 
@@ -257,7 +273,8 @@ class Board extends JFrame {
         p.setText(p.getOriginal()); // Swap the placed tile text with its original
         p.setPointingTo(null); // Set it so the placed tile no longer points to anything
         if (p.getPoint() != null) { // Check if it is a Board tile
-            p.setOpacity(100);
+            p.setOpacity(100); // Reset the opacity of the tile to default
+            p.setTextOpacity(175); // Reset the text opacity of the tile to default
         }
         recallTile(pointingAt); // Recalls the tile Tile 'p' was pointing to
     }
@@ -280,7 +297,18 @@ class Board extends JFrame {
     }
     
     public void tilesWereSubmitted() {
-        dispatchEvent(new CustomEvent(frame, DRAW_HAND));
+        dispatchEvent(new CustomEvent(frame, DRAW_HAND, current_player < 0 ? 0 : current_player)); // Signal to the client to redraw the hand.
+        // Might use a timer to keep running until the hand is drawn, only running code if hand is drawn and it's running...
+        current_player = (current_player + 1)%player_count; // Calculate the new player
+        Component[] list = getHand().getTileComponents(); // Get the list of tiles within the player's hand
+        for (int i=0; i<list.length; i++) {
+            Tile t = (Tile) list[i];
+            t.setText(players[current_player].getTile(i) + ""); // Update the tiles displayed
+            t.setOriginal(""+players[current_player].getTile(i));
+            t.setValue(Scrabble.getLetterValue(players[current_player].getTile(i)));
+        }
+        getPlayerDisplay().setText("Player:    "+(current_player + 1)); // Display who's turn it currently is
+        getScoreDisplay().setText("Score:    "+players[current_player].getScore()); // Display the current score of whomever's turn it is
     }
 
     // Creates the JPanel that displays the current player and their score
@@ -352,6 +380,7 @@ class Board extends JFrame {
                         }
                     }
                 });
+                temp.setTextOpacity(175); // Set the opacity of the text displayed in the tile.
                 temp.setSize(TILE_SIZE, TILE_SIZE); // Sets the size of the tile. Used in determining weights for the GridPanel
                 board.add(temp, r, c, 1, 1, GridBagConstraints.BOTH); // Adds the tile to the Board
             }
@@ -514,7 +543,7 @@ class Board extends JFrame {
     }
 
     // An attempt at layering panels
-    public void createError() {
+    private void createError() {
         // PaintComponent problems: https://stackoverflow.com/questions/20833913/flickering-when-updating-overlapping-jpanels-inside-a-jlayeredpane-using-timeste
         CurvedLabel text = new CurvedLabel("Invalid Word", TILE_RADIUS, Color.RED);
         text.setEnabled(false);
@@ -541,6 +570,13 @@ class Board extends JFrame {
         l.setConstraints(t, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH)); // Set the constraints
         //t.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
         gamePanel.add(t); // Add the layered panel to the JFrame
+    }
+
+    private void createPlayers() {
+        players = new Player[player_count];
+        for (int i=0; i<player_count; i++) {
+            dispatchEvent(new CustomEvent(frame, CREATE_PLAYER, i));
+        }
     }
 
     public void displayError(String error) {
@@ -613,6 +649,18 @@ class Board extends JFrame {
         return(board);//new GridPanel(1, 1, BoxLayout.X_AXIS));//return((GridPanel)(gamePanel.getComponent(1)));
     }
 
+    private GridPanel getScoreboard() {
+        return((GridPanel) gamePanel.getComponent(0));
+    }
+
+    private CurvedLabel getPlayerDisplay() {
+        return((CurvedLabel) getScoreboard().getComponent(6));
+    }
+
+    private CurvedLabel getScoreDisplay() {
+        return((CurvedLabel) getScoreboard().getComponent(7));
+    }
+
     private GridPanel getError() {
         JLayeredPane temp = (JLayeredPane) gamePanel.getComponent(1);
         return((GridPanel) temp.getComponent(0));
@@ -631,6 +679,16 @@ class Board extends JFrame {
             }
         }
         return(temp.toArray(new Tile[0]));
+    }
+
+    private int getTileIndex(Tile t) {
+        Component[] list = getHand().getTileComponents();
+        for (int i=0; i<list.length; i++) {
+            if ((Tile) list[i] == t) {
+                return(i);
+            }
+        }
+        return(0);
     }
 
     // Returns the a tile from the players hand at the given index

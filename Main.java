@@ -79,10 +79,14 @@ public class Main {
                     System.out.println("Game Running.");
                     b.startGame();
                 }
-                else if (e.getID() == b.DRAW_HAND) {
+                else if (e.getID() == b.DRAW_HAND || e.getID() == b.CREATE_PLAYER) {
                     System.out.println("Hand Drawn.");
-                    //b.setHand(real.drawTiles(b.getBlankAmount()));
-                    b.setHand(new char[] {'R', 'I', 'G', 'I', 'N', 'O', 'W'}); // Playing, [RIG |, GIN _, NOW |], results in GIN being valued 1 higher than it should.
+                    if (e.getID() == b.CREATE_PLAYER) { // Checks if the event is for generating the players
+                        b.createPlayer(real.drawTiles(7), e.getIndex()); // Draw a brand new hand
+                    }
+                    else { // The event was for re-drawing a players hand
+                        b.setHand(real.drawTiles(b.getBlankAmount()), e.getIndex()); // Draw a hand of however many tiles are missing
+                    }
                 }
                 else if (e.getID() == b.SELECTED_HAND) {
                     System.out.println("Selected Tile.");
@@ -112,6 +116,7 @@ public class Main {
                     int score = real.submitWordPlacement();
                     System.out.println("Submitted Play Is Worth: "+score);
                     if (score > 0) {
+                        b.updateScore(score);
                         b.tilesWereSubmitted();
                     }
                     else {

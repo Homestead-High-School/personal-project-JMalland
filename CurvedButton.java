@@ -9,6 +9,7 @@ public class CurvedButton extends JButton {
     private String text = "";
     private int radius = 1;
     private int opacity = 100;
+    private int tOpacity = 200;
     private int borderSize = 2;
     private double xOffset = 0.5;
     private double yOffset = 1.0/3.0;
@@ -95,6 +96,14 @@ public class CurvedButton extends JButton {
         return(opacity);
     }
 
+    public void setTextOpacity(int o) {
+        tOpacity = o;
+    }
+
+    public int getTextOpacity() {
+        return(tOpacity);
+    }
+
     // Sets the font of the button
     public void setFont(Font f) {
         font = f;
@@ -119,7 +128,7 @@ public class CurvedButton extends JButton {
 
     @Override
     public void paint(Graphics g) {
-        super.paint(g);
+        //super.paint(g);
         paintComponent(g);
         paintBorder(g);
     }
@@ -146,7 +155,7 @@ public class CurvedButton extends JButton {
 
         // Draw Button Text: https://stackoverflow.com/questions/5378052/positioning-string-in-graphic-java
         g.setFont(new Font(font.getName(), font.getStyle(), (int)(font.getSize()*frame.getWidth()/Board.MAX_WIDTH)));
-        g.setColor(tColor);
+        g.setColor(new Color(tColor.getRed(), tColor.getBlue(), tColor.getGreen(), tOpacity));
         Rectangle2D rect = g.getFontMetrics().getStringBounds(text, g);
         g.drawString(text, (int)(getSize().width/2 - rect.getWidth()*xOffset), (int)(getSize().height/2 + rect.getHeight()*yOffset));
     }
