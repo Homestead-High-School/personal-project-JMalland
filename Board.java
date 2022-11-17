@@ -211,14 +211,15 @@ class Board extends JFrame {
         Tile select = getTile(selected_tile); // Store the selected tile
         Tile old = c.getPointingTo(); // Store the previously placed tile, if there is one
         boolean isBoardTile = selected_tile >= 7;
-        c.swapText(select.findText()); // Swaps the text from the selected tile to the one it was placed on
         if (!isBoardTile) {
             recallTile(old); // Recalls the tile that was placed previous to the current one
+            c.swapText(select.findText()); // Swaps the text from the selected tile to the one it was placed on
             select.swapText(""); // Sets the text of the selected tile to be blank
             c.setPointingTo(select); // Sets the placed tile corresponding to the selected tile
             select.setPointingTo(c); // Sets the selected tile corresponding to the placed tile
         }
         else{
+            c.swapText(select.findText()); // Swaps the text from the selected tile to the one it was placed on
             select.swapText(c.getPrev()); // Swaps the text of the selected tile with that of the previous text from the placed tile
             c.setPointingTo(select.getPointingTo()); // Sets the placed tile corresponding to the tile the selected one points to
             select.setPointingTo(old); // Sets the selected tile corresponding to the tile the placed one pointed to, previously.
@@ -228,12 +229,12 @@ class Board extends JFrame {
             }
             else {
                 dispatchEvent(new CustomEvent(select, PLACED_LETTER, select.findText().charAt(0), select.getPoint().r, select.getPoint().c)); // Announce the re-placement of the selected tile
-                select.setOpacity(select.getOpacity()*2);
+                select.setOpacity(200);
             }
         }
         selectTile(select); // Deselects the selected tile
         placedTiles.add(c); // Adds the placed tile to the list of placed tiles
-        c.setOpacity(c.getOpacity()*2);
+        c.setOpacity(200);
         dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c)); // Announce the placement of the placed tile
     }
 
