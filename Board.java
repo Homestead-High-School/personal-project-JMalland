@@ -17,7 +17,7 @@ class Board extends JFrame {
     *   Should make either a sidemenu, or selections from the player's hand, where, when selected, it highlights the border in yellow or something.
     */
     // Actual ratios are more towards 19/15;
-    private static final double MULT = 1; // At Mult of 0.8, Aspect Ratio appears odd at <= 630 X 840
+    private static final double MULT = 0.5; // At Mult of 0.8, Aspect Ratio appears odd at <= 630 X 840
     public static final int MIN_WIDTH = (int)(MULT*675); // (75*8 + 50) = 650
     public static final int MIN_HEIGHT = (int)(MULT*900); // (750 + 75 | 125) = 825 ~ 950
     public static final int MAX_WIDTH = (int)(900*MULT); // If exceeds 843, duplicate tiles appear on bottom row
@@ -228,12 +228,12 @@ class Board extends JFrame {
             }
             else {
                 dispatchEvent(new CustomEvent(select, PLACED_LETTER, select.findText().charAt(0), select.getPoint().r, select.getPoint().c)); // Announce the re-placement of the selected tile
-                select.setOpacity(select.getOpacity()*3);
+                select.paintSuper(true);
             }
         }
         selectTile(select); // Deselects the selected tile
         placedTiles.add(c); // Adds the placed tile to the list of placed tiles
-        c.setOpacity(c.getOpacity()*2);
+        c.paintSuper(true);
         dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c)); // Announce the placement of the placed tile
     }
 
@@ -256,7 +256,7 @@ class Board extends JFrame {
         p.setText(p.getOriginal()); // Swap the placed tile text with its original
         p.setPointingTo(null); // Set it so the placed tile no longer points to anything
         if (p.getPoint() != null) { // Check if it is a Board tile
-            p.setOpacity(p.getOpacity()/3);
+            p.paintSuper(false);
         }
         recallTile(pointingAt); // Recalls the tile Tile 'p' was pointing to
     }
@@ -329,12 +329,12 @@ class Board extends JFrame {
         for (int r=0; r<ROWS; r++) { // Loops through each row on the board
             for (int c=0; c<COLS; c++) { // Loops through each col on the board
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
-                final Tile temp = new Tile("", TILE_RADIUS, new Color(0xBA7F40), 18, 1, 1, r, c); // Blank Tile, represented by '0'
+                final Tile temp = new Tile("", TILE_RADIUS, new Color(0xBA7F40), 75, 1, 1, r, c); // Blank Tile, represented by '0'
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
-                    temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(0x4274FF), tile%2 == 1 ? 12 : 50, tile, 1);
+                    temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(0x4274FF), tile%2 == 1 ? 50 : 100, tile, 1);
                 }
                 else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'
-                    temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(0xD7381C), tile%2 == 1 ? 12 : 50, 1, tile);
+                    temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(0xD7381C), tile%2 == 1 ? 50 : 100, 1, tile);
                 }
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
                 temp.addActionListener(new ActionListener() {
@@ -387,6 +387,7 @@ class Board extends JFrame {
             });
             if (i%2 == 1) {
                 tile.setSize(H_TILE_SIZE, H_TILE_SIZE); // Gridwidth = 1, gridheight = 2;
+                tile.paintSuper(true);
                 hand.add(tile, 0, i+2, 1, 2, GridBagConstraints.BOTH);
             }
             else {
