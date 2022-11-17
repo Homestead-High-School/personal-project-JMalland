@@ -85,7 +85,7 @@ public class Main {
                         b.createPlayer(real.drawTiles(7), e.getIndex()); // Draw a brand new hand
                     }
                     else { // The event was for re-drawing a players hand
-                        b.setHand(real.drawTiles(b.getBlankAmount()), e.getIndex()); // Draw a hand of however many tiles are missing
+                        b.setHand(real.drawTiles(b.getBlankAmount())); // Draw a hand of however many tiles are missing
                     }
                 }
                 else if (e.getID() == b.SELECTED_HAND) {
@@ -116,8 +116,9 @@ public class Main {
                     int score = real.submitWordPlacement();
                     System.out.println("Submitted Play Is Worth: "+score);
                     if (score > 0) {
-                        b.updateScore(score);
-                        b.tilesWereSubmitted();
+                        b.updateScore(score); // Update the current player's score
+                        b.setHand(real.drawTiles(b.getBlankAmount())); // Draw the next hand for the player
+                        b.tilesWereSubmitted(); // Move to the next turn.
                     }
                     else {
                         b.displayError("Invalid Word");

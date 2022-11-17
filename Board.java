@@ -1,5 +1,6 @@
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.*;
@@ -45,7 +46,7 @@ class Board extends JFrame {
     private final int COLS = Scrabble.getBoard()[0].length;
     private final int FONT_SIZE = (int)(26*MULT); // 26 Is actually double. Window starts out at half size
     private final int TILE_SIZE = (int)(45*MULT); // 50
-    private final int TILE_RADIUS = (int)(18*MULT); // 26 - Is actually double. Window starts out at half size
+    private final int TILE_RADIUS = (int)(25*MULT); // 26 - Is actually double. Window starts out at half size
     private final int SB_HEIGHT = (int)(TILE_SIZE*2.5);
     private final int HAND_LENGTH = 7;
     private final int H_TILE_SIZE = (int)(65 * MULT); // 675 - (8*65 + 8*(65/8) + 50)) --> 20px padding
@@ -59,7 +60,8 @@ class Board extends JFrame {
     private int FRAME_WIDTH = MIN_WIDTH; // 528
     private int FRAME_HEIGHT = MIN_HEIGHT; // 528
     private int player_count = 2;
-    private int current_player = -1;
+    private int current_player = 0;
+    private int displayed_player = 0;
     private int selected_tile = -1;
     private ArrayList<Integer> widths = new ArrayList<Integer>();
     private ArrayList<Integer> heights = new ArrayList<Integer>();
@@ -159,7 +161,14 @@ class Board extends JFrame {
         frame.add(gamePanel); // Add the game panel to display the Scrabble board
         frame.pack(); // Repaint the JFrame
         System.out.println("Game Started: "+player_count+" Players"); // Display the beginning of the game
-        tilesWereSubmitted();
+        dispatchEvent(new CustomEvent(frame, DRAW_HAND, 0)); // Signal to the client to redraw the hand.
+        Component[] list = getHand().getTileComponents();
+        for (int i=0; i<list.length; i++) {
+            Tile t = (Tile) list[i];
+            t.setText(""+players[current_player].getTile(i));
+            t.setOriginal(""+players[current_player].getTile(i));
+            t.setValue(Scrabble.getLetterValue(players[current_player].getTile(i)));
+        }
     }
 
     // Should be remade
@@ -184,13 +193,16 @@ class Board extends JFrame {
     }
 
     // Sets the letters on each tile within the players hand
-    public void setHand(char[] list, int player) {
+    public void setHand(char[] list) {
         Tile[] empty = getEmptyTiles(); // Gets the list of blank tiles to be drawn
         if (empty.length < list.length) { // Checks there are enough tiles to hold the list
             return; // Quits the function
         }
         for (int i=0; i<empty.length; i++) { // Loops through each blank tile
-            players[player].setTile(getTileIndex(empty[i]), list[i]);
+            players[current_player].setTile(getTileIndex(empty[i]), list[i]);
+            empty[i].setText(players[current_player].getTile(i)+"");
+            empty[i].setOriginal(players[current_player].getTile(i)+"");
+            empty[i].setValue(Scrabble.getLetterValue(players[current_player].getTile(i)));
         }
     }
     
@@ -297,18 +309,17 @@ class Board extends JFrame {
     }
     
     public void tilesWereSubmitted() {
-        dispatchEvent(new CustomEvent(frame, DRAW_HAND, current_player < 0 ? 0 : current_player)); // Signal to the client to redraw the hand.
-        // Might use a timer to keep running until the hand is drawn, only running code if hand is drawn and it's running...
         current_player = (current_player + 1)%player_count; // Calculate the new player
-        Component[] list = getHand().getTileComponents(); // Get the list of tiles within the player's hand
-        for (int i=0; i<list.length; i++) {
-            Tile t = (Tile) list[i];
-            t.setText(players[current_player].getTile(i) + ""); // Update the tiles displayed
-            t.setOriginal(""+players[current_player].getTile(i));
-            t.setValue(Scrabble.getLetterValue(players[current_player].getTile(i)));
-        }
-        getPlayerDisplay().setText("Player:    "+(current_player + 1)); // Display who's turn it currently is
-        getScoreDisplay().setText("Score:    "+players[current_player].getScore()); // Display the current score of whomever's turn it is
+        displayed_player = current_player; // Update the display to match the current player
+        setHand(players[current_player].getHand());
+        Timer pause = new Timer(current_player < 0 ? 0 : 1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeDisplay(0);
+            }
+        });
+        pause.setRepeats(false); // Make it so the timer cannot repeat
+        pause.start(); // Start the timer, so it doesn't run until 1 second has passed
     }
 
     // Creates the JPanel that displays the current player and their score
@@ -345,6 +356,19 @@ class Board extends JFrame {
         score.setSize(MIN_WIDTH, SB_HEIGHT);
         score.setFont(new Font("Serif", Font.BOLD, FONT_SIZE*2));
         scoreboard.add(score, 0, 2, 1, 3, GridBagConstraints.BOTH);
+
+        left.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeDisplay(-1);
+            }
+        });
+        right.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeDisplay(1);
+            }
+        });
 
         l.setConstraints(scoreboard, createConstraints(1, 2*SB_HEIGHT/1.0/MIN_HEIGHT, 0, 0, 1, 1, GridBagConstraints.BOTH));
         scoreboard.setPreferredSize(new Dimension(MIN_WIDTH, SB_HEIGHT));
@@ -472,7 +496,7 @@ class Board extends JFrame {
         submit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dispatchEvent(new CustomEvent(submit, FINALIZED_PLAY)); // Dispatch Submission
+                dispatchEvent(new CustomEvent(submit, FINALIZED_PLAY, current_player)); // Dispatch Submission
             }
         });
         
@@ -579,6 +603,12 @@ class Board extends JFrame {
         }
     }
 
+    private void changeDisplay(int num) {
+        displayed_player = Math.abs((displayed_player + num)%player_count);
+        getPlayerDisplay().setText("Player:    "+(displayed_player + 1));
+        getScoreDisplay().setText("Score:    "+players[displayed_player].getScore());
+    }
+
     public void displayError(String error) {
         if (getError().isVisible()) { // Checks if the error is currently being displayed
             return; // Quit the program
@@ -678,7 +708,7 @@ class Board extends JFrame {
                 temp.add(t);
             }
         }
-        return(temp.toArray(new Tile[0]));
+        return(temp.size() == 0 ? Arrays.copyOf(getHand().getTileComponents(), getHand().getTileComponents().length, Tile[].class) : temp.toArray(new Tile[0]));
     }
 
     private int getTileIndex(Tile t) {

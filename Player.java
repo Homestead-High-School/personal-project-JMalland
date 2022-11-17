@@ -18,6 +18,10 @@ public class Player {
         hand[i] = c;
     }
 
+    public char[] getHand() {
+        return(hand.clone());
+    }
+
     public char getTile(int i) {
         if (i < 0 || i >= hand.length) { // Throw an exception if I'm stupid enough to hit it
             throw new IllegalArgumentException("Index Out Of Bounds For Hand Retrieval");

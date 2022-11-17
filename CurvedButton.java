@@ -146,7 +146,7 @@ public class CurvedButton extends JButton {
             g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 2*opacity/3));
         }
 
-        g.fillRoundRect(0, 0, getSize().width, getSize().height, (int)(radius * frame.getWidth()/Board.MAX_WIDTH), (int)(radius * frame.getHeight()/Board.MAX_HEIGHT));
+        g.fillRoundRect(0, 0, getSize().width-1, getSize().height-1, (int)(radius * frame.getWidth()/Board.MAX_WIDTH), (int)(radius * frame.getHeight()/Board.MAX_HEIGHT));
 
         // End the method if text doesn't need to be painted
         if (text.trim().equals("")) {
