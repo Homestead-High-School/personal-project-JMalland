@@ -81,8 +81,8 @@ public class Main {
                 }
                 else if (e.getID() == b.DRAW_HAND) {
                     System.out.println("Hand Drawn.");
-                    b.setHand(real.drawTiles(b.getBlankAmount()));
-                    //b.setHand(new char[] {'L', 'I', 'T', 'I', 'P', 'T', 'M'});
+                    //b.setHand(real.drawTiles(b.getBlankAmount()));
+                    b.setHand(new char[] {'R', 'I', 'G', 'I', 'N', 'O', 'W'}); // Playing, [RIG |, GIN _, NOW |], results in GIN being valued 1 higher than it should.
                 }
                 else if (e.getID() == b.SELECTED_HAND) {
                     System.out.println("Selected Tile.");

@@ -97,6 +97,7 @@ public class Scrabble {
 
     public int submitWordPlacement() {
         HashMap<Point, Integer> check = new HashMap<Point, Integer>(); // HashMap to contain points that will be verified
+        HashMap<Point, Character> backup = new HashMap<Point, Character>(); // HashMap to hold the backup of all placed items, in case the play is invalid
         for (Point p : items.keySet()) {
             int r = p.getRow(); // Store the current row, for easy access
             int c = p.getCol(); // Store the current col, for easy acess
@@ -117,7 +118,7 @@ public class Scrabble {
                 check.put(new Point(r, c-1), LEFT); // Add the point to the 'check' map
             }
         }
-        //items.putAll(placed);
+        backup.putAll(items); // Add the current tiles to the backup
         for (Point p : check.keySet()) { // Loops through each point to be checked
             int direct = check.get(p); // Stores the direction Point 'p' is heading, for simplicity
             int rowDiff = direct == DOWN || direct == UP ? (direct == UP ? -1 : 1) : 0; // Calculates whether the row moves up or down.
@@ -138,6 +139,7 @@ public class Scrabble {
             return(calculatePlacementValue()); // Return the overall score of all connecting words
         }
         clearWordPlacement(); // Erase the map of placed items, because they've all been appended
+        items.putAll(backup); // Put the placed tiles, back into the list of items, because the board wasn't cleared for the client.
         return(0);
     }
 

@@ -423,8 +423,9 @@ class Board extends JFrame {
         recall.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (selected_tile >= 7) { // Checks if the selected tile is a Board tile
-                    recallTile(getTile(selected_tile)); // Recalls the selected tile
-                    selectTile(getTile(selected_tile)); // Clear the selection
+                    Tile t = getTile(selected_tile);
+                    dispatchEvent(new CustomEvent(t, RECALLED_TILE, t.getPoint().r, t.getPoint().c)); // Let the client decide whether or not to recall the tile
+                    dispatchEvent(new CustomEvent(t, SELECTED_LETTER)); // Let the client decide whether or not to deselect the tile
                 }
                 else { // If there is no selected tile, or it isn't a Board tile
                     recallTiles(); // Recalls all placed tiles
