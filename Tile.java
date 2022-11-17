@@ -1,14 +1,17 @@
 import java.awt.*;
+import java.util.ArrayList;
 
 public class Tile extends CurvedButton {
-    Tile pointsTo = null;
-    int letterBonus = 1;
-    int wordBonus = 1;
-    int tileValue = 0;
-    String originalText = "";
-    String prevText = "";
-    Point point = null;
-    int index = -1;
+    private static ArrayList<Point> dragList = new ArrayList<Point>();
+    private Tile pointsTo = null;
+    private int letterBonus = 1;
+    private int wordBonus = 1;
+    private int tileValue = 0;
+    private String originalText = "";
+    private String prevText = "";
+    private Point point = null;
+    private Point dragLocation = null;
+    private int index = -1;
 
     public Tile() {
         super();
@@ -26,6 +29,14 @@ public class Tile extends CurvedButton {
         letterBonus = l;
         wordBonus = w;
         point = new Point(row, col);
+    }
+
+    public static int getDragIndex(Point p) {
+        return(Tile.dragList.indexOf(p));
+    }
+
+    public static void clearDragTiles() {
+        dragList.clear();
     }
 
     // Method to swap the properties of two tiles, while keeping their location the same
@@ -80,6 +91,15 @@ public class Tile extends CurvedButton {
 
     public Point getPoint() {
         return(point);
+    }
+
+    public void setDragLocation(Point p) {
+        dragLocation = p;
+        Tile.dragList.add(dragLocation);
+    }
+
+    public Point getDragLocation() {
+        return(dragLocation);
     }
 
     // Sets the text of the Tile while saving the original text

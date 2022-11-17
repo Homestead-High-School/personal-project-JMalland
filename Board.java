@@ -5,6 +5,8 @@ import java.util.HashSet;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.MouseInputAdapter;
+
 import java.awt.*;
 import java.util.Random;
 
@@ -13,13 +15,13 @@ class Board extends JFrame {
     *   Should make either a sidemenu, or selections from the player's hand, where, when selected, it highlights the border in yellow or something.
     */
     // Actual ratios are more towards 19/15;
-    private static final double MULT = 0.8; // At Mult of 0.8, Aspect Ratio appears odd at <= 630 X 840
+    private static final double MULT = 1; // At Mult of 0.8, Aspect Ratio appears odd at <= 630 X 840
     public static final int MIN_WIDTH = (int)(MULT*675); // (75*8 + 50) = 650
     public static final int MIN_HEIGHT = (int)(MULT*900); // (750 + 75 | 125) = 825 ~ 950
     public static final int MAX_WIDTH = (int)(900*MULT); // If exceeds 843, duplicate tiles appear on bottom row
     public static final int MAX_HEIGHT = (int)(MULT*1200); // If exceeds 1012, duplicate tiles appear on bottom row
-    private final double widthRatio = 15.0; // Width has a ratio of 3
-    private final double heightRatio = 20.0; // Height has a ratio of 4
+    private final double widthRatio = 3.0; // Width has a ratio of 3
+    private final double heightRatio = 4.0; // Height has a ratio of 4
     public final int SELECTED_HAND = ("HAND").hashCode();
     public final int SELECTED_LETTER = ("SELECT").hashCode();
     public final int PLACING_LETTER = ("PLACING").hashCode();
@@ -80,19 +82,16 @@ class Board extends JFrame {
 
         mainPanel.setVisible(true); // Set the main menu visible, if not
     
-        frame.add(mainPanel);//mainPanel); // Add the main menu to the JFrame
+        frame.add(mainPanel); // Add the main menu to the JFrame
 
-        for (int i=MIN_WIDTH; i<=MAX_WIDTH; i+=(int) widthRatio) {
+        for (int i=(int)(MIN_WIDTH * (693.0/675)); i<=MAX_HEIGHT; i+=(int) widthRatio) {
             widths.add(i);
             heights.add((int)(i * (heightRatio/widthRatio)));
         }
 
-        /*for (int i=MIN_HEIGHT; i<=MAX_HEIGHT; i+=(int) heightRatio) {
-            heights.add(i);
-        }*/
-
+        // How to detect window minimized/maximized: https://stackoverflow.com/questions/11148950/how-to-detect-jframe-window-minimize-and-maximize-events
         Toolkit.getDefaultToolkit().setDynamicLayout(false); // Ensures window resize keeps the right ratio: https://stackoverflow.com/questions/20925193/using-componentadapter-to-determine-when-frame-resize-is-finished 
-        frame.setSize(new Dimension(MIN_WIDTH, MIN_HEIGHT)); // Sets the default dimensions
+        frame.setSize(new Dimension((int)(MIN_WIDTH * 693.0/675), (int)(MIN_HEIGHT * 908.0/900))); // Sets the default dimensions
         frame.addComponentListener(new ComponentAdapter() {
             // EventListener for window resizing: https://stackoverflow.com/questions/2303305/window-resize-eventff
             public void componentResized(ComponentEvent componentEvent) { // Method to run every time window is resized
@@ -101,38 +100,31 @@ class Board extends JFrame {
                 if ((int) (width%widthRatio) == 0 && (int) (height%heightRatio) == 0) {
                     
                 }
-                else if (Math.abs(FRAME_WIDTH - width) > Math.abs(FRAME_HEIGHT - height)) {
-                    int w = getClosestIndex(width, widths);
-                    int h = getClosestIndex((int) (FRAME_HEIGHT * (width / 1.0 / FRAME_WIDTH)), heights);
-                    if (width < MIN_WIDTH || width > MAX_WIDTH) {
-                        w = width > MAX_WIDTH ? widths.size()-1 : 0;
-                        h = width > MAX_WIDTH ? heights.size()-1 : 0;
-                    }
-                    frame.setPreferredSize(new Dimension(widths.get(w), heights.get(h)));
+                else if (Math.abs(FRAME_WIDTH - width) > Math.abs(FRAME_HEIGHT - height)) { // Check if the width was changed more than the height
+                    int w = getClosestIndex(width, widths); // Get the closest acceptable width relative to the chosen width
+                    int h = getClosestIndex((int) (FRAME_HEIGHT * (width / 1.0 / FRAME_WIDTH)), heights); // Get the closest acceptable height relative to the determined width
+                    frame.setPreferredSize(new Dimension(widths.get(w), heights.get(h))); // Set the new dimensions
                 }
-                else if (Math.abs(FRAME_WIDTH - width) < Math.abs(FRAME_HEIGHT - height)) {
-                    int h = getClosestIndex(height, heights);
-                    int w = getClosestIndex((int) (FRAME_WIDTH * (height / 1.0 / FRAME_HEIGHT)), widths);
-                    if (height < MIN_HEIGHT || height > MAX_HEIGHT) {
-                        h = width > MAX_HEIGHT ? heights.size()-1 : 0;
-                        w = height > MAX_HEIGHT ? widths.size()-1 : 0;
-                    }
-                    frame.setPreferredSize(new Dimension(widths.get(w), heights.get(h)));
+                else if (Math.abs(FRAME_WIDTH - width) < Math.abs(FRAME_HEIGHT - height)) { // Check if the height was changed more than the width
+                    int h = getClosestIndex(height, heights); // Get the closest acceptable height relative to the chosen height
+                    int w = getClosestIndex((int) (FRAME_WIDTH * (height / 1.0 / FRAME_HEIGHT)), widths); // Get the closest acceptable width relative to the determined height
+                    frame.setPreferredSize(new Dimension(widths.get(w), heights.get(h))); // Set the new dimensions
                 }
+
+                if (frame.getWidth() < MIN_WIDTH * 693.0/675 || frame.getWidth() > MAX_WIDTH || frame.getHeight() < MIN_HEIGHT * 908.0/900 || frame.getHeight() > MAX_HEIGHT) { // Check if the new dimensions are beyond the limits
+                    int w = frame.getWidth() > MAX_WIDTH || frame.getHeight() > MAX_HEIGHT ? MAX_WIDTH : (int)(MIN_WIDTH * 693.0/675); // Set the Max or Min width
+                    int h = frame.getWidth() > MAX_WIDTH || frame.getHeight() > MAX_HEIGHT ? MAX_HEIGHT : (int)(MIN_HEIGHT * 908.0/900); // Set the Max or Min height
+                    frame.setPreferredSize(new Dimension(w , h)); // Set the new dimensions
+                }
+
                 GridPanel error = getError();
                 error.setBounds(error.getX(), error.getY(), (int)(error.getSize().width * (frame.getWidth() / 1.0 / FRAME_WIDTH)), (int)(error.getSize().height * (frame.getHeight() / 1.0 / FRAME_HEIGHT)));
-                CurvedButton text = (CurvedButton) error.getComponent(0);
-                if (frame.getWidth() < 570) {
-                    text.setYOffset(-0.375);
-                }
-                else {
-                    text.setYOffset(0.375);
-                }
-                
+                CurvedLabel text = (CurvedLabel) error.getComponent(0);
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
                 frame.pack(); // Pack once more, in case the Hand was adjusted
                 System.out.println("Window Resized: "+frame.getWidth()+" x "+frame.getHeight());
+                compileDragData();
             }
         });
 
@@ -186,6 +178,7 @@ class Board extends JFrame {
             empty[i].setValue(Scrabble.getLetterValue(list[i])); // Sets the value of the tile
         }
     }
+    
     // Highlights the selected tile within the players hand
     public void selectTile(Tile c) {
         if (!(c instanceof Tile)) { // Checks to see if the tile is a valid selection
@@ -208,6 +201,7 @@ class Board extends JFrame {
             selected_tile = previous_tile; // Reselects the previous tile
         }
     }
+    
     // Places the letter from the selected tile within the players hand
     public void placeTile(Tile c) {
         if (selected_tile < 0 || !(c instanceof Tile) || c == getTile(selected_tile)) { // Check to see if the tile can be placed
@@ -249,6 +243,7 @@ class Board extends JFrame {
         }
         placedTiles.clear(); // Wipe the set of all placed tiles, since they were recalled
     }
+    
     // Recalls a tile back to its original position
     public void recallTile(Tile p) {
         if (p == null) { // Checks if Tile 'p' is null
@@ -259,6 +254,7 @@ class Board extends JFrame {
         p.setPointingTo(null); // Set it so the placed tile no longer points to anything
         recallTile(pointingAt); // Recalls the tile Tile 'p' was pointing to
     }
+    
     public void shuffleTiles() {
         // Shuffling: https://stackoverflow.com/questions/1519736/random-shuffling-of-an-array
         Random rand = new Random(); // Creates a random object for shuffling
@@ -266,6 +262,7 @@ class Board extends JFrame {
             Tile.swapTiles(getTile(i), getTile(rand.nextInt(HAND_LENGTH-i) + i)); // Uses the Tile class to swap the properties of the current tile with that of a random tile, past the current one
         }
     }
+    
     // Creates a HashMap of the Point/Character locations of placed tiles on the board
     public HashMap<Point, Character> getTilesPlaced() {
         HashMap<Point, Character> map = new HashMap<Point, Character>(); // Creates empty HashMap to store Point/Character placements
@@ -274,6 +271,7 @@ class Board extends JFrame {
         }
         return(map); // Return the newly created HashMap
     }
+    
     public void tilesWereSubmitted() {
         dispatchEvent(new CustomEvent(frame, DRAW_HAND));
     }
@@ -505,50 +503,50 @@ class Board extends JFrame {
     // An attempt at layering panels
     public void createError() {
         // PaintComponent problems: https://stackoverflow.com/questions/20833913/flickering-when-updating-overlapping-jpanels-inside-a-jlayeredpane-using-timeste
-        CurvedButton text = new CurvedButton("Invalid Word", TILE_RADIUS, Color.DARK_GRAY, 0);
+        CurvedLabel text = new CurvedLabel("Invalid Word", TILE_RADIUS, Color.RED);
         text.setEnabled(false);
-        text.setXOffset(0.55);
-        text.setYOffset(0.375);
         text.setFont(new Font("Serif", Font.BOLD, 37));
-        text.setTextColor(Color.RED);
-        text.setBorder(new Color(0, 0, 0, 0), 0);
-        text.setSize(10, 10);
+        text.setBackground(Color.DARK_GRAY);
+        text.setSize(1, 1);
 
-        GridPanel error = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.X_AXIS);
-        error.add(text, 0, 0, 1, 1, GridBagConstraints.BOTH);
-        error.setBounds(0, 0, COLS*TILE_SIZE, ROWS*TILE_SIZE);
-        error.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
-        error.setOpaque(false);
+        GridPanel error = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.X_AXIS); // Creates the error panel
+        error.add(text, 0, 0, 1, 1, GridBagConstraints.BOTH); // Adds the text to the panel
+        error.setBounds(0, 3, COLS*TILE_SIZE, ROWS*TILE_SIZE); // The y-value of 3 is enough to generally offset the bottom gap of the panel and the board
+        error.setOpaque(false); // Sets the panel as see-through
         error.setVisible(false); // Start with the error screen invisible.
-        text.setVisible(false);
+        text.setVisible(false); // Start with the text as invisible
 
-        JLayeredPane t = new JLayeredPane();
+        JLayeredPane t = new JLayeredPane(); // Create the LayeredPanel, to layer components
         
-        gamePanel.remove(board);
-        board.setBounds(0, 0, board.getSize().width, board.getSize().height);
+        gamePanel.remove(board); // Remove the board from the JFrame
+        board.setBounds(0, 0, board.getSize().width, board.getSize().height); // Set the general dimensions of the board
         
-        t.add(error, JLayeredPane.POPUP_LAYER);
-        t.add(board, JLayeredPane.DEFAULT_LAYER);
+        t.add(error, JLayeredPane.POPUP_LAYER); // Add the error screen to the panel
+        t.add(board, JLayeredPane.DEFAULT_LAYER); // Add the board to the panel
         
-        GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
-        l.setConstraints(t, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH));
-        //t.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
-        gamePanel.add(t);
+        GridBagLayout l = (GridBagLayout) gamePanel.getLayout(); // Get the LayoutManager for the GamePanel
+        l.setConstraints(t, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH)); // Set the constraints
+        gamePanel.add(t); // Add the layered panel to the JFrame
     }
 
- public void displayError(String error) {
-        final CurvedButton text = (CurvedButton) getError().getComponent(0);
-        if (text.isVisible()) {
-            return;
+    public void displayError(String error) {
+        if (getError().isVisible()) { // Checks if the error is currently being displayed
+            return; // Quit the program
         }
-        text.setText(error);
-        text.setOpacity(0);
+        
+        final CurvedLabel text = (CurvedLabel) getError().getComponent(0); // Stores the Text message
+        text.setText(error); // Sets the text to be displayed
+        getError().setVisible(true); // Sets the error visible
+        text.setVisible(true); // Sets the error visible
+        text.setOpacity(ERROR_OPACITY); // Sets the opacity the error starts at
+
         // How to use Java Swing Timer: https://stackoverflow.com/questions/28521173/how-to-use-swing-timer-actionlistener
         final Timer dec = new Timer(ERROR_INTERVAL, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 text.setOpacity(text.getOpacity()-1); // Decreases the opacity of the error
                 getError().repaint(); // Repaints the error panel
+                System.out.print(". ");
             }
         });
         final Timer a = new Timer(ERROR_LENGTH, new ActionListener() { // Original timer executes after 5 Seconds
@@ -560,13 +558,68 @@ class Board extends JFrame {
                 text.setVisible(false); // Sets the error invisible
             }
         });
-        getError().setVisible(true); // Sets the error visible
-        text.setVisible(true); // Sets the error visible
-        text.setOpacity(ERROR_OPACITY); // Sets the opacity the error starts at
         a.setRepeats(false); // Stops the Original timer from repeating
         System.out.print("Decreasing ");
         a.start(); // Starts the Original timer
         dec.start(); // Starts the Decreasing timer
+    }
+
+    private void compileDragData() {
+        Tile.clearDragTiles();
+        int max = getBoard().getComponents().length + 6;
+        final Tile[] dragged = new Tile[1];
+        final boolean[] released = new boolean[1];
+        for (int i=0; i<max; i++) {
+            Tile current = getTile(i);
+            current.setDragLocation(new Point(current.getY(), current.getX())); // Doesn't matter that this will change on resize
+            /*this.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    mousePt = e.getPoint();
+                    repaint();
+                }
+            });*/
+            gamePanel.addMouseMotionListener(new MouseAdapter() {
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    System.out.println("Pre-Released");
+                    if (dragged[0] == null) { // Check to see there is a dragged component
+                        return;
+                    }
+                    System.out.println("Released");
+                    released[0] = true;
+                }
+            });
+            current.addMouseMotionListener(new MouseInputAdapter() {
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    dragged[0] = (Tile) e.getSource();
+                    System.out.print(" Drag ");
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    System.out.println("Entered");
+                    if (!released[0]) { // Check to see there is a dragged component, and the mouse was released.
+                        return;
+                    }
+                    Tile temp = dragged[0];
+                    Tile placed = (Tile) e.getSource();
+                    if (temp.getPoint() != null && temp.findText().length() == 1) { // Checks that the dragged tile is a Board tile
+                        dispatchEvent(new CustomEvent(temp, SELECTED_LETTER, temp.getPoint().r, temp.getPoint().c)); // Trigger an ActionEvent to allow the client to determine whether or not the tile can be selected
+                    }
+                    else { // The dragged tile is a Hand tile
+                        selectTile((Tile) e.getSource()); // Just select the tile.
+                    }
+                    if (selected_tile != -1 && placed.getPoint() != null) { // Checks the dragged tile is a Board tile and was selected properly
+                        dispatchEvent(new CustomEvent(placed, PLACING_LETTER, placed.getPoint().r, placed.getPoint().c)); // Trigger an ActionEvent to allow the client to determine whether or not the tile can be placed
+                    }
+                    dragged[0] = null;
+                    released[0] = false;
+                }
+            });
+
+        }
     }
 
     private GridBagConstraints createConstraints(double xLbs, double yLbs, int x, int y, int w, int h, int fill) {

@@ -40,6 +40,10 @@ public class CurvedLabel extends JLabel {
         repaint();
     }
 
+    public int getOpacity() {
+        return(opacity);
+    }
+
     public void setBackground(Color c) {
         background = c;
         repaint();
