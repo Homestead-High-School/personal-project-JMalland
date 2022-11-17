@@ -213,10 +213,10 @@ class Board extends JFrame {
         boolean isBoardTile = selected_tile >= 7;
         c.swapText(select.findText()); // Swaps the text from the selected tile to the one it was placed on
         if (!isBoardTile) {
+            recallTile(old); // Recalls the tile that was placed previous to the current one
             select.swapText(""); // Sets the text of the selected tile to be blank
             c.setPointingTo(select); // Sets the placed tile corresponding to the selected tile
             select.setPointingTo(c); // Sets the selected tile corresponding to the placed tile
-            recallTile(old); // Recalls the tile that was placed previous to the current one
         }
         else{
             select.swapText(c.getPrev()); // Swaps the text of the selected tile with that of the previous text from the placed tile
@@ -228,10 +228,12 @@ class Board extends JFrame {
             }
             else {
                 dispatchEvent(new CustomEvent(select, PLACED_LETTER, select.findText().charAt(0), select.getPoint().r, select.getPoint().c)); // Announce the re-placement of the selected tile
+                select.setOpacity(select.getOpacity()*3);
             }
         }
         selectTile(select); // Deselects the selected tile
         placedTiles.add(c); // Adds the placed tile to the list of placed tiles
+        c.setOpacity(c.getOpacity()*2);
         dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c)); // Announce the placement of the placed tile
     }
 
@@ -253,6 +255,9 @@ class Board extends JFrame {
         Tile pointingAt = p.getPointingTo(); // Stores the tile Tile 'p' is pointing to for easy access
         p.setText(p.getOriginal()); // Swap the placed tile text with its original
         p.setPointingTo(null); // Set it so the placed tile no longer points to anything
+        if (p.getPoint() != null) { // Check if it is a Board tile
+            p.setOpacity(p.getOpacity()/3);
+        }
         recallTile(pointingAt); // Recalls the tile Tile 'p' was pointing to
     }
     
@@ -324,12 +329,12 @@ class Board extends JFrame {
         for (int r=0; r<ROWS; r++) { // Loops through each row on the board
             for (int c=0; c<COLS; c++) { // Loops through each col on the board
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
-                final Tile temp = new Tile("", TILE_RADIUS, new Color(0xBA7F40), 37, 1, 1, r, c); // Blank Tile, represented by '0'
+                final Tile temp = new Tile("", TILE_RADIUS, new Color(0xBA7F40), 18, 1, 1, r, c); // Blank Tile, represented by '0'
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
-                    temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(0x4274FF), tile%2 == 1 ? 25 : 100, tile, 1);
+                    temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(0x4274FF), tile%2 == 1 ? 12 : 50, tile, 1);
                 }
                 else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'
-                    temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(0xD7381C), tile%2 == 1 ? 25 : 100, 1, tile);
+                    temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(0xD7381C), tile%2 == 1 ? 12 : 50, 1, tile);
                 }
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
                 temp.addActionListener(new ActionListener() {
