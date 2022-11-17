@@ -5,11 +5,13 @@ import java.util.HashSet;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.MouseInputAdapter;
-
 import java.awt.*;
 import java.util.Random;
 
+
+// R I G
+//     I     --> Results in 17, 12 points for GIN, then NOW
+//     N O W
 class Board extends JFrame {
     /*
     *   Should make either a sidemenu, or selections from the player's hand, where, when selected, it highlights the border in yellow or something.
@@ -124,7 +126,6 @@ class Board extends JFrame {
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
                 frame.pack(); // Pack once more, in case the Hand was adjusted
                 System.out.println("Window Resized: "+frame.getWidth()+" x "+frame.getHeight());
-                compileDragData();
             }
         });
 
@@ -562,64 +563,6 @@ class Board extends JFrame {
         System.out.print("Decreasing ");
         a.start(); // Starts the Original timer
         dec.start(); // Starts the Decreasing timer
-    }
-
-    private void compileDragData() {
-        Tile.clearDragTiles();
-        int max = getBoard().getComponents().length + 6;
-        final Tile[] dragged = new Tile[1];
-        final boolean[] released = new boolean[1];
-        for (int i=0; i<max; i++) {
-            Tile current = getTile(i);
-            current.setDragLocation(new Point(current.getY(), current.getX())); // Doesn't matter that this will change on resize
-            /*this.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    mousePt = e.getPoint();
-                    repaint();
-                }
-            });*/
-            gamePanel.addMouseMotionListener(new MouseAdapter() {
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    System.out.println("Pre-Released");
-                    if (dragged[0] == null) { // Check to see there is a dragged component
-                        return;
-                    }
-                    System.out.println("Released");
-                    released[0] = true;
-                }
-            });
-            current.addMouseMotionListener(new MouseInputAdapter() {
-                @Override
-                public void mouseDragged(MouseEvent e) {
-                    dragged[0] = (Tile) e.getSource();
-                    System.out.print(" Drag ");
-                }
-
-                @Override
-                public void mouseEntered(MouseEvent e) {
-                    System.out.println("Entered");
-                    if (!released[0]) { // Check to see there is a dragged component, and the mouse was released.
-                        return;
-                    }
-                    Tile temp = dragged[0];
-                    Tile placed = (Tile) e.getSource();
-                    if (temp.getPoint() != null && temp.findText().length() == 1) { // Checks that the dragged tile is a Board tile
-                        dispatchEvent(new CustomEvent(temp, SELECTED_LETTER, temp.getPoint().r, temp.getPoint().c)); // Trigger an ActionEvent to allow the client to determine whether or not the tile can be selected
-                    }
-                    else { // The dragged tile is a Hand tile
-                        selectTile((Tile) e.getSource()); // Just select the tile.
-                    }
-                    if (selected_tile != -1 && placed.getPoint() != null) { // Checks the dragged tile is a Board tile and was selected properly
-                        dispatchEvent(new CustomEvent(placed, PLACING_LETTER, placed.getPoint().r, placed.getPoint().c)); // Trigger an ActionEvent to allow the client to determine whether or not the tile can be placed
-                    }
-                    dragged[0] = null;
-                    released[0] = false;
-                }
-            });
-
-        }
     }
 
     private GridBagConstraints createConstraints(double xLbs, double yLbs, int x, int y, int w, int h, int fill) {
