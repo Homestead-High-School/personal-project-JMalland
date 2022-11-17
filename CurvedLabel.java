@@ -79,7 +79,7 @@ public class CurvedLabel extends JLabel {
 
         // Draw Label Text: https://stackoverflow.com/questions/5378052/positioning-string-in-graphic-java
         g.setFont(new Font(font.getName(), font.getStyle(), (int)(font.getSize()*frame.getWidth()/Board.MAX_WIDTH)));
-        g.setColor(color);
+        g.setColor(new Color(color.getRed(), color.getBlue(), color.getGreen(), opacity));
         Rectangle2D rect = g.getFontMetrics().getStringBounds(text, g);
         g.drawString(text, (int)(getSize().width/2 - rect.getWidth()*xOffset), (int)(getSize().height/2 + rect.getHeight()/2 - rect.getHeight()*yOffset));
     }
