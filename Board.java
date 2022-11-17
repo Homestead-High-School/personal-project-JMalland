@@ -162,13 +162,7 @@ class Board extends JFrame {
         frame.pack(); // Repaint the JFrame
         System.out.println("Game Started: "+player_count+" Players"); // Display the beginning of the game
         dispatchEvent(new CustomEvent(frame, DRAW_HAND, 0)); // Signal to the client to redraw the hand.
-        Component[] list = getHand().getTileComponents();
-        for (int i=0; i<list.length; i++) {
-            Tile t = (Tile) list[i];
-            t.setText(""+players[current_player].getTile(i));
-            t.setOriginal(""+players[current_player].getTile(i));
-            t.setValue(Scrabble.getLetterValue(players[current_player].getTile(i)));
-        }
+        setHand(players[current_player].getHand());
     }
 
     // Should be remade
@@ -309,6 +303,7 @@ class Board extends JFrame {
     }
     
     public void tilesWereSubmitted() {
+        placedTiles.clear();
         current_player = (current_player + 1)%player_count; // Calculate the new player
         displayed_player = current_player; // Update the display to match the current player
         setHand(players[current_player].getHand());
