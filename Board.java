@@ -331,7 +331,7 @@ class Board extends JFrame {
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
                 final Tile temp = new Tile("", TILE_RADIUS, new Color(0xBA7F40), 75, 1, 1, r, c); // Blank Tile, represented by '0'
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
-                    temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(0x4274FF), tile%2 == 1 ? 50 : 100, tile, 1);
+                    temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(tile%2 == 1 ? 0x6bc9fa : 0x4274FF), 100, tile, 1);
                 }
                 else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'
                     temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(0xD7381C), tile%2 == 1 ? 50 : 100, 1, tile);
@@ -455,7 +455,7 @@ class Board extends JFrame {
         GridPanel menu = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.Y_AXIS); // Creates the Main Menu panel
     
         final CurvedButton startButton = new CurvedButton("Start", 15, Color.yellow, 100); // Creates a default start button
-        startButton.setFont(new Font("Serif", Font.PLAIN, 75)); // Sets the font of the Start Button to size 75
+        startButton.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*2.5))); // 75 font size originally. Sets the font of the Start Button to size 75
         startButton.setSize(MENU_WIDTH/3, MENU_HEIGHT); // Sets the default size of the Start Button
 
         startButton.addActionListener(new ActionListener() {
@@ -484,7 +484,7 @@ class Board extends JFrame {
         select.setSize(MIN_WIDTH, MENU_HEIGHT); // Sets the default size of the Selector
 
         final CurvedLabel counter = new CurvedLabel("Players:    2"); // Creates the Player Counter display
-        counter.setFont(new Font("Serif", Font.PLAIN, 75)); // Sets the font of the Counter to size 75
+        counter.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*2.5))); // 75 font size originalyl. Sets the font of the Counter to size 75
         counter.setSize(MIN_WIDTH, MENU_HEIGHT); // Sets the default size of the Player Display
 
         menu.add(makePadding(MIN_WIDTH, MIN_HEIGHT/3 - MENU_HEIGHT), 0, 0, 1, 1, GridBagConstraints.BOTH); // Adds Top Padding
@@ -512,7 +512,7 @@ class Board extends JFrame {
         // PaintComponent problems: https://stackoverflow.com/questions/20833913/flickering-when-updating-overlapping-jpanels-inside-a-jlayeredpane-using-timeste
         CurvedLabel text = new CurvedLabel("Invalid Word", TILE_RADIUS, Color.RED);
         text.setEnabled(false);
-        text.setFont(new Font("Serif", Font.BOLD, 37));
+        text.setFont(new Font("Serif", Font.BOLD, (int)(FONT_SIZE*1.5))); // 37 Font size originally.
         text.setBackground(Color.DARK_GRAY);
         text.setSize(1, 1);
 
