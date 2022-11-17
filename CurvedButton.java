@@ -119,9 +119,7 @@ public class CurvedButton extends JButton {
 
     @Override
     public void paint(Graphics g) {
-        if (paintSuper) {
-            super.paint(g);
-        }
+        super.paint(g);
         paintComponent(g);
         paintBorder(g);
     }

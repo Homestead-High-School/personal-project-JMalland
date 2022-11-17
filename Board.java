@@ -17,7 +17,7 @@ class Board extends JFrame {
     *   Should make either a sidemenu, or selections from the player's hand, where, when selected, it highlights the border in yellow or something.
     */
     // Actual ratios are more towards 19/15;
-    private static final double MULT = 0.5; // At Mult of 0.8, Aspect Ratio appears odd at <= 630 X 840
+    private static final double MULT = 1; // At Mult of 0.8, Aspect Ratio appears odd at <= 630 X 840
     public static final int MIN_WIDTH = (int)(MULT*675); // (75*8 + 50) = 650
     public static final int MIN_HEIGHT = (int)(MULT*900); // (750 + 75 | 125) = 825 ~ 950
     public static final int MAX_WIDTH = (int)(900*MULT); // If exceeds 843, duplicate tiles appear on bottom row
@@ -228,12 +228,12 @@ class Board extends JFrame {
             }
             else {
                 dispatchEvent(new CustomEvent(select, PLACED_LETTER, select.findText().charAt(0), select.getPoint().r, select.getPoint().c)); // Announce the re-placement of the selected tile
-                select.paintSuper(true);
+                select.setOpacity(select.getOpacity()*2);
             }
         }
         selectTile(select); // Deselects the selected tile
         placedTiles.add(c); // Adds the placed tile to the list of placed tiles
-        c.paintSuper(true);
+        c.setOpacity(c.getOpacity()*2);
         dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c)); // Announce the placement of the placed tile
     }
 
@@ -256,7 +256,7 @@ class Board extends JFrame {
         p.setText(p.getOriginal()); // Swap the placed tile text with its original
         p.setPointingTo(null); // Set it so the placed tile no longer points to anything
         if (p.getPoint() != null) { // Check if it is a Board tile
-            p.paintSuper(false);
+            p.setOpacity(100);
         }
         recallTile(pointingAt); // Recalls the tile Tile 'p' was pointing to
     }
@@ -333,7 +333,7 @@ class Board extends JFrame {
                 int blue = (int)0x3498DB;
                 int orange = (int)0xD35400;
                 int other = (int)0x8E44AD; // 0x8E44AD OR 0x2ECC71;
-                final Tile temp = new Tile("", TILE_RADIUS, new Color(0xBA7F40), 75, 1, 1, r, c); // Blank Tile, represented by '0'
+                final Tile temp = new Tile("", TILE_RADIUS, new Color(0xBA7F40), 100, 1, 1, r, c); // Blank Tile, represented by '0'
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'            // 2 / 3     https://htmlcolorcodes.com/
                     temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(tile%2 == 1 ? blue : other), 100, tile, 1);
                 }
@@ -381,7 +381,7 @@ class Board extends JFrame {
 
         // Would add the Recall and Shuffle buttons up here, if adding directly to JPanel.
         for (int i=0; i<=HAND_LENGTH*2; i++) {
-            final Tile tile = new Tile("", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 100, i/2); // Create the letter tile
+            final Tile tile = new Tile("", (int)(TILE_RADIUS*1.5), new Color(0xBA7F40), 200, i/2); // Create the letter tile
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*1.5))); // Set the font of the tile
             tile.addActionListener(new ActionListener() {
                 @Override
@@ -407,15 +407,15 @@ class Board extends JFrame {
     }
 
     private void createHandOptions(GridPanel hand) {
-        final CurvedButton recall = new CurvedButton("Recall", TILE_RADIUS, new Color(0x036FFC), 100); // Creates the Recall button
+        final CurvedButton recall = new CurvedButton("Recall", TILE_RADIUS, new Color(0x036FFC), 200); // Creates the Recall button
         recall.setSize(TILE_SIZE, TILE_SIZE); // Sets the size of the Recall button
         recall.setFont(new Font("Serif", Font.BOLD, 7*FONT_SIZE/8)); // Sets the font size
 
-        final CurvedButton shuffle = new CurvedButton("Shuffle", TILE_RADIUS, new Color(0xFC6603), 100); // Creates the Shuffler button
+        final CurvedButton shuffle = new CurvedButton("Shuffle", TILE_RADIUS, new Color(0xFC6603), 200); // Creates the Shuffler button
         shuffle.setSize(TILE_SIZE, TILE_SIZE); // Sets the size of the Shuffle button
         shuffle.setFont(new Font("Serif", Font.BOLD, 7*FONT_SIZE/8)); // Sets the font size
 
-        final CurvedButton submit = new CurvedButton("Submit", TILE_RADIUS, new Color(0x2BAB49), 100); // Creates the Submit button
+        final CurvedButton submit = new CurvedButton("Submit", TILE_RADIUS, new Color(0x2BAB49), 200); // Creates the Submit button
         submit.setSize(H_TILE_SIZE, H_TILE_SIZE);
         submit.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
 
