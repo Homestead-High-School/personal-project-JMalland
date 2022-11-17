@@ -104,13 +104,13 @@ class Board extends JFrame {
                 }
                 else if (Math.abs(FRAME_WIDTH - width) > Math.abs(FRAME_HEIGHT - height)) { // Check if the width was changed more than the height
                     int w = getClosestIndex(width, widths); // Get the closest acceptable width relative to the chosen width
-                    int h = getClosestIndex((int) (FRAME_HEIGHT * (width / 1.0 / FRAME_WIDTH)), heights); // Get the closest acceptable height relative to the determined width
-                    frame.setPreferredSize(new Dimension(widths.get(w), heights.get(h))); // Set the new dimensions
+                    //int h = heights.get(w); // Get the closest acceptable height relative to the determined width
+                    frame.setPreferredSize(new Dimension(widths.get(w), heights.get(w))); // Set the new dimensions
                 }
                 else if (Math.abs(FRAME_WIDTH - width) < Math.abs(FRAME_HEIGHT - height)) { // Check if the height was changed more than the width
                     int h = getClosestIndex(height, heights); // Get the closest acceptable height relative to the chosen height
-                    int w = getClosestIndex((int) (FRAME_WIDTH * (height / 1.0 / FRAME_HEIGHT)), widths); // Get the closest acceptable width relative to the determined height
-                    frame.setPreferredSize(new Dimension(widths.get(w), heights.get(h))); // Set the new dimensions
+                    //int w = getClosestIndex((int) (FRAME_WIDTH * (height / 1.0 / FRAME_HEIGHT)), widths); // Get the closest acceptable width relative to the determined height
+                    frame.setPreferredSize(new Dimension(widths.get(h), heights.get(h))); // Set the new dimensions
                 }
 
                 if (frame.getWidth() < MIN_WIDTH * 693.0/675 || frame.getWidth() > MAX_WIDTH || frame.getHeight() < MIN_HEIGHT * 908.0/900 || frame.getHeight() > MAX_HEIGHT) { // Check if the new dimensions are beyond the limits
@@ -375,8 +375,8 @@ class Board extends JFrame {
         //hand.add(left, 0, 0, 1, 2, GridBagConstraints.BOTH); // Add Left Padding at [0][0]
         //hand.add(right, 0, (HAND_LENGTH)*2 + 4, 1, 2, GridBagConstraints.BOTH); // Add Right Padding at [0][-1]
         
-        hand.add(makePadding(4*(MIN_WIDTH - (8*(H_TILE_SIZE + H_X_OFF) + TILE_SIZE))/2 + 4, H_TILE_SIZE), 0, 0, 1, 2, GridBagConstraints.BOTH);
-        hand.add(makePadding(4*(MIN_WIDTH - (8*(H_TILE_SIZE + H_X_OFF) + TILE_SIZE))/2 + 4, H_TILE_SIZE), 0, (HAND_LENGTH * 2) + 4, 1, 2, GridBagConstraints.BOTH);
+        hand.add(makePadding(4*(MIN_WIDTH - (8*(H_TILE_SIZE + H_X_OFF) + TILE_SIZE))/2, H_TILE_SIZE), 0, 0, 1, 2, GridBagConstraints.BOTH);
+        hand.add(makePadding(4*(MIN_WIDTH - (8*(H_TILE_SIZE + H_X_OFF) + TILE_SIZE))/2, H_TILE_SIZE), 0, (HAND_LENGTH * 2) + 4, 1, 2, GridBagConstraints.BOTH);
 
         System.out.println("Padding: "+(MIN_WIDTH - (8*(H_TILE_SIZE + H_X_OFF) + TILE_SIZE)));
 
@@ -524,7 +524,7 @@ class Board extends JFrame {
 
         GridPanel error = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.X_AXIS); // Creates the error panel
         error.add(text, 0, 0, 1, 1, GridBagConstraints.BOTH); // Adds the text to the panel
-        error.setBounds(0, 3, COLS*TILE_SIZE, ROWS*TILE_SIZE); // The y-value of 3 is enough to generally offset the bottom gap of the panel and the board
+        error.setBounds(0, 3, COLS*TILE_SIZE, (int)((ROWS+0.5)*TILE_SIZE)); // The y-value of 3 is enough to generally offset the bottom gap of the panel and the board
         error.setOpaque(false); // Sets the panel as see-through
         error.setVisible(false); // Start with the error screen invisible.
         text.setVisible(false); // Start with the text as invisible
@@ -539,6 +539,7 @@ class Board extends JFrame {
         
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout(); // Get the LayoutManager for the GamePanel
         l.setConstraints(t, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH)); // Set the constraints
+        //t.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
         gamePanel.add(t); // Add the layered panel to the JFrame
     }
 
