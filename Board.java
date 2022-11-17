@@ -541,7 +541,7 @@ class Board extends JFrame {
         if (text.isVisible()) {
             return;
         }
-        text.setText(error);
+        text.setText(error); // Set the text
         text.setOpacity(0);
         // How to use Java Swing Timer: https://stackoverflow.com/questions/28521173/how-to-use-swing-timer-actionlistener
         final Timer dec = new Timer(ERROR_INTERVAL, new ActionListener() {
