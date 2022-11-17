@@ -544,10 +544,6 @@ class Board extends JFrame {
         if (getError().isVisible()) { // Checks if the error is currently being displayed
             return; // Quit the program
         }
-<<<<<<< HEAD
-        text.setText(error); // Set the text
-        text.setOpacity(0);
-=======
         
         final CurvedLabel text = (CurvedLabel) getError().getComponent(0); // Stores the Text message
         text.setText(error); // Sets the text to be displayed
@@ -555,7 +551,6 @@ class Board extends JFrame {
         text.setVisible(true); // Sets the error visible
         text.setOpacity(ERROR_OPACITY); // Sets the opacity the error starts at
 
->>>>>>> b7bc3b41a48d7726b289e5714a1f70ff0d44ffcc
         // How to use Java Swing Timer: https://stackoverflow.com/questions/28521173/how-to-use-swing-timer-actionlistener
         final Timer dec = new Timer(ERROR_INTERVAL, new ActionListener() {
             @Override
