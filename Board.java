@@ -329,12 +329,16 @@ class Board extends JFrame {
         for (int r=0; r<ROWS; r++) { // Loops through each row on the board
             for (int c=0; c<COLS; c++) { // Loops through each col on the board
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
+                int red = (int)0xE74C3C;
+                int blue = (int)0x3498DB;
+                int orange = (int)0xD35400;
+                int other = (int)0x8E44AD; // 0x8E44AD OR 0x2ECC71;
                 final Tile temp = new Tile("", TILE_RADIUS, new Color(0xBA7F40), 75, 1, 1, r, c); // Blank Tile, represented by '0'
-                if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'
-                    temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(tile%2 == 1 ? 0x6bc9fa : 0x4274FF), 100, tile, 1);
+                if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'            // 2 / 3     https://htmlcolorcodes.com/
+                    temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(tile%2 == 1 ? blue : other), 100, tile, 1);
                 }
-                else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'
-                    temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(0xD7381C), tile%2 == 1 ? 50 : 100, 1, tile);
+                else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'             // 2 / 3
+                    temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(tile%2 == 1 ? orange : red), 100, 1, tile); // Still testing colors
                 }
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
                 temp.addActionListener(new ActionListener() {
