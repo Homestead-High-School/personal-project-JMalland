@@ -17,7 +17,6 @@ public class CurvedButton extends JButton {
     private Color borderColor = Color.black;
     private Color tColor = Color.black;
     private Font font = new Font("Arial", Font.PLAIN, 14);
-    private boolean paintSuper = false;
 
     public CurvedButton() {
 
@@ -51,11 +50,6 @@ public class CurvedButton extends JButton {
 
     public void setXOffset(double x) {
         xOffset = x;
-    }
-
-    public void paintSuper(boolean p) {
-        paintSuper = p;
-        repaint();
     }
 
     // Sets the border color and size

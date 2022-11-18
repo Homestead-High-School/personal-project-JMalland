@@ -198,7 +198,6 @@ class Board extends JFrame {
             players[current_player].setTile(getTileIndex(empty[i]), list[i]);
             empty[i].setText(players[current_player].getTile(i)+"");
             empty[i].setOriginal(players[current_player].getTile(i)+"");
-            empty[i].setValue(Scrabble.getLetterValue(players[current_player].getTile(i)));
         }
     }
     
@@ -383,12 +382,12 @@ class Board extends JFrame {
                 int blue = (int)0x3498DB;
                 int orange = (int) 0xE67E22;//0xF39C12;//0xD35400;
                 int other = (int)0x8E44AD; // 0x8E44AD OR 0x2ECC71;
-                final Tile temp = new Tile("", TILE_RADIUS, new Color(0xD8A772), MIN_OPACITY, 1, 1, r, c); // Blank Tile, represented by '0'
+                final Tile temp = new Tile("", TILE_RADIUS, new Color(0xD8A772), MIN_OPACITY, r, c); // Blank Tile, represented by '0'
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'            // 2 / 3     https://htmlcolorcodes.com/
-                    temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(tile%2 == 1 ? blue : other), MIN_OPACITY, tile, 1);
+                    temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(tile%2 == 1 ? blue : other), MIN_OPACITY);
                 }
                 else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'             // 2 / 3
-                    temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(tile%2 == 1 ? orange : red), MIN_OPACITY, 1, tile); // Still testing colors
+                    temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(tile%2 == 1 ? orange : red), MIN_OPACITY); // Still testing colors
                 }
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
                 temp.addActionListener(new ActionListener() {
@@ -439,8 +438,7 @@ class Board extends JFrame {
                 }
             });
             if (i%2 == 1) {
-                tile.setSize(H_TILE_SIZE, H_TILE_SIZE); // Gridwidth = 1, gridheight = 2;
-                tile.paintSuper(true);
+                tile.setSize(H_TILE_SIZE, H_TILE_SIZE);
                 hand.add(tile, 0, i+2, 1, 2, GridBagConstraints.BOTH);
             }
             else {
