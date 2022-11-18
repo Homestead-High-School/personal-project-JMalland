@@ -89,7 +89,7 @@ class Board extends JFrame {
         createMenu(); // Generate the Main Menu and add to mainPanel
         createScoreboard(); // Generate the Scoreboard displayed in-game
         createBoard(); // Create the Scrabble Board
-        createError();
+        createError(); // Create the Error Display
         createHand(); // Create the Player's Hand
 
         mainPanel.setVisible(true); // Set the main menu visible, if not
@@ -114,12 +114,10 @@ class Board extends JFrame {
                 }
                 else if (Math.abs(FRAME_WIDTH - width) > Math.abs(FRAME_HEIGHT - height)) { // Check if the width was changed more than the height
                     int w = getClosestIndex(width, widths); // Get the closest acceptable width relative to the chosen width
-                    //int h = heights.get(w); // Get the closest acceptable height relative to the determined width
                     frame.setPreferredSize(new Dimension(widths.get(w), heights.get(w))); // Set the new dimensions
                 }
                 else if (Math.abs(FRAME_WIDTH - width) < Math.abs(FRAME_HEIGHT - height)) { // Check if the height was changed more than the width
                     int h = getClosestIndex(height, heights); // Get the closest acceptable height relative to the chosen height
-                    //int w = getClosestIndex((int) (FRAME_WIDTH * (height / 1.0 / FRAME_HEIGHT)), widths); // Get the closest acceptable width relative to the determined height
                     frame.setPreferredSize(new Dimension(widths.get(h), heights.get(h))); // Set the new dimensions
                 }
 
@@ -131,7 +129,6 @@ class Board extends JFrame {
 
                 GridPanel error = getError();
                 error.setBounds(error.getX(), error.getY(), (int)(error.getSize().width * (frame.getWidth() / 1.0 / FRAME_WIDTH)), (int)(error.getSize().height * (frame.getHeight() / 1.0 / FRAME_HEIGHT)));
-                CurvedLabel text = (CurvedLabel) error.getComponent(0);
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
                 frame.pack(); // Pack once more, in case the Hand was adjusted
@@ -188,7 +185,7 @@ class Board extends JFrame {
 
     public void updateScore(int points) {
         players[current_player].addToScore(points);
-        getScoreDisplay().setText("Score:    "+players[current_player].getScore());
+        changeDisplay(0);
     }
 
     // Sets the letters on each tile within the players hand
