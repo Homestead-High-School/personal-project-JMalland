@@ -47,8 +47,13 @@ class Board extends JFrame {
     private final int FONT_SIZE = (int)(26*MULT); // 26 Is actually double. Window starts out at half size
     private final int TILE_SIZE = (int)(45*MULT); // 50
     private final int TILE_RADIUS = (int)(25*MULT); // 26 - Is actually double. Window starts out at half size
+    private final int MIN_OPACITY = 100;
+    private final int MAX_OPACITY = 200;
+    private final int MIN_TEXT_OPACITY = 175;
+    private final int MAX_TEXT_OPACITY = 200;
     private final int SB_HEIGHT = (int)(TILE_SIZE*2.5);
     private final int HAND_LENGTH = 7;
+    private final int HAND_OPACITY = 150;
     private final int H_TILE_SIZE = (int)(65 * MULT); // 675 - (8*65 + 8*(65/8) + 50)) --> 20px padding
     private final int H_Y_OFF = 3;
     private final int H_X_OFF = H_TILE_SIZE/8;
@@ -249,14 +254,14 @@ class Board extends JFrame {
             }
             else {
                 dispatchEvent(new CustomEvent(select, PLACED_LETTER, select.findText().charAt(0), select.getPoint().r, select.getPoint().c)); // Announce the re-placement of the selected tile
-                select.setOpacity(200); // Sets the tile to display as clear as possible
-                select.setTextOpacity(200); // Sets the tile to display text much clearer
+                select.setOpacity(MAX_OPACITY); // Sets the tile to display as clear as possible
+                select.setTextOpacity(MAX_TEXT_OPACITY); // Sets the tile to display text much clearer
             }
         }
         selectTile(select); // Deselects the selected tile
         placedTiles.add(c); // Adds the placed tile to the list of placed tiles
-        c.setOpacity(200); // Sets the tile to display as clear as possible
-        c.setTextOpacity(200); // Sets the tile to display text much clearer
+        c.setOpacity(MAX_OPACITY); // Sets the tile to display as clear as possible
+        c.setTextOpacity(MAX_TEXT_OPACITY); // Sets the tile to display text much clearer
         dispatchEvent(new CustomEvent(c, PLACED_LETTER, c.findText().charAt(0), c.getPoint().r, c.getPoint().c)); // Announce the placement of the placed tile
     }
 
@@ -279,8 +284,8 @@ class Board extends JFrame {
         p.setText(p.getOriginal()); // Swap the placed tile text with its original
         p.setPointingTo(null); // Set it so the placed tile no longer points to anything
         if (p.getPoint() != null) { // Check if it is a Board tile
-            p.setOpacity(125); // Reset the opacity of the tile to default
-            p.setTextOpacity(175); // Reset the text opacity of the tile to default
+            p.setOpacity(MIN_OPACITY); // Reset the opacity of the tile to default
+            p.setTextOpacity(MIN_TEXT_OPACITY); // Reset the text opacity of the tile to default
         }
         recallTile(pointingAt); // Recalls the tile Tile 'p' was pointing to
     }
@@ -381,12 +386,12 @@ class Board extends JFrame {
                 int blue = (int)0x3498DB;
                 int orange = (int) 0xE67E22;//0xF39C12;//0xD35400;
                 int other = (int)0x8E44AD; // 0x8E44AD OR 0x2ECC71;
-                final Tile temp = new Tile("", TILE_RADIUS, new Color(0xD8A772), 125, 1, 1, r, c); // Blank Tile, represented by '0'
+                final Tile temp = new Tile("", TILE_RADIUS, new Color(0xD8A772), MIN_OPACITY, 1, 1, r, c); // Blank Tile, represented by '0'
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'            // 2 / 3     https://htmlcolorcodes.com/
-                    temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(tile%2 == 1 ? blue : other), 125, tile, 1);
+                    temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(tile%2 == 1 ? blue : other), MIN_OPACITY, tile, 1);
                 }
                 else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'             // 2 / 3
-                    temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(tile%2 == 1 ? orange : red), 125, 1, tile); // Still testing colors
+                    temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(tile%2 == 1 ? orange : red), MIN_OPACITY, 1, tile); // Still testing colors
                 }
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
                 temp.addActionListener(new ActionListener() {
@@ -454,15 +459,15 @@ class Board extends JFrame {
     }
 
     private void createHandOptions(GridPanel hand) {
-        final CurvedButton recall = new CurvedButton("Recall", TILE_RADIUS, new Color(0x036FFC), 150); // Creates the Recall button
+        final CurvedButton recall = new CurvedButton("Recall", TILE_RADIUS, new Color(0x036FFC), HAND_OPACITY); // Creates the Recall button
         recall.setSize(TILE_SIZE, TILE_SIZE); // Sets the size of the Recall button
         recall.setFont(new Font("Serif", Font.BOLD, 7*FONT_SIZE/8)); // Sets the font size
 
-        final CurvedButton shuffle = new CurvedButton("Shuffle", TILE_RADIUS, new Color(0xFC6603), 150); // Creates the Shuffler button
+        final CurvedButton shuffle = new CurvedButton("Shuffle", TILE_RADIUS, new Color(0xFC6603), HAND_OPACITY); // Creates the Shuffler button
         shuffle.setSize(TILE_SIZE, TILE_SIZE); // Sets the size of the Shuffle button
         shuffle.setFont(new Font("Serif", Font.BOLD, 7*FONT_SIZE/8)); // Sets the font size
 
-        final CurvedButton submit = new CurvedButton("Submit", TILE_RADIUS, new Color(0x2BAB49), 150); // Creates the Submit button
+        final CurvedButton submit = new CurvedButton("Submit", TILE_RADIUS, new Color(0x2BAB49), HAND_OPACITY); // Creates the Submit button
         submit.setSize(H_TILE_SIZE, H_TILE_SIZE);
         submit.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
 
