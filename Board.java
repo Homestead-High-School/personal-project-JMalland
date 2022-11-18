@@ -34,7 +34,6 @@ class Board extends JFrame {
     public final int RECALLED_ALL = ("ALL").hashCode();
     public final int SHUFFLED_TILES = ("SHUFFLE").hashCode();
     public final int FINALIZED_PLAY = ("SUBMIT").hashCode();
-    public final int DRAW_HAND = ("DRAW").hashCode();
     public final int GAME_RUNNING = ("ON").hashCode();
     private final JFrame frame;
     private JPanel gamePanel = new JPanel();
@@ -55,7 +54,6 @@ class Board extends JFrame {
     private final int HAND_LENGTH = 7;
     private final int HAND_OPACITY = 150;
     private final int H_TILE_SIZE = (int)(65 * MULT); // 675 - (8*65 + 8*(65/8) + 50)) --> 20px padding
-    private final int H_Y_OFF = 3;
     private final int H_X_OFF = H_TILE_SIZE/8;
     private final int MENU_WIDTH = (int)(300*MULT); // 300
     private final int MENU_HEIGHT = (int)(75*MULT); // 75
@@ -163,8 +161,7 @@ class Board extends JFrame {
         frame.add(gamePanel); // Add the game panel to display the Scrabble board
         frame.pack(); // Repaint the JFrame
         System.out.println("Game Started: "+player_count+" Players"); // Display the beginning of the game
-        dispatchEvent(new CustomEvent(frame, DRAW_HAND, 0)); // Signal to the client to redraw the hand.
-        setHand(players[current_player].getHand());
+        setHand(players[current_player].getHand()); // Set the hand for Player 1
     }
 
     // Should be remade

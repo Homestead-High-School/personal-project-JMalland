@@ -79,14 +79,9 @@ public class Main {
                     System.out.println("Game Running.");
                     b.startGame();
                 }
-                else if (e.getID() == b.DRAW_HAND || e.getID() == b.CREATE_PLAYER) {
-                    System.out.println("Hand Drawn.");
-                    if (e.getID() == b.CREATE_PLAYER) { // Checks if the event is for generating the players
-                        b.createPlayer(real.drawTiles(7), e.getIndex()); // Draw a brand new hand
-                    }
-                    else { // The event was for re-drawing a players hand
-                        b.setHand(real.drawTiles(b.getBlankAmount())); // Draw a hand of however many tiles are missing
-                    }
+                else if (e.getID() == b.CREATE_PLAYER) {
+                    System.out.println("Created Player "+(e.getIndex()+1)+".");
+                    b.createPlayer(real.drawTiles(7), e.getIndex()); // Draw a brand new hand
                 }
                 else if (e.getID() == b.SELECTED_HAND) {
                     System.out.println("Selected Tile.");
