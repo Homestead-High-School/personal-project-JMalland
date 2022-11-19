@@ -50,11 +50,12 @@ class Board extends JFrame {
     private final int MAX_OPACITY = 200;
     private final int MIN_TEXT_OPACITY = 175;
     private final int MAX_TEXT_OPACITY = 200;
-    private final int SB_HEIGHT = (int)(TILE_SIZE*2.5);
+    private final int SB_HEIGHT = (int)(TILE_SIZE*1.75);
     private final int HAND_LENGTH = 7;
     private final int HAND_OPACITY = 150;
     private final int H_TILE_SIZE = (int)(65 * MULT); // 675 - (8*65 + 8*(65/8) + 50)) --> 20px padding
-    private final int H_X_OFF = H_TILE_SIZE/8;
+    private final int H_X_OFF = 1;
+    private final int OPTION_HEIGHT = H_TILE_SIZE/2;
     private final int MENU_WIDTH = (int)(300*MULT); // 300
     private final int MENU_HEIGHT = (int)(75*MULT); // 75
     private final int ERROR_LENGTH = 2000; // Sets the length of time that errors are displayed
@@ -89,6 +90,7 @@ class Board extends JFrame {
         createBoard(); // Create the Scrabble Board
         createError(); // Create the Error Display
         createHand(); // Create the Player's Hand
+        createHandOptions();
 
         mainPanel.setVisible(true); // Set the main menu visible, if not
     
@@ -412,18 +414,21 @@ class Board extends JFrame {
     private void createHand() {
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
         GridPanel hand = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.X_AXIS);
-    
-        JPanel left = new JPanel(); // Left padding
-        left.setSize((MAX_WIDTH - (7*(H_TILE_SIZE + H_X_OFF) + H_TILE_SIZE/2))/2, H_TILE_SIZE); // Set the size of the left padding
-        JPanel right = new JPanel(); // Right padding
-        right.setSize(left.getSize()); // Set the size of the right padding
-
-        //hand.add(left, 0, 0, 1, 2, GridBagConstraints.BOTH); // Add Left Padding at [0][0]
-        //hand.add(right, 0, (HAND_LENGTH)*2 + 4, 1, 2, GridBagConstraints.BOTH); // Add Right Padding at [0][-1]
         
-        hand.add(makePadding(4*(MIN_WIDTH - (8*(H_TILE_SIZE + H_X_OFF) + TILE_SIZE))/2, H_TILE_SIZE), 0, 0, 1, 2, GridBagConstraints.BOTH);
-        hand.add(makePadding(4*(MIN_WIDTH - (8*(H_TILE_SIZE + H_X_OFF) + TILE_SIZE))/2, H_TILE_SIZE), 0, (HAND_LENGTH * 2) + 4, 1, 2, GridBagConstraints.BOTH);
+        hand.add(makePadding((MIN_WIDTH - (9*H_TILE_SIZE + 8*H_X_OFF)), H_TILE_SIZE), 0, 0, 1, 1, GridBagConstraints.BOTH);
+        hand.add(makePadding((MIN_WIDTH - (9*H_TILE_SIZE + 8*H_X_OFF)), H_TILE_SIZE), 0, (HAND_LENGTH * 2) + 4, 1, 1, GridBagConstraints.BOTH);
 
+        final CurvedButton skip = new CurvedButton("Skip", TILE_RADIUS, new Color(0x607D8B), 200); // Creates the Skip button
+        skip.setSize(H_TILE_SIZE, H_TILE_SIZE);
+        skip.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
+
+        final CurvedButton quit = new CurvedButton("Quit", TILE_RADIUS, new Color(0x607D8B), 200); // Creates the Quit button
+        quit.setSize(H_TILE_SIZE, H_TILE_SIZE);
+        quit.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
+
+        hand.add(quit, 0, 1, 1, 1, GridBagConstraints.BOTH); // Quit button at [0][1] --> [1][1]
+        hand.add(skip, 0, (HAND_LENGTH)*2 + 3, 1, 1, GridBagConstraints.BOTH); // Skip button at [0][17] --> [1][17]
+        
         // Would add the Recall and Shuffle buttons up here, if adding directly to JPanel.
         for (int i=0; i<=HAND_LENGTH*2; i++) {
             final Tile tile = new Tile("", (int)(TILE_RADIUS*1.5), new Color(0xD8A772), 200, i/2); // Create the letter tile
@@ -436,45 +441,52 @@ class Board extends JFrame {
             });
             if (i%2 == 1) {
                 tile.setSize(H_TILE_SIZE, H_TILE_SIZE);
-                hand.add(tile, 0, i+2, 1, 2, GridBagConstraints.BOTH);
+                hand.add(tile, 0, i+2, 1, 1, GridBagConstraints.BOTH);
             }
             else {
                 JLabel temp = new JLabel();
                 temp.setSize(H_X_OFF, H_TILE_SIZE);
-                hand.add(temp, 0, i+2, 1, 2, GridBagConstraints.BOTH);
+                hand.add(makePadding(H_X_OFF, H_TILE_SIZE), 0, i+2, 1, 1, GridBagConstraints.BOTH);
             }
         }
-        l.setConstraints(hand, createConstraints(1, (H_TILE_SIZE + 2*H_X_OFF)/1.0/MAX_WIDTH, 0, 2, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the hand
-        createHandOptions(hand); // Create the action buttons, located on the Player's Hand
+        l.setConstraints(hand, createConstraints(1, (H_TILE_SIZE)/1.0/MAX_HEIGHT, 0, 2, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the hand
+        //createHandOptions(hand); // Create the action buttons, located on the Player's Hand
         hand.setPreferredSize(new Dimension(MIN_WIDTH, H_TILE_SIZE));
         gamePanel.add(hand); // Create and add the hand to the application frame;
     }
 
-    private void createHandOptions(GridPanel hand) {
+    private void createHandOptions() {
+        GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
+        GridPanel options = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.X_AXIS);
+
         final CurvedButton recall = new CurvedButton("Recall", TILE_RADIUS, new Color(0x036FFC), HAND_OPACITY); // Creates the Recall button
-        recall.setSize(TILE_SIZE, TILE_SIZE); // Sets the size of the Recall button
+        recall.setSize(2*H_TILE_SIZE, OPTION_HEIGHT); // Sets the size of the Recall button
         recall.setFont(new Font("Serif", Font.BOLD, 7*FONT_SIZE/8)); // Sets the font size
 
         final CurvedButton shuffle = new CurvedButton("Shuffle", TILE_RADIUS, new Color(0xFC6603), HAND_OPACITY); // Creates the Shuffler button
-        shuffle.setSize(TILE_SIZE, TILE_SIZE); // Sets the size of the Shuffle button
+        shuffle.setSize(2*H_TILE_SIZE, OPTION_HEIGHT); // Sets the size of the Shuffle button
         shuffle.setFont(new Font("Serif", Font.BOLD, 7*FONT_SIZE/8)); // Sets the font size
 
+        final CurvedButton swap = new CurvedButton("Swap", TILE_RADIUS, new Color(0x607D8B), 200); // Creates the Swap button
+        swap.setSize(2*H_TILE_SIZE, OPTION_HEIGHT);
+        swap.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
+
         final CurvedButton submit = new CurvedButton("Submit", TILE_RADIUS, new Color(0x2BAB49), HAND_OPACITY); // Creates the Submit button
-        submit.setSize(H_TILE_SIZE, H_TILE_SIZE);
+        submit.setSize(2*H_TILE_SIZE, OPTION_HEIGHT);
         submit.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
 
         /*
-         * The Skip, Swap, and Submit buttons could all be below the hand, making 
-         * it simpler, and allow the opportunity to skip the turns or swap tiles.
+         * OLD:
+         * 
+         * R  1 2 3 4 5 6 7 SUB
+         * S  1 2 3 4 5 6 7 SUB
+         * 
+         * NEW:
+         * 
+         * QT 1 2 3 4 5 6 7 SK
+         * QT 1 2 3 4 5 6 7 SK
+         *    SWP RCL SHF SBMT
          */
-
-        final CurvedButton skip = new CurvedButton("Skip", TILE_RADIUS, new Color(0x607D8B), 200); // Creates the Skip button
-        skip.setSize(H_TILE_SIZE, H_TILE_SIZE);
-        skip.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
-
-        final CurvedButton swap = new CurvedButton("Swap", TILE_RADIUS, new Color(0x000000), 200); // Creates the Swap button
-        swap.setSize(H_TILE_SIZE, H_TILE_SIZE);
-        skip.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); 
 
         recall.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -503,9 +515,32 @@ class Board extends JFrame {
             }
         });
         
-        hand.add(recall, 0, 1, 1, 1, GridBagConstraints.BOTH); // Add Recall Button at [0][1]
-        hand.add(shuffle, 1, 1, 1, 1, GridBagConstraints.BOTH); // Add Shuffle Button at [1][1]
-        hand.add(submit, 0, (HAND_LENGTH)*2 + 3, 1, 2, GridBagConstraints.BOTH); // Add Submit Button at [0][-2];
+        options.add(makePadding((MIN_WIDTH - (9*H_TILE_SIZE + 8*H_X_OFF))/2, H_TILE_SIZE), 0, 0, 1, 2, GridBagConstraints.BOTH);
+        options.add(makePadding((MIN_WIDTH - (9*H_TILE_SIZE + 8*H_X_OFF))/2, H_TILE_SIZE), 0, (HAND_LENGTH * 2) + 4, 1, 2, GridBagConstraints.BOTH);
+        options.add(makePadding(H_TILE_SIZE, H_TILE_SIZE), 0, 1, 1, 1, GridBagConstraints.BOTH);
+
+        // Add padding at 2, 6, 10, 14:
+        options.add(makePadding(H_X_OFF, OPTION_HEIGHT), 0, 2, 1, 1, GridBagConstraints.BOTH);
+        options.add(makePadding(H_X_OFF, OPTION_HEIGHT), 0, 6, 1, 1, GridBagConstraints.BOTH);
+        options.add(makePadding(H_X_OFF, OPTION_HEIGHT), 0, 10, 1, 1, GridBagConstraints.BOTH);
+        options.add(makePadding(H_X_OFF, OPTION_HEIGHT), 0, 14, 1, 1, GridBagConstraints.BOTH);
+
+        options.add(swap, 0, 3, 3, 1, GridBagConstraints.BOTH); // Swap button at [2][3] --> [2][5]
+        options.add(recall,0, 7, 3, 1, GridBagConstraints.BOTH); // Recall button at [2][7] --> [2][9]
+        options.add(shuffle, 0, 11, 3, 1, GridBagConstraints.BOTH); // Shuffle button at [2][11] --> [2][13]
+        options.add(submit, 0, 15, 3, 1, GridBagConstraints.BOTH); // Submit button at [2][15] --> [2][17]
+
+        l.setConstraints(options, createConstraints(1, OPTION_HEIGHT/1.0/MIN_HEIGHT, 0, 3, 1, 1, GridBagConstraints.BOTH));
+        options.setPreferredSize(new Dimension(MIN_WIDTH, OPTION_HEIGHT));
+        gamePanel.add(options);
+        //hand.add(recall, 0, 1, 1, 1, GridBagConstraints.BOTH); // Add Recall Button at [0][1]
+        //hand.add(shuffle, 1, 1, 1, 1, GridBagConstraints.BOTH); // Add Shuffle Button at [1][1]
+        //hand.add(submit, 0, (HAND_LENGTH)*2 + 3, 1, 2, GridBagConstraints.BOTH); // Add Submit Button at [0][-2];
+        //hand.add(quit, 2, 1, 5, 1, GridBagConstraints.BOTH);
+        //hand.add(makePadding(H_X_OFF, H_TILE_SIZE), 2, 6, 1, 1, GridBagConstraints.BOTH);
+        //hand.add(swap, 2, 7, 5, 1, GridBagConstraints.BOTH);
+        //hand.add(makePadding(H_X_OFF, H_TILE_SIZE), 2, 12, 1, 1, GridBagConstraints.BOTH);
+        //hand.add(skip, 2, 13, 5, 1, GridBagConstraints.BOTH);
     }
 
     // Creates the JPanel that contains the components which make up the main menu
