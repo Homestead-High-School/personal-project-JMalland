@@ -100,34 +100,34 @@ public class Main {
                     System.out.println("Swapping Tiles.");
                 }
                 else if (e.getID() == b.PLACING_LETTER || e.getID() == b.SELECTED_LETTER) {
-                    if (real.notYetPlaced(e.getRow(), e.getCol())) {
-                        if (e.getID() == b.PLACING_LETTER) {
+                    if (real.notYetPlaced(e.getRow(), e.getCol())) { // Check that the tile hasn't been played there
+                        if (e.getID() == b.PLACING_LETTER) { // Check that the tile is being placed
                             System.out.println("Placing To: "+((Tile)(e.getSource())).findText());
-                            b.placeTile((Tile) e.getSource());
+                            b.placeTile((Tile) e.getSource()); // Place the tile at the given position
                         }
                         else {
                             System.out.println("Selecting: "+((Tile)(e.getSource())).findText());
-                            b.selectTile((Tile) e.getSource());
+                            b.selectTile((Tile) e.getSource()); // Select the tile
                         }
                     }
                 }
-                else if (e.getID() == b.PLACED_LETTER) {
-                    Tile t = (Tile) e.getSource();
+                else if (e.getID() == b.PLACED_LETTER) { // Check that a tile was just placed
+                    Tile t = (Tile) e.getSource(); // Store the tile placed for easy access
                     System.out.println("Placed Tile @ ["+t.getPoint().r+"]["+t.getPoint().c+"]. Contains Letter: "+t.findText()+".");
-                    real.placeLetter(e.getChar(), e.getRow(), e.getCol());
+                    real.placeLetter(e.getChar(), e.getRow(), e.getCol()); // Place a letter at the given point
                 }
                 else if (e.getID() == b.FINALIZED_PLAY || e.getID() == b.SKIPPED_TURN || e.getID() == b.TILES_SWAPPED) {
                     System.out.println("Submitted Letters: "+real.getPlacedLetters()+".");
-                    int score = real.submitWordPlacement();
+                    int score = real.submitWordPlacement(); // Submit the play and determine validity
                     System.out.println("Submitted Play Is Worth: "+score);
                     if (score > 0 || e.getID() == b.SKIPPED_TURN || e.getID() == b.TILES_SWAPPED) {
                         b.updateScore(score); // Update the current player's score
                         if (score > 0 || e.getID() == b.TILES_SWAPPED) {
-                            if (e.getID() == b.TILES_SWAPPED) {
-                                real.addBack(e.getChars());
+                            if (e.getID() == b.TILES_SWAPPED) { // Check that tiles were swapped
+                                real.addBack(e.getChars()); // Add the swapped out tiles back into the pool
                             }
-                            else {
-                                b.clearTileStorage();
+                            else { // Check that the score was above zero
+                                b.clearTileStorage(); // Clear the stored list of placed tiles, so they can't be recalled
                             }
                             b.setHand(real.drawTiles(b.getBlankAmount())); // Draw the next hand for the player
                         }
@@ -137,16 +137,16 @@ public class Main {
                         b.displayError("Invalid Word", Color.red, 2000);
                     }
                 }
-                else if (e.getID() == b.RECALLED_TILE) {
-                    if (real.notYetPlaced(e.getRow(), e.getCol())) {
+                else if (e.getID() == b.RECALLED_TILE) { // Check that a single tile was recalled
+                    if (real.notYetPlaced(e.getRow(), e.getCol())) { // Check that the tile hasn't been placed
                         System.out.println("Recalled Placed Tile: "+e.getRow()+" "+e.getCol());
-                        b.recallTile((Tile) e.getSource());
-                        real.recallTile(e.getRow(), e.getCol());
+                        b.recallTile((Tile) e.getSource()); // Recall the tile
+                        real.recallTile(e.getRow(), e.getCol()); // Recall the tile
                     }
                 }
-                else if (e.getID() == b.RECALLED_ALL) {
+                else if (e.getID() == b.RECALLED_ALL) { // Check that all tiles were recalled
                     System.out.println("Recalled All Tiles.");
-                    real.clearWordPlacement();
+                    real.clearWordPlacement(); // Erase all played tiles
                 }
             }
         });

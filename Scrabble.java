@@ -8,7 +8,7 @@ import java.util.Comparator;
 public class Scrabble {
     private static final int[] values = new int[] {1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 10, 1, 1, 1, 1, 4, 4, 8, 4, 10, 0}; // List of tile values, each corresponding to a letter
     private int[] tiles = new int[] {9, 2, 2, 2, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1, 0}; // List of tile amounts, each corresponding to a letter
-    private final int[][] board = new int[][] {
+    private int[][] board = new int[][] {
         {4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4},
         {0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0},
         {0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 3, 0, 0},
@@ -49,6 +49,7 @@ public class Scrabble {
         items.clear(); // Reset the currently placed tiles
         counted.clear(); // Reset the scored tiles
         numTiles = 100; // Reset the number of tiles
+        board = new Scrabble(list).board; // Reset the board array
         tiles = new Scrabble(list).tiles; // Reset the tiles array
     }
 
@@ -148,6 +149,7 @@ public class Scrabble {
         if (validWordPlacement()) { // Check to see that all connecting words fit legally on the board
             for (Point p : items.keySet()) { // Loop through each Point that was checked
                 placed.put(p, items.get(p)); // Add the point to the placed tiles, since the play is valid
+                board[p.getRow()][p.getCol()] = 0; // Set the board position to a basic tile, just because it gets overwritten when tiles are played.
             }
             clearWordPlacement(); // Erase the map of placed items, because they've all been appended
             return(calculatePlacementValue()); // Return the overall score of all connecting words
@@ -222,8 +224,6 @@ public class Scrabble {
     }
 
     private boolean calcRowOrCol(final boolean rowOrCol) {
-        // Eventually need to remove the " map.get(p) == ' ' " and implement a blank tile chooser.
-        // Eventually need to remove the x2 or x3 bonus tiles, after they've been calculated in the score.
         int score = 0;
         TreeMap<Point, Character> map = makeSortedMap(rowOrCol);
         HashMap<Point, Integer> letterMap = new HashMap<Point, Integer>();

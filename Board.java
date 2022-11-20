@@ -278,14 +278,14 @@ class Board extends JFrame {
             c.setBorder(Color.black, 2); // Set the current tile back to its default
             selected_tile = previous_tile; // Reselects the previous tile
         }
-        else if (getSwapButton().isPushed()) {
-            selected_tile = previous_tile;
-            if (!swapping.contains(index)) {
-                swapping.add(index);
+        else if (getSwapButton().isPushed()) { // Checks if tiles are currently being swapped out
+            selected_tile = previous_tile; // Switch the selection back to what it was
+            if (!swapping.contains(index)) { // Check if the tile is being selected
+                swapping.add(index); // Add it to the list of swapped out tiles
             }
-            else {
-                swapping.remove(index);
-                c.setBorder(Color.black, 2);
+            else { // The tile is being deselected
+                swapping.remove(index); // Remove it from the list of swapped tiles
+                c.setBorder(Color.black, 2); // Set its border to normal, once more
             }
         }
     }
@@ -536,7 +536,6 @@ class Board extends JFrame {
                 if (getError().isVisible()) { // Check that no other buttons are pressed
                     return; // Quit the function, if something has been pressed
                 }
-
                 dispatchEvent(new CustomEvent(submit, FINALIZED_PLAY, current_player)); // Dispatch Submission
                 Timer auto = new Timer(ERROR_LENGTH, new ActionListener() {
                     @Override
@@ -554,7 +553,6 @@ class Board extends JFrame {
                 if (getError().isVisible() && !quit.isPushed()) { // Checks there are no buttons toggled
                     return; // Quits the function if other buttons are toggled.
                 }
-
                 if (!quit.isPushed()) { // Checks that the button hasn't been pushed
                     quit.setPushed(true);
                     displayCondition("Are you sure you want to quit?\nPress 'Quit' to confirm, or wait to cancel.", Color.ORANGE);
@@ -571,7 +569,6 @@ class Board extends JFrame {
         hand.add(quit, 0, 1, 1, 1, GridBagConstraints.BOTH); // Quit button at [0][1] --> [1][1]
         hand.add(submit, 0, (HAND_LENGTH)*2 + 3, 1, 1, GridBagConstraints.BOTH); // Skip button at [0][17] --> [1][17]
         
-        // Would add the Recall and Shuffle buttons up here, if adding directly to JPanel.
         for (int i=0; i<=HAND_LENGTH*2; i++) {
             final Tile tile = new Tile("", (int)(TILE_RADIUS*1.5), new Color(0xD8A772), 200, i/2); // Create the letter tile
             tile.setFont(new Font("Serif", Font.PLAIN, (int)(FONT_SIZE*1.5))); // Set the font of the tile
@@ -582,7 +579,7 @@ class Board extends JFrame {
                 }
             });
             tile.setSize(H_TILE_SIZE, H_TILE_SIZE);
-            hand.add(i%2 == 1 ? tile : makePadding(H_X_OFF, H_TILE_SIZE), 0, i+2, 1, 1, GridBagConstraints.BOTH);
+            hand.add(i%2 == 1 ? tile : makePadding(H_X_OFF, H_TILE_SIZE), 0, i+2, 1, 1, GridBagConstraints.BOTH); // Add the Tile or padding
         }
         l.setConstraints(hand, createConstraints(1, H_TILE_SIZE/1.0/MIN_HEIGHT, 0, 2, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the hand
         hand.setPreferredSize(new Dimension(MIN_WIDTH, H_TILE_SIZE));
