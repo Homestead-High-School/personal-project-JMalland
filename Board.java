@@ -28,6 +28,9 @@ class Board extends JFrame {
     public final int CREATE_PLAYER = ("PLAYER").hashCode();
     public final int SELECTED_HAND = ("HAND").hashCode();
     public final int SELECTED_LETTER = ("SELECT").hashCode();
+    public final int SKIPPED_TURN = ("SKIP").hashCode();
+    public final int SWAPPING_TILES = ("SWAPPING").hashCode();
+    public final int TILES_SWAPPED = ("SWITCH").hashCode();
     public final int PLACING_LETTER = ("PLACING").hashCode();
     public final int PLACED_LETTER = ("TILE").hashCode();
     public final int RECALLED_TILE = ("RECALL").hashCode();
@@ -35,6 +38,7 @@ class Board extends JFrame {
     public final int SHUFFLED_TILES = ("SHUFFLE").hashCode();
     public final int FINALIZED_PLAY = ("SUBMIT").hashCode();
     public final int GAME_RUNNING = ("ON").hashCode();
+    public final int QUIT_GAME = ("QUIT").hashCode();
     private final JFrame frame;
     private JPanel gamePanel = new JPanel();
     private JPanel mainPanel = new JPanel();
@@ -54,13 +58,13 @@ class Board extends JFrame {
     private final int HAND_LENGTH = 7;
     private final int HAND_OPACITY = 150;
     private final int H_TILE_SIZE = (int)(65 * MULT); // 675 - (8*65 + 8*(65/8) + 50)) --> 20px padding
-    private final int H_X_OFF = 1;
+    private final int H_X_OFF = 5;
     private final int OPTION_HEIGHT = H_TILE_SIZE/2;
     private final int MENU_WIDTH = (int)(300*MULT); // 300
     private final int MENU_HEIGHT = (int)(75*MULT); // 75
     private final int ERROR_LENGTH = 2000; // Sets the length of time that errors are displayed
-    private final int ERROR_OPACITY = 75; // Sets the opacity the error starts at
-    private final int ERROR_INTERVAL = ERROR_LENGTH/ERROR_OPACITY; // Determines the interval at which the error disappears
+    private final int ERROR_OPACITY = 125; // Sets the opacity the error starts at
+    private final Timer check; // Uninitialized Timer to be the 'wait' feature of certain toggles
     private int FRAME_WIDTH = MIN_WIDTH; // 528
     private int FRAME_HEIGHT = MIN_HEIGHT; // 528
     private int player_count = 2;
@@ -69,6 +73,7 @@ class Board extends JFrame {
     private int selected_tile = -1;
     private ArrayList<Integer> widths = new ArrayList<Integer>();
     private ArrayList<Integer> heights = new ArrayList<Integer>();
+    private HashSet<Integer> swapping = new HashSet<Integer>();
     private Player[] players = null;
  
     // The Board() constructor runs its private methods to generate the panels that are contained in the application 
@@ -83,6 +88,9 @@ class Board extends JFrame {
         catch (Exception e) {
             System.err.println(e.getMessage());
         }
+
+        check = new Timer(3000, null);
+        check.setRepeats(false); // Make it so the Timer doesn't repeat
         
         // Using Layouts With Auto-Adapting Components: https://stackoverflow.com/questions/70523527/how-to-stop-components-adapting-to-the-size-of-a-jpanel-that-is-inside-a-jscroll
         createMenu(); // Generate the Main Menu and add to mainPanel
@@ -90,7 +98,7 @@ class Board extends JFrame {
         createBoard(); // Create the Scrabble Board
         createError(); // Create the Error Display
         createHand(); // Create the Player's Hand
-        createHandOptions();
+        createHandOptions(); // Create the Options below the Hand
 
         mainPanel.setVisible(true); // Set the main menu visible, if not
     
@@ -139,6 +147,7 @@ class Board extends JFrame {
         frame.setVisible(true); // Set the application frame visible
     }
 
+    // Returns the index of the closest integer to another integer within a list
     private int getClosestIndex(int n, ArrayList<Integer> list) {
         int diff = Math.abs(list.get(0) - n);
         int index = 0;
@@ -158,7 +167,7 @@ class Board extends JFrame {
     public void startGame() {
         createPlayers(); // Start the process of player creation.
         frame.remove(mainPanel); // Remove all current panels to begin the gameplay
-        createBoard(); // Recreate the gamePanel
+        createBoard(); // Recreate the gamePanel (Why this works with the JLayeredPane, I don't know)
         createHand(); // Recreate the gamePanel
         frame.add(gamePanel); // Add the game panel to display the Scrabble board
         frame.pack(); // Repaint the JFrame
@@ -166,15 +175,17 @@ class Board extends JFrame {
         setHand(players[current_player].getHand()); // Set the hand for Player 1
     }
 
-    // Should be remade
+    // Returns the number of players in the game
     public int getPlayers() {
         return(player_count); // Returns the number of players
     }
 
+    // Returns the number of blank tiles that were played
     public int getBlankAmount() {
         return(getEmptyTiles().length);
     }
 
+    // Creates the player at the beginning of a game
     public void createPlayer(char[] hand, int i) {
         if (i >= player_count) { // Throw an exception if I'm stupid enough to hit it
             throw new IllegalArgumentException("Index Out Of Bounds For Player Creation");
@@ -182,6 +193,7 @@ class Board extends JFrame {
         players[i] = new Player(hand);
     }
 
+    // Updates the display of the current player's score
     public void updateScore(int points) {
         players[current_player].addToScore(points);
         changeDisplay(0);
@@ -206,7 +218,7 @@ class Board extends JFrame {
             return; // Return, if tile is not valid
         }
         int previous_tile = selected_tile; // Stores the index of the previously selected tile
-        c.setBorder(Color.orange, 6); // Sets the chosen tile's border to orange
+        c.setBorder(getSwapButton().isPushed() ? Color.blue : Color.orange, 6); // Sets the chosen tile's border to orange
         Point point = c.getPoint(); // Stores the location of the chosen tile, if it's a Board tile
         int index = c.getIndex(); // Stores the index of the chosen tile, if it's a Hand tile
         int calculated_tile = point == null ? -1 : calculateTile(point.getRow(), point.getCol()); // Calculates the index of the chosen tile, if it's a Board tile
@@ -220,6 +232,16 @@ class Board extends JFrame {
         else if (c.findText().equals("")) { // Checks if the selected tile is empty
             c.setBorder(Color.black, 2); // Set the current tile back to its default
             selected_tile = previous_tile; // Reselects the previous tile
+        }
+        else if (getSwapButton().isPushed()) {
+            selected_tile = previous_tile;
+            if (!swapping.contains(index)) {
+                swapping.add(index);
+            }
+            else {
+                swapping.remove(index);
+                c.setBorder(Color.black, 2);
+            }
         }
     }
     
@@ -285,11 +307,17 @@ class Board extends JFrame {
         recallTile(pointingAt); // Recalls the tile Tile 'p' was pointing to
     }
     
+    // Shuffles the tiles in the Hand and the players Hand
     public void shuffleTiles() {
         // Shuffling: https://stackoverflow.com/questions/1519736/random-shuffling-of-an-array
         Random rand = new Random(); // Creates a random object for shuffling
         for (int i=0; i<HAND_LENGTH-1; i++) { // Loops through each tile in the Players Hand
-            Tile.swapTiles(getTile(i), getTile(rand.nextInt(HAND_LENGTH-i) + i)); // Uses the Tile class to swap the properties of the current tile with that of a random tile, past the current one
+            int rIdx = rand.nextInt(HAND_LENGTH-i) + i;
+            Tile.swapTiles(getTile(i), getTile(rIdx)); // Uses the Tile class to swap the properties of the current tile with that of a random tile, past the current one
+            String a = getTile(i).findText();
+            String b = getTile(rIdx).findText();
+            players[current_player].setTile(i, a.length() > 0 ? a.charAt(0) : '\0');
+            players[current_player].setTile(rIdx, b.length() > 0 ? b.charAt(0) : '\0');
         }
     }
     
@@ -302,23 +330,38 @@ class Board extends JFrame {
         return(map); // Return the newly created HashMap
     }
     
+    // Switches to the next turn after a play has been finished
     public void tilesWereSubmitted() {
         placedTiles.clear();
+        selectTile(getTile(-1)); // De select the already selected tile, if there is one.
         current_player = (current_player + 1)%player_count; // Calculate the new player
         displayed_player = current_player; // Update the display to match the current player
-        setHand(players[current_player].getHand());
-        Timer pause = new Timer(current_player < 0 ? 0 : 1000, new ActionListener() {
+        setHand(players[current_player].getHand()); // Update the hand to match the current player
+        changeDisplay(0); // Update the display to show the current player
+    }
+
+    // Displays an error to the screen for a specific duration
+    public void displayError(String error, Color tColor, int duration) {
+        displayError(error, tColor);
+        final Timer check = new Timer(0, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                changeDisplay(0);
+                getError().repaint();
             }
         });
-        pause.setRepeats(false); // Make it so the timer cannot repeat
-        pause.start(); // Start the timer, so it doesn't run until 1 second has passed
+        Timer stop = new Timer(duration, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                check.stop();
+                getError().setVisible(false);
+            }
+        });
+        stop.setRepeats(false);
+        check.start();
+        stop.start();
     }
 
     // Creates the JPanel that displays the current player and their score
-    // Still under development
     private void createScoreboard() {
         gamePanel = new JPanel(new GridBagLayout()); // Clears the gamePanel
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
@@ -370,31 +413,27 @@ class Board extends JFrame {
         gamePanel.add(scoreboard);
     }
 
-    // Creates the JPanel which holds each JButton that makes up the Scrabble board 
-    // Creates the JPanel which holds each JButton that makes up the Scrabble board 
+    // Creates the JPanel which holds each JButton that makes up the Scrabble board
     private void createBoard() {
         board = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.Y_AXIS); // Creates the main Board panel
         for (int r=0; r<ROWS; r++) { // Loops through each row on the board
             for (int c=0; c<COLS; c++) { // Loops through each col on the board
                 int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
-                int red = (int)0xE74C3C;
-                int blue = (int)0x3498DB;
-                int orange = (int) 0xE67E22;//0xF39C12;//0xD35400;
-                int other = (int)0x8E44AD; // 0x8E44AD OR 0x2ECC71;
+                // Tile Colors From: https://htmlcolorcodes.com/
                 final Tile temp = new Tile("", TILE_RADIUS, new Color(0xD8A772), MIN_OPACITY, r, c); // Blank Tile, represented by '0'
-                if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'            // 2 / 3     https://htmlcolorcodes.com/
-                    temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(tile%2 == 1 ? blue : other), MIN_OPACITY);
+                if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'            // 2 / 3 | B / P
+                    temp.resetProperties((tile == 1 ? '2' : '3') + "x L", TILE_RADIUS, new Color(tile%2 == 1 ? 0x3498DB : 0x8E44AD), MIN_OPACITY);
                 }
-                else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'             // 2 / 3
-                    temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(tile%2 == 1 ? orange : red), MIN_OPACITY); // Still testing colors
+                else if (tile == 3 || tile == 4) { // Tile is a Word Tile, represented by '3' or '4'             // 2 / 3 | O / R
+                    temp.resetProperties((tile == 3 ? '2' : '3') + "x W", TILE_RADIUS, new Color(tile%2 == 1 ? 0xE67E22 : 0xE74C3C), MIN_OPACITY); // Still testing colors
                 }
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
                 temp.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        if (selected_tile != -1 && calculateTile(temp.getPoint().r, temp.getPoint().c) != selected_tile) { // Checks if the selected tile is valid and is not the same tile
+                        if (!getSwapButton().isPushed() && selected_tile != -1 && calculateTile(temp.getPoint().r, temp.getPoint().c) != selected_tile) { // Checks if the selected tile is valid and is not the same tile
                             dispatchEvent(new CustomEvent(temp, PLACING_LETTER, temp.getPoint().r, temp.getPoint().c)); // Trigger an ActionEvent to allow the client to determine whether or not the tile can be placed
                         }
-                        else if (temp.findText().length() == 1) { // Checks that the chosen tile holds a valid letter
+                        else if (!getSwapButton().isPushed() && temp.findText().length() == 1) { // Checks that the chosen tile holds a valid letter
                             dispatchEvent(new CustomEvent(temp, SELECTED_LETTER, temp.getPoint().r, temp.getPoint().c)); // Trigger an ActionEvent to allow the client to determine whether or not the tile can be selected
                         }
                     }
@@ -418,16 +457,64 @@ class Board extends JFrame {
         hand.add(makePadding((MIN_WIDTH - (9*H_TILE_SIZE + 8*H_X_OFF)), H_TILE_SIZE), 0, 0, 1, 1, GridBagConstraints.BOTH);
         hand.add(makePadding((MIN_WIDTH - (9*H_TILE_SIZE + 8*H_X_OFF)), H_TILE_SIZE), 0, (HAND_LENGTH * 2) + 4, 1, 1, GridBagConstraints.BOTH);
 
-        final CurvedButton skip = new CurvedButton("Skip", TILE_RADIUS, new Color(0x607D8B), 200); // Creates the Skip button
-        skip.setSize(H_TILE_SIZE, H_TILE_SIZE);
-        skip.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
+        final CurvedButton submit = new CurvedButton("Submit", TILE_RADIUS, new Color(0x2BAB49), HAND_OPACITY); // Creates the Skip button
+        submit.setSize(H_TILE_SIZE, H_TILE_SIZE);
+        submit.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
 
-        final CurvedButton quit = new CurvedButton("Quit", TILE_RADIUS, new Color(0x607D8B), 200); // Creates the Quit button
+        final CurvedButton quit = new CurvedButton("Quit", TILE_RADIUS, new Color(0x607D8B), HAND_OPACITY); // Creates the Quit button
         quit.setSize(H_TILE_SIZE, H_TILE_SIZE);
         quit.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
+        quit.setToggleColor(new Color(0x339933));
+        
+        check.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (quit.isPushed()) { // Check the button is still toggled
+                    quit.setPushed(false); // De-Toggle the button, as the user didn't confirm
+                }
+            }
+        });
+        
+        submit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (getError().isVisible()) { // Check that no other buttons are pressed
+                    return; // Quit the function, if something has been pressed
+                }
+
+                dispatchEvent(new CustomEvent(submit, FINALIZED_PLAY, current_player)); // Dispatch Submission
+                Timer auto = new Timer(ERROR_LENGTH, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        getError().setVisible(false);
+                    }
+                });
+                auto.setRepeats(false);
+                auto.start();
+            }
+        });
+        quit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (getError().isVisible() && !quit.isPushed()) { // Checks there are no buttons toggled
+                    return; // Quits the function if other buttons are toggled.
+                }
+
+                if (!quit.isPushed()) { // Checks that the button hasn't been pushed
+                    quit.setPushed(true);
+                    displayCondition("Are you sure you want to quit?\nPress 'Quit' to confirm, or wait to cancel.", Color.ORANGE);
+                    check.start();
+                }
+                else { // The button has been pushed
+                    quit.setPushed(false);
+                    check.stop();
+                    dispatchEvent(new CustomEvent(quit, QUIT_GAME)); // Let the client know the user requested to quit the game
+                }
+            }
+        });
 
         hand.add(quit, 0, 1, 1, 1, GridBagConstraints.BOTH); // Quit button at [0][1] --> [1][1]
-        hand.add(skip, 0, (HAND_LENGTH)*2 + 3, 1, 1, GridBagConstraints.BOTH); // Skip button at [0][17] --> [1][17]
+        hand.add(submit, 0, (HAND_LENGTH)*2 + 3, 1, 1, GridBagConstraints.BOTH); // Skip button at [0][17] --> [1][17]
         
         // Would add the Recall and Shuffle buttons up here, if adding directly to JPanel.
         for (int i=0; i<=HAND_LENGTH*2; i++) {
@@ -439,54 +526,51 @@ class Board extends JFrame {
                     selectTile(tile);
                 }
             });
-            if (i%2 == 1) {
-                tile.setSize(H_TILE_SIZE, H_TILE_SIZE);
-                hand.add(tile, 0, i+2, 1, 1, GridBagConstraints.BOTH);
-            }
-            else {
-                JLabel temp = new JLabel();
-                temp.setSize(H_X_OFF, H_TILE_SIZE);
-                hand.add(makePadding(H_X_OFF, H_TILE_SIZE), 0, i+2, 1, 1, GridBagConstraints.BOTH);
-            }
+            tile.setSize(H_TILE_SIZE, H_TILE_SIZE);
+            hand.add(i%2 == 1 ? tile : makePadding(H_X_OFF, H_TILE_SIZE), 0, i+2, 1, 1, GridBagConstraints.BOTH);
         }
-        l.setConstraints(hand, createConstraints(1, (H_TILE_SIZE)/1.0/MAX_HEIGHT, 0, 2, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the hand
-        //createHandOptions(hand); // Create the action buttons, located on the Player's Hand
+        l.setConstraints(hand, createConstraints(1, H_TILE_SIZE/1.0/MIN_HEIGHT, 0, 2, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the hand
         hand.setPreferredSize(new Dimension(MIN_WIDTH, H_TILE_SIZE));
         gamePanel.add(hand); // Create and add the hand to the application frame;
     }
 
+    // Creates the buttons featured beneath the Hand tiles
     private void createHandOptions() {
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
+        
+        JPanel temp = (JPanel) makePadding(MIN_WIDTH, H_X_OFF); // A temp JPanel to offset the options by a few pixels
+        temp.setPreferredSize(new Dimension(MIN_WIDTH, H_X_OFF)); // Sets the size of the JPanel
+        l.setConstraints(temp, createConstraints(1, H_X_OFF/1.0/MIN_HEIGHT, 0, 3, 1, 1, GridBagConstraints.BOTH)); // Sets the constraints of the JPanel
+        gamePanel.add(temp); // Adds the JPanel to the game panel
+
         GridPanel options = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.X_AXIS);
 
-        final CurvedButton recall = new CurvedButton("Recall", TILE_RADIUS, new Color(0x036FFC), HAND_OPACITY); // Creates the Recall button
-        recall.setSize(2*H_TILE_SIZE, OPTION_HEIGHT); // Sets the size of the Recall button
-        recall.setFont(new Font("Serif", Font.BOLD, 7*FONT_SIZE/8)); // Sets the font size
+        final CurvedButton recall = new CurvedButton("Recall", TILE_RADIUS, new Color(0xD0A600), HAND_OPACITY); // Creates the Recall button
+        recall.setSize(2*H_TILE_SIZE - 4*H_X_OFF, OPTION_HEIGHT); // Sets the size of the Recall button
+        recall.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Sets the font size
 
-        final CurvedButton shuffle = new CurvedButton("Shuffle", TILE_RADIUS, new Color(0xFC6603), HAND_OPACITY); // Creates the Shuffler button
-        shuffle.setSize(2*H_TILE_SIZE, OPTION_HEIGHT); // Sets the size of the Shuffle button
-        shuffle.setFont(new Font("Serif", Font.BOLD, 7*FONT_SIZE/8)); // Sets the font size
+        final CurvedButton shuffle = new CurvedButton("Shuffle", TILE_RADIUS, new Color(0xD0A600), HAND_OPACITY); // Creates the Shuffler button
+        shuffle.setSize(2*H_TILE_SIZE - 4*H_X_OFF, OPTION_HEIGHT); // Sets the size of the Shuffle button
+        shuffle.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Sets the font size
+        
+        final CurvedButton swap = new CurvedButton("Swap", TILE_RADIUS, new Color(0xD0A600), HAND_OPACITY); // Creates the Swap button
+        swap.setSize(2*H_TILE_SIZE - 4*H_X_OFF, OPTION_HEIGHT); // Sets the size of the Swap button
+        swap.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Sets the font size
+        swap.setToggleColor(new Color(0xE74C3C));
 
-        final CurvedButton swap = new CurvedButton("Swap", TILE_RADIUS, new Color(0x607D8B), 200); // Creates the Swap button
-        swap.setSize(2*H_TILE_SIZE, OPTION_HEIGHT);
-        swap.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
+        final CurvedButton skip = new CurvedButton("Skip", TILE_RADIUS, new Color(0xD0A600), HAND_OPACITY); // Creates the Submit button
+        skip.setSize(2*H_TILE_SIZE - 5*H_X_OFF, OPTION_HEIGHT); // Sets the size of the Skip button
+        skip.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Sets the font size
+        skip.setToggleColor(new Color(0x339933)); // Set the color of the button when toggled.
 
-        final CurvedButton submit = new CurvedButton("Submit", TILE_RADIUS, new Color(0x2BAB49), HAND_OPACITY); // Creates the Submit button
-        submit.setSize(2*H_TILE_SIZE, OPTION_HEIGHT);
-        submit.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
-
-        /*
-         * OLD:
-         * 
-         * R  1 2 3 4 5 6 7 SUB
-         * S  1 2 3 4 5 6 7 SUB
-         * 
-         * NEW:
-         * 
-         * QT 1 2 3 4 5 6 7 SK
-         * QT 1 2 3 4 5 6 7 SK
-         *    SWP RCL SHF SBMT
-         */
+        check.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (skip.isPushed()) { // Check the button is still toggled
+                    skip.setPushed(false); // De-Toggle the button, as the user didn't confirm
+                }
+            }
+        });
 
         recall.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -508,39 +592,75 @@ class Board extends JFrame {
                 shuffleTiles(); // Shuffles all tiles in the hand
             }
         });
-        submit.addActionListener(new ActionListener() {
+        skip.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dispatchEvent(new CustomEvent(submit, FINALIZED_PLAY, current_player)); // Dispatch Submission
+                if (getError().isVisible() && !skip.isPushed()) { // Check that the Swap button isn't toggled
+                    return; // Quit the function, if there's another toggled button
+                }
+
+                if (!skip.isPushed()) { // If the button isn't pushed
+                    skip.setPushed(true); // Sets the toggled status of the Skip button to true
+                    displayCondition("Do you really want to skip your turn?\nClick 'Skip' to confirm, or wait to cancel.", Color.YELLOW);
+                    check.start(); // Start the 3 second timer.
+                }
+                else { // The button has been pushed
+                    skip.setPushed(false); // Sets the toggled status of the Skip button to false
+                    check.stop(); // Stop the timer from running, if it has been running. Prevents Timer overlap
+                    dispatchEvent(new CustomEvent(skip, SKIPPED_TURN)); // Dispatch Skip
+                }
+            }
+        });
+        swap.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (getError().isVisible() && !swap.isPushed()) { // Check that the Skip button isn't toggled
+                    return; // Quit the function, if there's another toggled button
+                }
+
+                if (!swap.isPushed()) { // If the button is not pushed
+                    swap.setPushed(true); // Sets the swapping status to true
+                    selectTile(getTile(selected_tile)); // Reselect the selected tile, just in case.
+                    dispatchEvent(new CustomEvent(swap, SWAPPING_TILES)); // Lets the client determine how to react to the action of trying to swap tiles
+                    displayCondition("Select The Tiles You Want To Swap.\n Click 'Swap' to confirm or cancel.", Color.CYAN);
+                }
+                else { // The button has been pushed
+                    swap.setPushed(false); // Sets the swapping status to false
+                    if (swapping.size() > 0) { // Checks to see that there are tiles being swapped
+                        String chars = "";
+                        for (int i : swapping) { // Loops through each selected tile to be swapped
+                            chars += getTile(i).findText(); // Count the tiles being put back into the pool
+                            getTile(i).setText(""); // Resets the tile
+                            getTile(i).setOriginal(""); // Resets the tile
+                            players[current_player].setTile(i, '\0'); // Sets the player's tile to null
+                            selectTile(getTile(i)); // Deselects the swapped tile
+                        }
+                        swapping.clear(); // Erases the list of swapped tiles
+                        dispatchEvent(new CustomEvent(swap, TILES_SWAPPED, chars)); // Lets the client determine how to swap the tiles
+                    }
+                }
             }
         });
         
-        options.add(makePadding((MIN_WIDTH - (9*H_TILE_SIZE + 8*H_X_OFF))/2, H_TILE_SIZE), 0, 0, 1, 2, GridBagConstraints.BOTH);
-        options.add(makePadding((MIN_WIDTH - (9*H_TILE_SIZE + 8*H_X_OFF))/2, H_TILE_SIZE), 0, (HAND_LENGTH * 2) + 4, 1, 2, GridBagConstraints.BOTH);
-        options.add(makePadding(H_TILE_SIZE, H_TILE_SIZE), 0, 1, 1, 1, GridBagConstraints.BOTH);
+        // Padding on the left and right of the Option buttons
+        options.add(makePadding((MIN_WIDTH - (9*H_TILE_SIZE + 8*H_X_OFF))/2, H_TILE_SIZE), 0, 0, 1, 1, GridBagConstraints.BOTH); // Left side padding
+        options.add(makePadding((MIN_WIDTH - (9*H_TILE_SIZE + 8*H_X_OFF))/2 + 4*H_X_OFF, H_TILE_SIZE), 0, 9, 1, 1, GridBagConstraints.BOTH); // Right side padding
+        options.add(makePadding(H_TILE_SIZE + 6*H_X_OFF, H_TILE_SIZE), 0, 1, 1, 1, GridBagConstraints.BOTH); // Extra left-padding to pad the area of the Quit Button
 
-        // Add padding at 2, 6, 10, 14:
-        options.add(makePadding(H_X_OFF, OPTION_HEIGHT), 0, 2, 1, 1, GridBagConstraints.BOTH);
-        options.add(makePadding(H_X_OFF, OPTION_HEIGHT), 0, 6, 1, 1, GridBagConstraints.BOTH);
-        options.add(makePadding(H_X_OFF, OPTION_HEIGHT), 0, 10, 1, 1, GridBagConstraints.BOTH);
-        options.add(makePadding(H_X_OFF, OPTION_HEIGHT), 0, 14, 1, 1, GridBagConstraints.BOTH);
+        // Padding in between each of the Option buttons
+        options.add(makePadding(H_X_OFF*4, OPTION_HEIGHT), 0, 3, 1, 1, GridBagConstraints.BOTH);
+        options.add(makePadding(H_X_OFF*4, OPTION_HEIGHT), 0, 5, 1, 1, GridBagConstraints.BOTH);
+        options.add(makePadding(H_X_OFF*5, OPTION_HEIGHT), 0, 7, 1, 1, GridBagConstraints.BOTH);
 
-        options.add(swap, 0, 3, 3, 1, GridBagConstraints.BOTH); // Swap button at [2][3] --> [2][5]
-        options.add(recall,0, 7, 3, 1, GridBagConstraints.BOTH); // Recall button at [2][7] --> [2][9]
-        options.add(shuffle, 0, 11, 3, 1, GridBagConstraints.BOTH); // Shuffle button at [2][11] --> [2][13]
-        options.add(submit, 0, 15, 3, 1, GridBagConstraints.BOTH); // Submit button at [2][15] --> [2][17]
+        // Option Buttons that are placed below the Hand, each as long as 2 tiles
+        options.add(swap, 0, 8, 1, 1, GridBagConstraints.BOTH); // Swap button at [0][8]
+        options.add(recall,0, 2, 1, 1, GridBagConstraints.BOTH); // Recall button at [0][2]
+        options.add(shuffle, 0, 4, 1, 1, GridBagConstraints.BOTH); // Shuffle button at [0][4]
+        options.add(skip, 0, 6, 1, 1, GridBagConstraints.BOTH); // Skip button at [0][6]
 
-        l.setConstraints(options, createConstraints(1, OPTION_HEIGHT/1.0/MIN_HEIGHT, 0, 3, 1, 1, GridBagConstraints.BOTH));
-        options.setPreferredSize(new Dimension(MIN_WIDTH, OPTION_HEIGHT));
-        gamePanel.add(options);
-        //hand.add(recall, 0, 1, 1, 1, GridBagConstraints.BOTH); // Add Recall Button at [0][1]
-        //hand.add(shuffle, 1, 1, 1, 1, GridBagConstraints.BOTH); // Add Shuffle Button at [1][1]
-        //hand.add(submit, 0, (HAND_LENGTH)*2 + 3, 1, 2, GridBagConstraints.BOTH); // Add Submit Button at [0][-2];
-        //hand.add(quit, 2, 1, 5, 1, GridBagConstraints.BOTH);
-        //hand.add(makePadding(H_X_OFF, H_TILE_SIZE), 2, 6, 1, 1, GridBagConstraints.BOTH);
-        //hand.add(swap, 2, 7, 5, 1, GridBagConstraints.BOTH);
-        //hand.add(makePadding(H_X_OFF, H_TILE_SIZE), 2, 12, 1, 1, GridBagConstraints.BOTH);
-        //hand.add(skip, 2, 13, 5, 1, GridBagConstraints.BOTH);
+        l.setConstraints(options, createConstraints(1, OPTION_HEIGHT/1.0/MIN_HEIGHT, 0, 4, 1, 1, GridBagConstraints.BOTH));
+        options.setPreferredSize(new Dimension(MIN_WIDTH, OPTION_HEIGHT)); // Sets the default size of the Option Buttons
+        gamePanel.add(options); // Adds the option buttons to the game panel
     }
 
     // Creates the JPanel that contains the components which make up the main menu
@@ -604,14 +724,14 @@ class Board extends JFrame {
         mainPanel.add(menu); // Create and add the Menu to the JPanel
     }
 
-    // An attempt at layering panels
+    // Creates the JPanel for layered text that displays most errors
     private void createError() {
         // PaintComponent problems: https://stackoverflow.com/questions/20833913/flickering-when-updating-overlapping-jpanels-inside-a-jlayeredpane-using-timeste
         CurvedLabel text = new CurvedLabel("Invalid Word", TILE_RADIUS, Color.RED);
         text.setEnabled(false);
         text.setFont(new Font("Serif", Font.BOLD, (int)(FONT_SIZE*1.5))); // 37 Font size originally.
         text.setBackground(Color.DARK_GRAY);
-        text.setSize(1, 1);
+        text.setSize(COLS*TILE_SIZE, ROWS*TILE_SIZE);
 
         GridPanel error = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.X_AXIS); // Creates the error panel
         error.add(text, 0, 0, 1, 1, GridBagConstraints.BOTH); // Adds the text to the panel
@@ -634,6 +754,7 @@ class Board extends JFrame {
         gamePanel.add(t); // Add the layered panel to the JFrame
     }
 
+    // Creates the players used in the game
     private void createPlayers() {
         players = new Player[player_count];
         for (int i=0; i<player_count; i++) {
@@ -641,13 +762,15 @@ class Board extends JFrame {
         }
     }
 
+    // Updates the scoreboard display
     private void changeDisplay(int num) {
         displayed_player = Math.abs((displayed_player + num)%player_count);
         getPlayerDisplay().setText("Player:    "+(displayed_player + 1));
         getScoreDisplay().setText("Score:    "+players[displayed_player].getScore());
     }
 
-    public void displayError(String error) {
+    // Changes the displayed error
+    private void displayError(String error, Color tColor) {
         if (getError().isVisible()) { // Checks if the error is currently being displayed
             return; // Quit the program
         }
@@ -657,31 +780,35 @@ class Board extends JFrame {
         getError().setVisible(true); // Sets the error visible
         text.setVisible(true); // Sets the error visible
         text.setOpacity(ERROR_OPACITY); // Sets the opacity the error starts at
-
-        // How to use Java Swing Timer: https://stackoverflow.com/questions/28521173/how-to-use-swing-timer-actionlistener
-        final Timer dec = new Timer(ERROR_INTERVAL, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                text.setOpacity(text.getOpacity()-1); // Decreases the opacity of the error
-                getError().repaint(); // Repaints the error panel
-                System.out.print(". ");
-            }
-        });
-        final Timer a = new Timer(ERROR_LENGTH, new ActionListener() { // Original timer executes after 5 Seconds
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dec.stop(); // Starts the Decreasing timer
-                System.out.println("Stopped.");
-                getError().setVisible(false); // Sets the error panel invisible
-                text.setVisible(false); // Sets the error invisible
-            }
-        });
-        a.setRepeats(false); // Stops the Original timer from repeating
-        System.out.print("Decreasing ");
-        a.start(); // Starts the Original timer
-        dec.start(); // Starts the Decreasing timer
+        text.setColor(tColor);
     }
 
+    // Displays specific errors based on conditions
+    private void displayCondition(String text, Color c) {
+        final boolean skipPushed = getSkipButton().isPushed();
+        final boolean swapPushed = getSwapButton().isPushed();
+        final boolean quitPushed = getQuitButton().isPushed();
+
+        displayError(text, c); // Sets the display for the text
+
+        // How to use Java Swing Timer: https://stackoverflow.com/questions/28521173/how-to-use-swing-timer-actionlistener
+        Timer repeat = new Timer(0, new ActionListener() { // Needs to be zero, so it runs without potential overlap
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if ((quitPushed && getQuitButton().isPushed()) || (swapPushed && getSwapButton().isPushed()) || (skipPushed && getSkipButton().isPushed())) { // Checks that the button is still pushed
+                    getSwapButton().setToggleColor(new Color(swapping.size() > 0 ? 0x339933 : 0xE74C3C));
+                    getError().repaint();
+                }
+                else { // The button has been de-pressed
+                    getError().setVisible(false);
+                    ((Timer) e.getSource()).stop(); // Stop this Timer from running
+                }
+            }
+        });
+        repeat.start(); // Start the timer running
+    }
+
+    // Creates GridBagConstraints
     private GridBagConstraints createConstraints(double xLbs, double yLbs, int x, int y, int w, int h, int fill) {
         GridBagConstraints g = new GridBagConstraints();
         g.weightx = xLbs;
@@ -694,6 +821,7 @@ class Board extends JFrame {
         return(g);
     }
 
+    // Creates an empty JPanel to act as padding
     private Component makePadding(int width, int height) {
         JPanel padding = new JPanel();
         padding.setSize(width, height);
@@ -702,6 +830,7 @@ class Board extends JFrame {
         return(padding);
     }
 
+    // Dispatches an AWT Event to the client
     private void dispatchEvent(CustomEvent e) {
         for (CustomListener c : listeners) {
             c.actionPerformed(e);
@@ -713,31 +842,58 @@ class Board extends JFrame {
         return((GridPanel)(gamePanel.getComponent(2)));
     }
 
+    // Returns the JPanel for the game board
     private GridPanel getBoard() {
         return(board);//new GridPanel(1, 1, BoxLayout.X_AXIS));//return((GridPanel)(gamePanel.getComponent(1)));
     }
 
+    // Returns the JPanel for the options
+    private GridPanel getOptions() {
+        return((GridPanel) gamePanel.getComponent(4));
+    }
+
+    // Returns the Swap button
+    private CurvedButton getSwapButton() {
+        return((CurvedButton) getOptions().getComponent(6));
+    }
+
+    // Returns the Skip button
+    private CurvedButton getSkipButton() {
+        return((CurvedButton) getOptions().getComponent(9));
+    }
+
+    // Returns the Quit button
+    private CurvedButton getQuitButton() {
+        return((CurvedButton) getHand().getComponent(2));
+    }
+
+    // Returns the JPanel for the scoreboard
     private GridPanel getScoreboard() {
         return((GridPanel) gamePanel.getComponent(0));
     }
 
+    // Returns the JLabel for the currently displayed player
     private CurvedLabel getPlayerDisplay() {
         return((CurvedLabel) getScoreboard().getComponent(6));
     }
 
+    // Returns the JLabel for the currently displayed score
     private CurvedLabel getScoreDisplay() {
         return((CurvedLabel) getScoreboard().getComponent(7));
     }
 
+    // Returns the JPanel for the error display
     private GridPanel getError() {
         JLayeredPane temp = (JLayeredPane) gamePanel.getComponent(1);
         return((GridPanel) temp.getComponent(0));
     }
 
+    // Returns the calculated index of a Board Tile
     private int calculateTile(int r, int c) {
         return(6 + (r + 1) * (c + 1) + (COLS - (c + 1)) * r);
     }
 
+    // Returns a list of all blank tiles that were played
     private Tile[] getEmptyTiles() {
         ArrayList<Tile> temp = new ArrayList<Tile>();
         for (Component c : getHand().getTileComponents()) {
@@ -749,6 +905,7 @@ class Board extends JFrame {
         return(temp.size() == 0 ? Arrays.copyOf(getHand().getTileComponents(), getHand().getTileComponents().length, Tile[].class) : temp.toArray(new Tile[0]));
     }
 
+    // Returns the index of a Tile within the Hand
     private int getTileIndex(Tile t) {
         Component[] list = getHand().getTileComponents();
         for (int i=0; i<list.length; i++) {

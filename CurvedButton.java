@@ -13,9 +13,11 @@ public class CurvedButton extends JButton {
     private int borderSize = 2;
     private double xOffset = 0.5;
     private double yOffset = 1.0/3.0;
+    private boolean pushed = false;
     private Color color = Color.white;
     private Color borderColor = Color.black;
     private Color tColor = Color.black;
+    private Color toggleColor = null;
     private Font font = new Font("Arial", Font.PLAIN, 14);
 
     public CurvedButton() {
@@ -82,6 +84,11 @@ public class CurvedButton extends JButton {
         return(color);
     }
 
+    public void setToggleColor(Color c) {
+        toggleColor = c;
+        repaint();
+    }
+
     public void setOpacity(int o) {
         opacity = o;
     }
@@ -120,6 +127,15 @@ public class CurvedButton extends JButton {
         return(text);
     }
 
+    public boolean isPushed() {
+        return(pushed);
+    }
+
+    public void setPushed(boolean b) {
+        pushed = b;
+        repaint();
+    }
+
     @Override
     public void paint(Graphics g) {
         //super.paint(g);
@@ -133,11 +149,11 @@ public class CurvedButton extends JButton {
         // Draw Button Background:  https://stackoverflow.com/questions/26036002/how-to-make-round-jbuttons-in-java
         // Setting Opacity:         https://stackoverflow.com/questions/29379441/java-set-transparency-on-color-color-without-using-rgbs
         // Setting Button Color:    https://stackoverflow.com/questions/6256483/how-to-set-the-button-color-of-a-jbutton-not-background-color
-        if (!getModel().isPressed()) {
-            g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), opacity));
+        if (getModel().isPressed() || pushed) {
+            g.setColor(toggleColor != null && pushed ? new Color(toggleColor.getRed(), toggleColor.getGreen(), toggleColor.getBlue(), 2*opacity/3) : new Color(color.getRed(), color.getGreen(), color.getBlue(), 2*opacity/3));
         }
         else {
-            g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 2*opacity/3));
+            g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), opacity));
         }
 
         g.fillRoundRect(0, 0, getSize().width-1, getSize().height-1, (int)(radius * frame.getWidth()/Board.MAX_WIDTH), (int)(radius * frame.getHeight()/Board.MAX_HEIGHT));
@@ -160,8 +176,8 @@ public class CurvedButton extends JButton {
         Graphics2D g2d = (Graphics2D)(g);
         g2d.setColor(borderColor);
         // Setting Stroke Thickness: https://stackoverflow.com/questions/4219511/draw-rectangle-border-thickness
-        g2d.setStroke(new BasicStroke((int)(borderSize * (frame.getWidth()/Board.MAX_WIDTH))));
-        if ((int)(borderSize * (frame.getWidth()/Board.MAX_WIDTH)) < 2) {
+        g2d.setStroke(new BasicStroke((int)(borderSize * (frame.getWidth()/Board.MIN_WIDTH))));
+        if ((int)(borderSize * (frame.getWidth()/Board.MIN_WIDTH)) < 2) {
             g2d.setStroke(new BasicStroke(2));
         }
         // Draw Button Border: https://stackoverflow.com/questions/13866252/button-with-round-edges

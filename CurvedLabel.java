@@ -79,8 +79,24 @@ public class CurvedLabel extends JLabel {
 
         // Draw Label Text: https://stackoverflow.com/questions/5378052/positioning-string-in-graphic-java
         g.setFont(new Font(font.getName(), font.getStyle(), (int)(font.getSize()*frame.getWidth()/Board.MAX_WIDTH)));
-        g.setColor(new Color(color.getRed(), color.getBlue(), color.getGreen(), 200)); // Should make a text-specific opacity
-        Rectangle2D rect = g.getFontMetrics().getStringBounds(text, g);
-        g.drawString(text, (int)(getSize().width/2 - rect.getWidth()*xOffset), (int)(getSize().height/2 + rect.getHeight()/2 - rect.getHeight()*yOffset));
+        g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 200)); // Should make a text-specific opacity
+        String[] array = text.split("\n");
+        int curX = 0;
+        int curY = 0;
+        if (array.length > 1) {
+            for (String t : array) { // Loops through the lines to calculate the medium height needed for displaying
+                Rectangle2D rect = g.getFontMetrics().getStringBounds(t, g); // Gets the dimensions of the text displayed
+                curY += rect.getY()/2; // Adds half of the height to keep the ratio of 1/2 on top, 1/2 on bottom.
+            }
+            for (String t : array) { // Allows for the printing of new lines
+                Rectangle2D rect = g.getFontMetrics().getStringBounds(t, g);
+                g.drawString(t, curX + (int)(getSize().width/2 - rect.getWidth()*xOffset), curY + (int)(getSize().height/2 + rect.getHeight()/2 - rect.getHeight()*yOffset));
+                curY -= rect.getY();
+            }
+        }
+        else {
+            Rectangle2D rect = g.getFontMetrics().getStringBounds(text, g);
+            g.drawString(text, curX + (int)(getSize().width/2 - rect.getWidth()*xOffset), curY + (int)(getSize().height/2 + rect.getHeight()/2 - rect.getHeight()*yOffset));
+        }
     }
 }

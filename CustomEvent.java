@@ -5,10 +5,16 @@ public class CustomEvent extends ActionEvent {
     private int r = 0;
     private int c = 0;
     private int index = 0;
+    private String chars = "";
     private char t = '\0';
 
     public CustomEvent(Component c, int id) {
         super(c, id, "");
+    }
+
+    public CustomEvent(Component c, int id, String chars) {
+        super(c, id, "");
+        this.chars = chars;
     }
     
     public CustomEvent(Component c, int id, int index) {
@@ -30,6 +36,10 @@ public class CustomEvent extends ActionEvent {
 
     public char getChar() {
         return(t);
+    }
+
+    public char[] getChars() {
+        return(chars.toCharArray());
     }
 
     // Returns the index of the component, assuming it is within a single array

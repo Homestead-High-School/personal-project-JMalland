@@ -1,5 +1,7 @@
 import java.util.*;
 import java.io.File;
+import java.awt.*;
+
 public class Main {
     public static void main(String[] args) {
         final TreeMap<Character, HashMap<String, String>> map = parseAndStore("Words.txt"); // Get the sorted TreeMap
@@ -89,6 +91,9 @@ public class Main {
                 else if (e.getID() == b.SHUFFLED_TILES) {
                     System.out.println("Shuffled Tiles.");
                 }
+                else if (e.getID() == b.SWAPPING_TILES) {
+                    System.out.println("Swapping Tiles.");
+                }
                 else if (e.getID() == b.PLACING_LETTER || e.getID() == b.SELECTED_LETTER) {
                     if (real.notYetPlaced(e.getRow(), e.getCol())) {
                         if (e.getID() == b.PLACING_LETTER) {
@@ -106,17 +111,22 @@ public class Main {
                     System.out.println("Placed Tile @ ["+t.getPoint().r+"]["+t.getPoint().c+"]. Contains Letter: "+t.findText()+".");
                     real.placeLetter(e.getChar(), e.getRow(), e.getCol());
                 }
-                else if (e.getID() == b.FINALIZED_PLAY) {
+                else if (e.getID() == b.FINALIZED_PLAY || e.getID() == b.SKIPPED_TURN || e.getID() == b.TILES_SWAPPED) {
                     System.out.println("Submitted Letters: "+real.getPlacedLetters()+".");
                     int score = real.submitWordPlacement();
                     System.out.println("Submitted Play Is Worth: "+score);
-                    if (score > 0) {
+                    if (score > 0 || e.getID() == b.SKIPPED_TURN || e.getID() == b.TILES_SWAPPED) {
                         b.updateScore(score); // Update the current player's score
-                        b.setHand(real.drawTiles(b.getBlankAmount())); // Draw the next hand for the player
+                        if (score > 0 || e.getID() == b.TILES_SWAPPED) {
+                            if (e.getID() == b.TILES_SWAPPED) {
+                                real.addBack(e.getChars());
+                            }
+                            b.setHand(real.drawTiles(b.getBlankAmount())); // Draw the next hand for the player
+                        }
                         b.tilesWereSubmitted(); // Move to the next turn.
                     }
                     else {
-                        b.displayError("Invalid Word");
+                        b.displayError("Invalid Word", Color.red, 2000);
                     }
                 }
                 else if (e.getID() == b.RECALLED_TILE) {

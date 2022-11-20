@@ -44,6 +44,12 @@ public class Scrabble {
         numTiles = 100; // Set the default number of tiles
     }
 
+    public void addBack(char[] list) {
+        for (char c : list) { // Loop through each tile, and add them back to the pool
+            tiles[c == 32 ? 26 : c-65] ++; // Increase the counted value of each specific tile
+        }
+    }
+
     public char[] drawTiles(int num) {
         Random rand = new Random();
         char[] hand = new char[num];
