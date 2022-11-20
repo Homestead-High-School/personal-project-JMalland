@@ -81,6 +81,9 @@ public class Main {
                     System.out.println("Game Running.");
                     b.startGame();
                 }
+                else if (e.getID() == b.QUIT_GAME) {
+                    System.out.println("Quit Game.");
+                }
                 else if (e.getID() == b.CREATE_PLAYER) {
                     System.out.println("Created Player "+(e.getIndex()+1)+".");
                     b.createPlayer(real.drawTiles(7), e.getIndex()); // Draw a brand new hand
