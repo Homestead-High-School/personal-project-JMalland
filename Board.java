@@ -188,7 +188,7 @@ class Board extends JFrame {
                 getError().setVisible(true); // Repeatedly refresh the display
             }
         });
-        Timer end = new Timer(3000, new ActionListener() {
+        check.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 getQuitButton().setPushed(false); // De-Toggle the Quit button
@@ -202,7 +202,7 @@ class Board extends JFrame {
                 System.out.println("Game Quit.");
             }
         });
-        end.setRepeats(false); // Make it so the timer can't repeat
+        check.setRepeats(false); // Make it so the timer can't repeat
         int highest = 0; // Store the highest scoring player
         boolean tied = players.length > 1; // Store whether or not there's a tie
         for (int i=1; i<players.length; i++) { // Loop through each player to find the highest scoring
@@ -211,7 +211,7 @@ class Board extends JFrame {
         }
         displayCondition(tied ? "The Game Tied!\nScore: "+players[0].getScore() : "Winner: Player "+(highest+1)+"\nScore: "+players[highest].getScore(), Color.green);
         loop.start(); // Start the loop
-        end.start(); // Start the timer
+        check.start(); // Start the timer
     }
 
     // Returns the number of players in the game
