@@ -126,7 +126,9 @@ public class Main {
                             if (e.getID() == b.TILES_SWAPPED) {
                                 real.addBack(e.getChars());
                             }
-                            b.clearTileStorage();
+                            else {
+                                b.clearTileStorage();
+                            }
                             b.setHand(real.drawTiles(b.getBlankAmount())); // Draw the next hand for the player
                         }
                         b.tilesWereSubmitted(); // Move to the next turn.

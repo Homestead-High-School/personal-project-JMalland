@@ -21,12 +21,12 @@ class Board extends JFrame {
     private static final double MULT = 1; // At Mult of 0.8, Aspect Ratio appears odd at <= 630 X 840
     public static final int MIN_WIDTH = (int)(MULT*675); // (75*8 + 50) = 650
     public static final int MIN_HEIGHT = (int)(MULT*900); // (750 + 75 | 125) = 825 ~ 950
-    public static final int MAX_WIDTH = (int)(900*MULT); // If exceeds 843, duplicate tiles appear on bottom row
-    public static final int MAX_HEIGHT = (int)(MULT*1200); // If exceeds 1012, duplicate tiles appear on bottom row
+    public static final int MAX_WIDTH = (int)(810*MULT); // If exceeds 843, duplicate tiles appear on bottom row
+    public static final int MAX_HEIGHT = (int)(MULT*1080); // If exceeds 1012, duplicate tiles appear on bottom row
     private final double widthRatio = 3.0; // Width has a ratio of 3
     private final double heightRatio = 4.0; // Height has a ratio of 4
     public final int CREATE_PLAYER = ("PLAYER").hashCode();
-    public final int SELECTED_HAND = ("HAND").hashCode();
+    public final int SELECTED_HAND = ("HAND").hashCode(); 
     public final int SELECTED_LETTER = ("SELECT").hashCode();
     public final int SKIPPED_TURN = ("SKIP").hashCode();
     public final int SWAPPING_TILES = ("SWAPPING").hashCode();
@@ -47,7 +47,7 @@ class Board extends JFrame {
     private HashSet<Tile> placedTiles = new HashSet<Tile>();
     private final int ROWS = Scrabble.getBoard().length;
     private final int COLS = Scrabble.getBoard()[0].length;
-    private final int FONT_SIZE = (int)(26*MULT); // 26 Is actually double. Window starts out at half size
+    private final int FONT_SIZE = (int)(24*MULT); // 26 Is actually double. Window starts out at half size
     private final int TILE_SIZE = (int)(45*MULT); // 50
     private final int TILE_RADIUS = (int)(25*MULT); // 26 - Is actually double. Window starts out at half size
     private final int MIN_OPACITY = 100;
@@ -137,6 +137,8 @@ class Board extends JFrame {
 
                 GridPanel error = getError();
                 error.setBounds(error.getX(), error.getY(), (int)(error.getSize().width * (frame.getWidth() / 1.0 / FRAME_WIDTH)), (int)(error.getSize().height * (frame.getHeight() / 1.0 / FRAME_HEIGHT)));
+                GridPanel board = getBoard();
+                board.setBounds(board.getX(), board.getY(), (int)(board.getSize().width * (frame.getWidth() / 1.0 / FRAME_WIDTH)), (int)(board.getSize().height * (frame.getHeight() / 1.0 / FRAME_HEIGHT)));
                 FRAME_WIDTH = frame.getWidth(); // Update the Width property so it is current
                 FRAME_HEIGHT = frame.getHeight(); // Update the Height property so it is current
                 frame.pack(); // Pack once more, in case the Hand was adjusted
@@ -167,9 +169,6 @@ class Board extends JFrame {
     public void startGame() {
         createPlayers(); // Start the process of player creation.
         frame.remove(mainPanel); // Remove all current panels to begin the gameplay
-        createBoard(); // Recreate the gamePanel (Why this works with the JLayeredPane, I don't know)
-        createHand(); // Recreate the gamePanel
-        createHandOptions(); // Recreate the hand options
         frame.add(gamePanel); // Add the game panel to display the Scrabble board
         frame.pack(); // Repack the JFrame
         frame.repaint(); // Repaint the JFrame
@@ -467,7 +466,9 @@ class Board extends JFrame {
 
     // Creates the JPanel which holds each JButton that makes up the Scrabble board
     private void createBoard() {
-        board.removeAll();
+        for (Component c : board.getComponents()) {
+            board.remove(c);
+        }
         board = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.Y_AXIS); // Creates the main Board panel
         for (int r=0; r<ROWS; r++) { // Loops through each row on the board
             for (int c=0; c<COLS; c++) { // Loops through each col on the board
@@ -512,11 +513,11 @@ class Board extends JFrame {
 
         final CurvedButton submit = new CurvedButton("Submit", TILE_RADIUS, new Color(0x2BAB49), HAND_OPACITY); // Creates the Skip button
         submit.setSize(H_TILE_SIZE, H_TILE_SIZE);
-        submit.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
+        submit.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
 
         final CurvedButton quit = new CurvedButton("Quit", TILE_RADIUS, new Color(0x607D8B), HAND_OPACITY); // Creates the Quit button
         quit.setSize(H_TILE_SIZE, H_TILE_SIZE);
-        quit.setFont(new Font("Serif", Font.BOLD, FONT_SIZE));
+        quit.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
         quit.setToggleColor(new Color(0x339933));
         
         check.addActionListener(new ActionListener() {
@@ -784,6 +785,7 @@ class Board extends JFrame {
         text.setFont(new Font("Serif", Font.BOLD, (int)(FONT_SIZE*1.5))); // 37 Font size originally.
         text.setBackground(Color.DARK_GRAY);
         text.setSize(COLS*TILE_SIZE, ROWS*TILE_SIZE);
+        text.setOpacity(ERROR_OPACITY);
 
         GridPanel error = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.X_AXIS); // Creates the error panel
         error.add(text, 0, 0, 1, 1, GridBagConstraints.BOTH); // Adds the text to the panel
@@ -795,14 +797,14 @@ class Board extends JFrame {
         JLayeredPane t = new JLayeredPane(); // Create the LayeredPanel, to layer components
         
         gamePanel.remove(board); // Remove the board from the JFrame
-        board.setBounds(0, 0, board.getSize().width, board.getSize().height); // Set the general dimensions of the board
+        board.setBounds(0, 3, (int)((COLS-0.25)*TILE_SIZE), ROWS*TILE_SIZE); // Set the general dimensions of the board
         
         t.add(error, JLayeredPane.POPUP_LAYER); // Add the error screen to the panel
         t.add(board, JLayeredPane.DEFAULT_LAYER); // Add the board to the panel
         
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout(); // Get the LayoutManager for the GamePanel
         l.setConstraints(t, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH)); // Set the constraints
-        //t.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
+        t.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
         gamePanel.add(t); // Add the layered panel to the JFrame
     }
 
@@ -826,7 +828,6 @@ class Board extends JFrame {
         if (getError().isVisible()) { // Checks if the error is currently being displayed
             return; // Quit the program
         }
-        
         final CurvedLabel text = (CurvedLabel) getError().getComponent(0); // Stores the Text message
         text.setText(error); // Sets the text to be displayed
         getError().setVisible(true); // Sets the error visible
