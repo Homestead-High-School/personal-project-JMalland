@@ -191,6 +191,9 @@ class Board extends JFrame {
         check.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (!getQuitButton().isPushed()) { // Check that the button toggled is the quit button
+                    return; // Quit the function
+                }
                 getQuitButton().setPushed(false); // De-Toggle the Quit button
                 getQuitButton().setToggleColor(new Color(0x339933)); // Reset the toggle color
                 loop.stop(); // Stop the display
