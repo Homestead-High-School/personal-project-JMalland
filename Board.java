@@ -169,10 +169,49 @@ class Board extends JFrame {
         frame.remove(mainPanel); // Remove all current panels to begin the gameplay
         createBoard(); // Recreate the gamePanel (Why this works with the JLayeredPane, I don't know)
         createHand(); // Recreate the gamePanel
+        createHandOptions(); // Recreate the hand options
         frame.add(gamePanel); // Add the game panel to display the Scrabble board
-        frame.pack(); // Repaint the JFrame
+        frame.pack(); // Repack the JFrame
+        frame.repaint(); // Repaint the JFrame
         System.out.println("Game Started: "+player_count+" Players"); // Display the beginning of the game
         setHand(players[current_player].getHand()); // Set the hand for Player 1
+    }
+
+    // Quits the game and returns to the main menu.
+    public void endGame() {
+        getError().setVisible(false); // Stop the display, to allow text to catch up
+        getQuitButton().setPushed(true); // Re-push the Quit button
+        getQuitButton().setToggleColor(getQuitButton().getColor()); // Change the toggle color
+        final Timer loop = new Timer(0, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                getError().setVisible(true); // Repeatedly refresh the display
+            }
+        });
+        Timer end = new Timer(3000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                getQuitButton().setPushed(false); // De-Toggle the Quit button
+                getQuitButton().setToggleColor(new Color(0x339933)); // Reset the toggle color
+                loop.stop(); // Stop the display
+                getError().setVisible(false); // Make the display invisible
+                frame.remove(gamePanel); // Remove the game board
+                frame.add(mainPanel); // Go back to the main screen
+                frame.pack(); // Repack the JFrame
+                frame.repaint(); // Repaint the JFrame
+                System.out.println("Game Quit.");
+            }
+        });
+        end.setRepeats(false); // Make it so the timer can't repeat
+        int highest = 0; // Store the highest scoring player
+        boolean tied = players.length > 1; // Store whether or not there's a tie
+        for (int i=1; i<players.length; i++) { // Loop through each player to find the highest scoring
+            tied = players[i-1].getScore() == players[i].getScore() && tied; // Check if there is or isn't a tie
+            highest = players[i].getScore() > players[highest].getScore() ? i : highest; // Check for the highest scoring player
+        }
+        displayCondition(tied ? "The Game Tied!\nScore: "+players[0].getScore() : "Winner: Player "+(highest+1)+"\nScore: "+players[highest].getScore(), Color.green);
+        loop.start(); // Start the loop
+        end.start(); // Start the timer
     }
 
     // Returns the number of players in the game
@@ -304,6 +343,9 @@ class Board extends JFrame {
             p.setOpacity(MIN_OPACITY); // Reset the opacity of the tile to default
             p.setTextOpacity(MIN_TEXT_OPACITY); // Reset the text opacity of the tile to default
         }
+        else {
+            players[current_player].setTile(getTileIndex(p), p.findText().charAt(0));
+        }
         recallTile(pointingAt); // Recalls the tile Tile 'p' was pointing to
     }
     
@@ -332,12 +374,16 @@ class Board extends JFrame {
     
     // Switches to the next turn after a play has been finished
     public void tilesWereSubmitted() {
-        placedTiles.clear();
+        recallTiles(); // Recall all currently placed tiles, if any are left
         selectTile(getTile(-1)); // De select the already selected tile, if there is one.
         current_player = (current_player + 1)%player_count; // Calculate the new player
         displayed_player = current_player; // Update the display to match the current player
         setHand(players[current_player].getHand()); // Update the hand to match the current player
         changeDisplay(0); // Update the display to show the current player
+    }
+
+    public void clearTileStorage() {
+        placedTiles.clear(); // Clear the placed tiles, so they aren't recalled
     }
 
     // Displays an error to the screen for a specific duration
@@ -418,7 +464,7 @@ class Board extends JFrame {
         board = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.Y_AXIS); // Creates the main Board panel
         for (int r=0; r<ROWS; r++) { // Loops through each row on the board
             for (int c=0; c<COLS; c++) { // Loops through each col on the board
-                int tile = Scrabble.getVal(r%ROWS, c%COLS); // Create the tile value to determine the look of each button
+                int tile = Scrabble.getBoard()[r%ROWS][c%COLS]; // Create the tile value to determine the look of each button
                 // Tile Colors From: https://htmlcolorcodes.com/
                 final Tile temp = new Tile("", TILE_RADIUS, new Color(0xD8A772), MIN_OPACITY, r, c); // Blank Tile, represented by '0'
                 if (tile == 1 || tile == 2) { // Tile is a Letter Tile, represented by a '1' or '2'            // 2 / 3 | B / P
@@ -430,10 +476,10 @@ class Board extends JFrame {
                 temp.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Set the font of the tile
                 temp.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-                        if (!getSwapButton().isPushed() && selected_tile != -1 && calculateTile(temp.getPoint().r, temp.getPoint().c) != selected_tile) { // Checks if the selected tile is valid and is not the same tile
+                        if (!getError().isVisible() && selected_tile != -1 && calculateTile(temp.getPoint().r, temp.getPoint().c) != selected_tile) { // Checks if the selected tile is valid and is not the same tile
                             dispatchEvent(new CustomEvent(temp, PLACING_LETTER, temp.getPoint().r, temp.getPoint().c)); // Trigger an ActionEvent to allow the client to determine whether or not the tile can be placed
                         }
-                        else if (!getSwapButton().isPushed() && temp.findText().length() == 1) { // Checks that the chosen tile holds a valid letter
+                        else if (!getError().isVisible() && temp.findText().length() == 1) { // Checks that the chosen tile holds a valid letter
                             dispatchEvent(new CustomEvent(temp, SELECTED_LETTER, temp.getPoint().r, temp.getPoint().c)); // Trigger an ActionEvent to allow the client to determine whether or not the tile can be selected
                         }
                     }
@@ -664,7 +710,6 @@ class Board extends JFrame {
     }
 
     // Creates the JPanel that contains the components which make up the main menu
-    // Need to redesign this at some point. PaddedPanel is just too non-redundant
     private void createMenu() {
         mainPanel = new JPanel(new GridBagLayout()); // Initializes the mainPanel
         GridBagLayout l = (GridBagLayout) mainPanel.getLayout(); // Stores the GridBagLayout of the mainPanel

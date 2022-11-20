@@ -6,9 +6,9 @@ import java.util.Comparator;
 // Will eventually need to create a method to find all directly connected points to a valid placed word
 
 public class Scrabble {
-    private static int[] tiles = new int[] {9, 2, 2, 2, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1, 2}; // List of tile amounts, each corresponding to a letter
     private static final int[] values = new int[] {1, 3, 3, 2, 1, 4, 2, 4, 1, 8, 5, 1, 3, 1, 1, 3, 10, 1, 1, 1, 1, 4, 4, 8, 4, 10, 0}; // List of tile values, each corresponding to a letter
-    private static final int[][] board = new int[][] {
+    private int[] tiles = new int[] {9, 2, 2, 2, 12, 2, 3, 2, 9, 1, 1, 4, 2, 6, 8, 2, 1, 6, 4, 6, 4, 2, 2, 1, 2, 1, 2}; // List of tile amounts, each corresponding to a letter
+    private final int[][] board = new int[][] {
         {4, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 0, 0, 4},
         {0, 3, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0, 3, 0},
         {0, 0, 3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 3, 0, 0},
@@ -44,6 +44,14 @@ public class Scrabble {
         numTiles = 100; // Set the default number of tiles
     }
 
+    public void restart() {
+        placed.clear(); // Reset the already played tiles
+        items.clear(); // Reset the currently placed tiles
+        counted.clear(); // Reset the scored tiles
+        numTiles = 100; // Reset the number of tiles
+        tiles = new Scrabble(list).tiles; // Reset the tiles array
+    }
+
     public void addBack(char[] list) {
         for (char c : list) { // Loop through each tile, and add them back to the pool
             tiles[c == 32 ? 26 : c-65] ++; // Increase the counted value of each specific tile
@@ -74,7 +82,7 @@ public class Scrabble {
     }
 
     public int getLetterCount(char c) {
-        return(c == 32 ? Scrabble.tiles[26] : Scrabble.tiles[c-65]);
+        return(c == 32 ? tiles[26] : tiles[c-65]);
     }
 
     public void recallTile(int row, int col) {
@@ -225,7 +233,7 @@ public class Scrabble {
         int wordMultiplier = 1; // Stores the value at which to multiply the word's score
         for (Point p : map.keySet()) { // Loop through each character, forming each possible word in the list
             int posUsed = rowOrCol ? p.getRow() : p.getCol(); // Use X if 'rowOrCol' is true, otherwise use Y
-            int posVal = Scrabble.getVal(p.getRow(), p.getCol());
+            int posVal = getVal(p.getRow(), p.getCol());
             if (position == -1 || posUsed != position || map.get(p) == ' ') { // The point doesn't follow the previous one
                 if (isLegalWord(current) && score >= 0 && current.length() > 1) { // Check to see if the word is valid
                     for (Point x : letterMap.keySet()) { // Loop through each point in the letter map
@@ -293,14 +301,14 @@ public class Scrabble {
 
     // Return the scrabble board
     public static int[][] getBoard() {
-        return(Scrabble.board.clone()); // Return a clone of the board, so it isn't potentially edited
+        return(new Scrabble(new TreeMap<Character, HashMap<String, String>>()).board.clone()); // Return a clone of the board, so it isn't potentially edited
     }
 
     // Return the scrabble board tile
-    public static int getVal(int r, int c) {
-        if (r > Scrabble.board.length || c > Scrabble.board.length) { // Throw an exception if I'm stupid enough to make such a horrible mistake.
+    public int getVal(int r, int c) {
+        if (r > board.length || c > board.length) { // Throw an exception if I'm stupid enough to make such a horrible mistake.
             throw new IllegalArgumentException("Index Out Of Bounds For Scrabble Board");
         }
-        return(Scrabble.board[r][c]);
+        return(board[r][c]);
     }
 }

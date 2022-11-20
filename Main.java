@@ -83,6 +83,8 @@ public class Main {
                 }
                 else if (e.getID() == b.QUIT_GAME) {
                     System.out.println("Quit Game.");
+                    b.endGame();
+                    real.restart();
                 }
                 else if (e.getID() == b.CREATE_PLAYER) {
                     System.out.println("Created Player "+(e.getIndex()+1)+".");
@@ -124,6 +126,7 @@ public class Main {
                             if (e.getID() == b.TILES_SWAPPED) {
                                 real.addBack(e.getChars());
                             }
+                            b.clearTileStorage();
                             b.setHand(real.drawTiles(b.getBlankAmount())); // Draw the next hand for the player
                         }
                         b.tilesWereSubmitted(); // Move to the next turn.
