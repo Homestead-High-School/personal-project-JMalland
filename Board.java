@@ -175,6 +175,9 @@ class Board extends JFrame {
         frame.repaint(); // Repaint the JFrame
         System.out.println("Game Started: "+player_count+" Players"); // Display the beginning of the game
         setHand(players[current_player].getHand()); // Set the hand for Player 1
+        getSkipButton().setPushed(false);
+        getSwapButton().setPushed(false);
+        getQuitButton().setPushed(false);
     }
 
     // Quits the game and returns to the main menu.
@@ -464,6 +467,7 @@ class Board extends JFrame {
 
     // Creates the JPanel which holds each JButton that makes up the Scrabble board
     private void createBoard() {
+        board.removeAll();
         board = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.Y_AXIS); // Creates the main Board panel
         for (int r=0; r<ROWS; r++) { // Loops through each row on the board
             for (int c=0; c<COLS; c++) { // Loops through each col on the board
