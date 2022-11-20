@@ -174,9 +174,10 @@ class Board extends JFrame {
         frame.repaint(); // Repaint the JFrame
         System.out.println("Game Started: "+player_count+" Players"); // Display the beginning of the game
         setHand(players[current_player].getHand()); // Set the hand for Player 1
-        getSkipButton().setPushed(false);
-        getSwapButton().setPushed(false);
-        getQuitButton().setPushed(false);
+        getSkipButton().setPushed(false); // De-Toggle the Skip button
+        getSwapButton().setPushed(false); // De-Toggle the Swap button
+        getQuitButton().setPushed(false); // De-Toggle the Quit button
+        selectTile(getTile(selected_tile)); // Deselect the current tile, if there is one
     }
 
     // Quits the game and returns to the main menu.
