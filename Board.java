@@ -147,6 +147,7 @@ class Board extends JFrame {
         });
 
         frame.setVisible(true); // Set the application frame visible
+        frame.setResizable(false);
     }
 
     // Returns the index of the closest integer to another integer within a list
@@ -169,6 +170,8 @@ class Board extends JFrame {
     public void startGame() {
         createPlayers(); // Start the process of player creation.
         frame.remove(mainPanel); // Remove all current panels to begin the gameplay
+        board.removeAll();
+        generateBoard();
         frame.add(gamePanel); // Add the game panel to display the Scrabble board
         frame.pack(); // Repack the JFrame
         frame.repaint(); // Repaint the JFrame
@@ -215,7 +218,7 @@ class Board extends JFrame {
             tied = players[i-1].getScore() == players[i].getScore() && tied; // Check if there is or isn't a tie
             highest = players[i].getScore() > players[highest].getScore() ? i : highest; // Check for the highest scoring player
         }
-        displayCondition(tied ? "The Game Tied!\nScore: "+players[0].getScore() : "Winner: Player "+(highest+1)+"\nScore: "+players[highest].getScore(), Color.green);
+        displayCondition(tied ? "The Game Tied!\n\nScore: "+players[0].getScore() : "Winner: Player "+(highest+1)+"\n\nScore: "+players[highest].getScore(), Color.green);
         loop.start(); // Start the loop
         check.start(); // Start the timer
     }
@@ -471,6 +474,14 @@ class Board extends JFrame {
             board.remove(c);
         }
         board = new GridPanel(FRAME_WIDTH, FRAME_HEIGHT, BoxLayout.Y_AXIS); // Creates the main Board panel
+        generateBoard();
+        GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
+        l.setConstraints(board, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the board
+        board.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
+        gamePanel.add(board); // Create and add the board to the application frame
+    }
+
+    private void generateBoard() {
         for (int r=0; r<ROWS; r++) { // Loops through each row on the board
             for (int c=0; c<COLS; c++) { // Loops through each col on the board
                 int tile = Scrabble.getBoard()[r%ROWS][c%COLS]; // Create the tile value to determine the look of each button
@@ -498,10 +509,6 @@ class Board extends JFrame {
                 board.add(temp, r, c, 1, 1, GridBagConstraints.BOTH); // Adds the tile to the Board
             }
         }
-        GridBagLayout l = (GridBagLayout) gamePanel.getLayout();
-        l.setConstraints(board, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH)); // Set the constraints on the board
-        board.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
-        gamePanel.add(board); // Create and add the board to the application frame
     }
 
     // Creates the JPanel that features each player's hand of tiles
@@ -516,7 +523,7 @@ class Board extends JFrame {
         submit.setSize(H_TILE_SIZE, H_TILE_SIZE);
         submit.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
 
-        final CurvedButton quit = new CurvedButton("Quit", TILE_RADIUS, new Color(0x607D8B), HAND_OPACITY); // Creates the Quit button
+        final CurvedButton quit = new CurvedButton("Quit", TILE_RADIUS, new Color(0x2196F3), HAND_OPACITY); // Creates the Quit button
         quit.setSize(H_TILE_SIZE, H_TILE_SIZE);
         quit.setFont(new Font("Serif", Font.PLAIN, FONT_SIZE));
         quit.setToggleColor(new Color(0x339933));
@@ -555,7 +562,7 @@ class Board extends JFrame {
                 }
                 if (!quit.isPushed()) { // Checks that the button hasn't been pushed
                     quit.setPushed(true);
-                    displayCondition("Are you sure you want to quit?\nPress 'Quit' to confirm, or wait to cancel.", Color.ORANGE);
+                    displayCondition("Are you sure you want to quit?\n\nPress 'Quit' to confirm, or wait to cancel.", Color.ORANGE);
                     check.start();
                 }
                 else { // The button has been pushed
@@ -602,16 +609,16 @@ class Board extends JFrame {
         recall.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Sets the font size
 
         final CurvedButton shuffle = new CurvedButton("Shuffle", TILE_RADIUS, new Color(0xD0A600), HAND_OPACITY); // Creates the Shuffler button
-        shuffle.setSize(2*H_TILE_SIZE - 4*H_X_OFF, OPTION_HEIGHT); // Sets the size of the Shuffle button
+        shuffle.setSize(2*H_TILE_SIZE, OPTION_HEIGHT); // Sets the size of the Shuffle button
         shuffle.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Sets the font size
         
         final CurvedButton swap = new CurvedButton("Swap", TILE_RADIUS, new Color(0xD0A600), HAND_OPACITY); // Creates the Swap button
-        swap.setSize(2*H_TILE_SIZE - 4*H_X_OFF, OPTION_HEIGHT); // Sets the size of the Swap button
+        swap.setSize(2*H_TILE_SIZE, OPTION_HEIGHT); // Sets the size of the Swap button
         swap.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Sets the font size
         swap.setToggleColor(new Color(0xE74C3C));
 
         final CurvedButton skip = new CurvedButton("Skip", TILE_RADIUS, new Color(0xD0A600), HAND_OPACITY); // Creates the Submit button
-        skip.setSize(2*H_TILE_SIZE - 5*H_X_OFF, OPTION_HEIGHT); // Sets the size of the Skip button
+        skip.setSize(2*H_TILE_SIZE, OPTION_HEIGHT); // Sets the size of the Skip button
         skip.setFont(new Font("Serif", Font.BOLD, FONT_SIZE)); // Sets the font size
         skip.setToggleColor(new Color(0x339933)); // Set the color of the button when toggled.
 
@@ -653,7 +660,7 @@ class Board extends JFrame {
 
                 if (!skip.isPushed()) { // If the button isn't pushed
                     skip.setPushed(true); // Sets the toggled status of the Skip button to true
-                    displayCondition("Do you really want to skip your turn?\nClick 'Skip' to confirm, or wait to cancel.", Color.YELLOW);
+                    displayCondition("Do you really want to skip your turn?\n\nClick 'Skip' to confirm, or wait to cancel.", Color.YELLOW);
                     check.start(); // Start the 3 second timer.
                 }
                 else { // The button has been pushed
@@ -674,7 +681,7 @@ class Board extends JFrame {
                     swap.setPushed(true); // Sets the swapping status to true
                     selectTile(getTile(selected_tile)); // Reselect the selected tile, just in case.
                     dispatchEvent(new CustomEvent(swap, SWAPPING_TILES)); // Lets the client determine how to react to the action of trying to swap tiles
-                    displayCondition("Select The Tiles You Want To Swap.\n Click 'Swap' to confirm or cancel.", Color.CYAN);
+                    displayCondition("Select the tiles you want to swap.\n\nClick 'Swap' to confirm or cancel.", Color.CYAN);
                 }
                 else { // The button has been pushed
                     swap.setPushed(false); // Sets the swapping status to false
@@ -696,13 +703,13 @@ class Board extends JFrame {
         
         // Padding on the left and right of the Option buttons
         options.add(makePadding((MIN_WIDTH - (9*H_TILE_SIZE + 8*H_X_OFF))/2, H_TILE_SIZE), 0, 0, 1, 1, GridBagConstraints.BOTH); // Left side padding
-        options.add(makePadding((MIN_WIDTH - (9*H_TILE_SIZE + 8*H_X_OFF))/2 + 4*H_X_OFF, H_TILE_SIZE), 0, 9, 1, 1, GridBagConstraints.BOTH); // Right side padding
-        options.add(makePadding(H_TILE_SIZE + 6*H_X_OFF, H_TILE_SIZE), 0, 1, 1, 1, GridBagConstraints.BOTH); // Extra left-padding to pad the area of the Quit Button
+        options.add(makePadding((MIN_WIDTH - (9*H_TILE_SIZE + 8*H_X_OFF))/2, H_TILE_SIZE), 0, 9, 1, 1, GridBagConstraints.BOTH); // Right side padding
+        //options.add(makePadding(H_TILE_SIZE/2, H_TILE_SIZE), 0, 1, 1, 1, GridBagConstraints.BOTH); // Extra left-padding to pad the area of the Quit Button
 
         // Padding in between each of the Option buttons
-        options.add(makePadding(H_X_OFF*4, OPTION_HEIGHT), 0, 3, 1, 1, GridBagConstraints.BOTH);
-        options.add(makePadding(H_X_OFF*4, OPTION_HEIGHT), 0, 5, 1, 1, GridBagConstraints.BOTH);
-        options.add(makePadding(H_X_OFF*5, OPTION_HEIGHT), 0, 7, 1, 1, GridBagConstraints.BOTH);
+        options.add(makePadding(H_X_OFF, OPTION_HEIGHT), 0, 3, 1, 1, GridBagConstraints.BOTH);
+        options.add(makePadding(H_X_OFF, OPTION_HEIGHT), 0, 5, 1, 1, GridBagConstraints.BOTH);
+        options.add(makePadding(H_X_OFF, OPTION_HEIGHT), 0, 7, 1, 1, GridBagConstraints.BOTH);
 
         // Option Buttons that are placed below the Hand, each as long as 2 tiles
         options.add(swap, 0, 8, 1, 1, GridBagConstraints.BOTH); // Swap button at [0][8]
@@ -782,7 +789,7 @@ class Board extends JFrame {
         text.setEnabled(false);
         text.setFont(new Font("Serif", Font.BOLD, (int)(FONT_SIZE*1.5))); // 37 Font size originally.
         text.setBackground(Color.DARK_GRAY);
-        text.setSize(COLS*TILE_SIZE, ROWS*TILE_SIZE);
+        text.setSize(COLS*TILE_SIZE, (int)((ROWS+0.5)*TILE_SIZE));
         text.setOpacity(ERROR_OPACITY);
 
         GridPanel error = new GridPanel(MIN_WIDTH, MIN_HEIGHT, BoxLayout.X_AXIS); // Creates the error panel
@@ -795,14 +802,14 @@ class Board extends JFrame {
         JLayeredPane t = new JLayeredPane(); // Create the LayeredPanel, to layer components
         
         gamePanel.remove(board); // Remove the board from the JFrame
-        board.setBounds(0, 3, (int)((COLS-0.25)*TILE_SIZE), ROWS*TILE_SIZE); // Set the general dimensions of the board
+        board.setBounds(3, 3, (int)((COLS-0.125)*TILE_SIZE), (int)((ROWS+0.5)*TILE_SIZE)); // Set the general dimensions of the board
         
         t.add(error, JLayeredPane.POPUP_LAYER); // Add the error screen to the panel
         t.add(board, JLayeredPane.DEFAULT_LAYER); // Add the board to the panel
         
         GridBagLayout l = (GridBagLayout) gamePanel.getLayout(); // Get the LayoutManager for the GamePanel
         l.setConstraints(t, createConstraints(1, 1, 0, 1, 1, 1, GridBagConstraints.BOTH)); // Set the constraints
-        t.setPreferredSize(new Dimension(COLS*TILE_SIZE, ROWS*TILE_SIZE));
+        t.setPreferredSize(new Dimension(COLS*TILE_SIZE, (int)((ROWS+0.5)*TILE_SIZE)));
         gamePanel.add(t); // Add the layered panel to the JFrame
     }
 
@@ -905,12 +912,12 @@ class Board extends JFrame {
 
     // Returns the Swap button
     private CurvedButton getSwapButton() {
-        return((CurvedButton) getOptions().getComponent(6));
+        return((CurvedButton) getOptions().getComponent(5));
     }
 
     // Returns the Skip button
     private CurvedButton getSkipButton() {
-        return((CurvedButton) getOptions().getComponent(9));
+        return((CurvedButton) getOptions().getComponent(8));
     }
 
     // Returns the Quit button
