@@ -168,9 +168,15 @@ class Board extends JFrame {
     
     // Starts the game, and switches from mainPanel to gamePanel
     public void startGame() {
+        for (int i=0; i<HAND_LENGTH; i++) {
+            getTile(i).setText("");
+            getTile(i).setOriginal("");
+        }
+        players = new Player[0];
         createPlayers(); // Start the process of player creation.
         frame.remove(mainPanel); // Remove all current panels to begin the gameplay
         board.removeAll();
+        placedTiles.clear();
         generateBoard();
         frame.add(gamePanel); // Add the game panel to display the Scrabble board
         frame.pack(); // Repack the JFrame
